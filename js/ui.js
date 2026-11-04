@@ -27,6 +27,7 @@
     mode = null;
     hideOverlay();
     if (window.Scenarios) Scenarios.clear(); // the menu never shows a scene
+    if (window.DealerTalk) DealerTalk.stop();
     $('game').hidden = true;
     $('lore').hidden = true;
     $('menu').hidden = false;
@@ -216,6 +217,8 @@
     // Challenge and Endless play in their difficulty's room (js/scenarios.js); Practice keeps the plain table.
     if (window.Achievements) window.Achievements.startSession({ mode: type, difficulty: diffId || null, start: rules.startingBankroll });
     if (window.Scenarios) Scenarios.applyForMode(type, diffId);
+    // The scene's dealer comments on the game in speech bubbles (js/dealertalk.js).
+    if (window.DealerTalk) DealerTalk.start(game, window.Scenarios ? Scenarios.forMode(type, diffId) : null);
   }
 
   // ======================================================================

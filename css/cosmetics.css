@@ -353,3 +353,17 @@ html .cos-sw-faces.cos-sw-faces[data-face="face_heartbreak"] .card::after {
 .cos-pf-stats b { display: block; font-family: var(--font-pixel); font-size: 12px; font-weight: normal; color: var(--gold, #ffd75e); margin-bottom: 4px; }
 .cos-pf-stats span { font-size: 17px; color: #b8a890; }
 @media (prefers-reduced-motion: reduce) { .cos-title.shine { animation: none; } }
+
+/* ---------- Insanity rarity: a colour that never sits still ---------- */
+@property --holo { syntax: '<color>'; inherits: true; initial-value: #5af2ff; }
+:root { animation: cos-holo-hue 2.4s steps(24) infinite; }
+@keyframes cos-holo-hue {
+  0%   { --holo: #ff4fd8; }
+  17%  { --holo: #ffe14f; }
+  33%  { --holo: #4fff9a; }
+  50%  { --holo: #4fd8ff; }
+  67%  { --holo: #8a5cff; }
+  83%  { --holo: #ff5a8a; }
+  100% { --holo: #ff4fd8; }
+}
+@media (prefers-reduced-motion: reduce) { :root { animation: none; } }

@@ -1,0 +1,43 @@
+/* Dealer speech bubble (js/dealertalk.js): a pixel comic bubble anchored at the dealer's mouth.
+   The script sets left/right/bottom in px; the tail's tip sits on that point. */
+#dealer-bubble {
+  --db-bg: #fffdf4; --db-ink: #15121a; --db-who: #8a6a1a; --db-line: #000;
+  position: fixed; z-index: 40; pointer-events: none; margin-bottom: 20px;
+  min-width: 7em; width: max-content;
+  padding: .4em .65em .45em;
+  font-family: var(--font-text, "VT323", monospace); font-size: clamp(17px, 1.7vw, 24px); line-height: 1.05;
+  color: var(--db-ink); background: var(--db-bg);
+  /* stepped pixel outline with notched corners and a hard drop shadow */
+  box-shadow: 0 -4px 0 0 var(--db-line), 0 4px 0 0 var(--db-line), -4px 0 0 0 var(--db-line), 4px 0 0 0 var(--db-line),
+              8px 8px 0 0 rgba(0, 0, 0, .4);
+  transform-origin: 0 100%;
+}
+#dealer-bubble.db-flip { transform-origin: 100% 100%; }
+#dealer-bubble .db-who {
+  display: block; margin-bottom: .35em;
+  font-family: var(--font-pixel, "Press Start 2P", monospace); font-size: 8px; letter-spacing: 1px; text-transform: uppercase; color: var(--db-who);
+}
+#dealer-bubble .db-ghost { visibility: hidden; }
+/* tail: a stepped triangle pointing down-left (down-right when flipped) */
+#dealer-bubble .db-tail {
+  position: absolute; left: 0; bottom: -20px; width: 20px; height: 20px;
+  background:
+    linear-gradient(var(--db-line), var(--db-line)) 0 0 / 4px 20px no-repeat,
+    linear-gradient(var(--db-bg), var(--db-bg)) 4px 0 / 12px 4px no-repeat,
+    linear-gradient(var(--db-line), var(--db-line)) 16px 0 / 4px 4px no-repeat,
+    linear-gradient(var(--db-bg), var(--db-bg)) 4px 4px / 8px 4px no-repeat,
+    linear-gradient(var(--db-line), var(--db-line)) 12px 4px / 4px 4px no-repeat,
+    linear-gradient(var(--db-bg), var(--db-bg)) 4px 8px / 4px 4px no-repeat,
+    linear-gradient(var(--db-line), var(--db-line)) 8px 8px / 4px 8px no-repeat,
+    linear-gradient(var(--db-line), var(--db-line)) 4px 12px / 4px 8px no-repeat;
+}
+#dealer-bubble.db-flip .db-tail { left: auto; right: 0; transform: scaleX(-1); }
+#dealer-bubble.db-shout { --db-bg: #ffe24a; --db-who: #7a3a00; font-size: clamp(19px, 2vw, 28px); text-transform: uppercase; }
+#dealer-bubble.db-soft { --db-bg: #ece7f6; --db-ink: #4a4258; }
+#dealer-bubble.db-pop { animation: db-pop .2s steps(3) both; }
+#dealer-bubble.db-shout.db-pop { animation: db-pop .2s steps(3) both, db-shake .3s steps(2) .2s 2; }
+#dealer-bubble.db-out { animation: db-out .18s steps(2) both; }
+@keyframes db-pop { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes db-out { to { transform: scale(.6); opacity: 0; } }
+@keyframes db-shake { 0% { translate: -3px 0; } 50% { translate: 3px 0; } 100% { translate: 0 0; } }
+@media (prefers-reduced-motion: reduce) { #dealer-bubble, #dealer-bubble * { animation: none !important; } }

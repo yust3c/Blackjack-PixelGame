@@ -20,7 +20,7 @@
     epic:      { name: 'Epic',      color: '#c069f0' },
     legendary: { name: 'Legendary', color: '#ffb020' },
     secret:    { name: 'Secret',    color: '#ff5a6a' },
-    insanity:  { name: 'Insanity',  color: '#5af2ff' },
+    insanity:  { name: 'Insanity',  color: 'var(--holo, #5af2ff)' }, // animated rainbow, see css/cosmetics.css
   };
   const TYPES = [
     { id: 'back',  name: 'Card backs' },
