@@ -112,7 +112,7 @@
   // ---------------------------------------------------------------- the cast
   const DEALERS = {
     corner: {
-      name: 'Don Tito', line: 'Thirty years at the same table.',
+      name: 'Old Tito', line: 'Thirty years at the same table.',
       skin: '#e0a878', skinShade: '#b87a50', hair: '#c8c2ae', hairStyle: 'side', brow: '#a8a290', mustache: '#d8d2c0',
       outfit: '#7a1a26', outfitDark: '#5a1018', shirt: '#fbf6e6', neck: 'bow', neckColor: '#20202a', extras: ['mustache'],
     },
@@ -127,7 +127,7 @@
       outfit: '#15151c', outfitDark: '#08080c', shirt: '#f0c8a0', neck: 'pearls', neckColor: '#fbf6e6', trim: '#c9a24a', extras: ['earring'], earring: '#fbf6e6',
     },
     liner: {
-      name: 'Capitana Odette', line: 'Commands the liner and the table.',
+      name: 'Captain Odette', line: 'Commands the liner and the table.',
       skin: '#f0c8a0', skinShade: '#c89870', hair: '#e8e2d0', hairStyle: 'bob', hairHi: '#ffffff', lip: '#b04fd0',
       outfit: '#1a1d5a', outfitDark: '#10123a', shirt: '#fbf6e6', neck: 'tie', neckColor: '#c9a24a', epaulettes: '#ffd75e',
       extras: ['helmet'], helmet: '#bfe4ff', helmetRing: '#c9a24a',
@@ -143,7 +143,7 @@
       outfit: '#1a1a22', outfitDark: '#08080c', shirt: '#9a3a12', neck: 'chain', neckColor: '#7ff0ff', trim: '#7ff0ff', extras: ['cyborg'],
     },
     vip: {
-      name: 'Señor Valdés', line: 'High stakes, white gloves.',
+      name: 'Mr. Valdez', line: 'High stakes, white gloves.',
       skin: '#8a5a3a', skinShade: '#6a4028', hair: '#d8d2c0', hairStyle: 'slick', hairHi: '#ffffff', brow: '#c8c2ae',
       outfit: '#141018', outfitDark: '#050407', shirt: '#fbf6e6', neck: 'bow', neckColor: '#141018', trim: '#2a2630', extras: ['monocle'], monocle: '#c9a24a',
     },

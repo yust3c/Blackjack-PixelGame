@@ -25,7 +25,7 @@
     maxBots: 6,             // how many bot seats the mode allows
   };
 
-  const BOT_NAMES = ['Lucía', 'Marco', 'Sofía', 'Diego', 'Elena', 'Bruno', 'Carla', 'Iván', 'Nora', 'Tomás'];
+  const BOT_NAMES = ['Lucy', 'Mark', 'Sophie', 'Dan', 'Ellen', 'Bruno', 'Carla', 'Ivan', 'Nora', 'Tom'];
   const BOT_BETS = [10, 15, 20, 25, 25, 50];
 
   let nextCardId = 1;
@@ -517,7 +517,7 @@
   }
 
   function formatChips(n) {
-    return Number.isInteger(n) ? String(n) : n.toFixed(1).replace('.', ',');
+    return Number.isInteger(n) ? String(n) : n.toFixed(1);
   }
 
   const NS = { SUITS, RANKS, DEFAULT_RULES, cardValue, handValue, hiLo, isBlackjack, Shoe, Game, formatChips };

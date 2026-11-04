@@ -231,7 +231,7 @@
   SCENES.corner = {
     wall: '#522b15', floor: '#7a1a26',
     top: '#3a1d0c',
-    name: 'El Rincón', subtitle: 'Casino de barrio',
+    name: 'The Corner', subtitle: 'Neighborhood casino',
     vars: {},
     draw(p) {
       for (let x = 0; x < W; x += 6) {
@@ -281,7 +281,7 @@
   SCENES.orbit = {
     wall: '#2a3344', floor: '#1f2633',
     top: '#1a2130',
-    name: 'Estación Órbita', subtitle: 'Rincón en órbita baja',
+    name: 'Orbit Station', subtitle: 'The Corner in low orbit',
     space: true,
     vars: {
       '--bg': '#0c1018', '--felt': '#127a7a', '--felt-dot': '#0f6c6c', '--felt-dark': '#0a4e4e', '--felt-line': '#7ff0ff',
@@ -351,7 +351,7 @@
   SCENES.deco = {
     wall: '#0f1a32', floor: '#15151c',
     top: '#0a1020',
-    name: 'Gran Hotel', subtitle: 'Salón art déco',
+    name: 'Grand Hotel', subtitle: 'Art deco ballroom',
     vars: {
       '--bg': '#0b1226', '--felt': '#1f4f9a', '--felt-dot': '#1b468a', '--felt-dark': '#143468', '--felt-line': '#e9d27a',
       '--rail': '#5a1f1f', '--rail-light': '#8a3a2a', '--rail-dark': '#2e0c0c',
@@ -391,7 +391,7 @@
   SCENES.liner = {
     wall: '#090c20', floor: '#0a0a20',
     top: '#05060f',
-    name: 'Crucero Estelar', subtitle: 'Gran Hotel entre nebulosas',
+    name: 'Star Liner', subtitle: 'The Grand Hotel among the nebulas',
     space: true,
     vars: {
       '--bg': '#070918', '--felt': '#2b2f8a', '--felt-dot': '#25297a', '--felt-dark': '#1a1d5a', '--felt-line': '#ffd75e',
@@ -446,7 +446,7 @@
   SCENES.neon = {
     wall: '#08040f', floor: '#140a1e',
     top: '#05030a',
-    name: 'Neón', subtitle: 'La avenida de noche',
+    name: 'Neon', subtitle: 'The avenue at night',
     vars: {
       '--bg': '#0e0820', '--felt': '#8f1d2c', '--felt-dot': '#7f1827', '--felt-dark': '#5e101c', '--felt-line': '#ff9ad6',
       '--rail': '#1a1a22', '--rail-light': '#3a3a48', '--rail-dark': '#08080c',
@@ -480,7 +480,7 @@
   SCENES.mars = {
     wall: '#0a0606', floor: '#1a0a0a',
     top: '#05030a',
-    name: 'Neón Marte', subtitle: 'La avenida bajo la cúpula',
+    name: 'Mars Neon', subtitle: 'The avenue under the dome',
     space: true,
     vars: {
       '--bg': '#120606', '--felt': '#9a3a12', '--felt-dot': '#8a3410', '--felt-dark': '#6a2408', '--felt-line': '#7ff0ff',
@@ -531,7 +531,7 @@
   SCENES.vip = {
     wall: '#0c0b10', floor: '#0a090d',
     top: '#0c0b10',
-    name: 'Sala VIP', subtitle: 'Penthouse de los grandes apostadores',
+    name: 'VIP Lounge', subtitle: 'Penthouse for high rollers',
     vars: {
       '--bg': '#08070b', '--felt': '#2a1640', '--felt-dot': '#25133a', '--felt-dark': '#1a0c2c', '--felt-line': '#c9a24a',
       '--rail': '#141018', '--rail-light': '#c9a24a', '--rail-dark': '#050407',
@@ -569,7 +569,7 @@
   SCENES.horizon = {
     wall: '#0a0812', floor: '#06050a',
     top: '#0a0812',
-    name: 'Horizonte de Sucesos', subtitle: 'Sala VIP al borde del agujero negro',
+    name: 'Event Horizon', subtitle: 'The VIP Lounge at the edge of a black hole',
     space: true,
     vars: {
       '--bg': '#030208', '--felt': '#14102a', '--felt-dot': '#110d24', '--felt-dark': '#0a0818', '--felt-line': '#ffb347',
@@ -652,7 +652,14 @@
     felt: '#1f7a45', 'felt-dot': '#1b6c3d', 'felt-dark': '#155a32', 'felt-line': '#e9d27a',
     rail: '#6b3a1e', 'rail-light': '#9a5a2c', 'rail-dark': '#3a1d0c', gold: '#ffd75e',
   };
-  const colorOf = (sc, k) => (sc.vars && sc.vars[`--${k}`]) || DEFAULT_COLORS[k];
+  // An equipped felt cosmetic also recolours the felt pixels painted into the scene, so the edges match the HTML felt.
+  const colorOf = (sc, k) => {
+    if (k.startsWith('felt')) {
+      const f = root.Cosmetics && root.Cosmetics.feltVars ? root.Cosmetics.feltVars() : null;
+      if (f && f[`--${k}`]) return f[`--${k}`];
+    }
+    return (sc.vars && sc.vars[`--${k}`]) || DEFAULT_COLORS[k];
+  };
 
   // Horizontal extent of a rounded-bottom shape on row y, or null outside it.
   function span(shape, y) {
@@ -716,7 +723,7 @@
   }
 
 
-  // ---------------------------------------------------------------- 3/4 perspective view (prototype: El Rincón)
+  // ---------------------------------------------------------------- 3/4 perspective view (prototype: The Corner)
   // One-point perspective: the camera sits at the near side of the table looking slightly down at the dealer.
   // Room: back wall (BW), side walls converging to VP, floor in perspective. Table: a half-moon seen from above at an
   // angle (straight dealer edge at the back, curved player edge at the front), with its wooden side (apron) visible.
@@ -1242,7 +1249,7 @@
     const el = layer();
     const stage = stageFits();
     const art = el.querySelector('.scene-art');
-    const want = `${id}:${stage ? 1 : 0}`;
+    const want = `${id}:${stage ? 1 : 0}:${doc.documentElement.dataset.cosFelt || ''}`;
     if (art.dataset.key !== want) { art.innerHTML = svg(id, stage); art.dataset.key = want; }
     const table = doc.querySelector('#game .table');
     const sc = SCENES[id];
@@ -1272,6 +1279,7 @@
     }
   }
   root.addEventListener('resize', layout);
+  root.document.addEventListener('cosmetics:change', layout);
 
   // Stacked layout only: the dealer stands in a band above the table, at the room's pixel size.
   function placeDealer(id) {

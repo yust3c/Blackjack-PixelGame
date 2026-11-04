@@ -198,13 +198,10 @@
     selectedSeat = null;
     game = new BJ.Game({ rules, onUpdate: render, onRoundEnd: roundEnd });
 
-    // Start seated, with a bot beside you when the table allows one.
-    game.sitPlayer(0);
-    if (game.rules.maxBots > 0) game.addBot(1);
-    else game.sitPlayer(1);
+    // The table starts empty: the player picks their seats and any bots.
     game.say(game.rules.maxBots > 0
-      ? 'Place your bet. Add or remove bots from the open seats.'
-      : 'No bots at this table: bet on both of your seats.');
+      ? 'Pick a seat. Two bets are needed: play two seats or add a bot.'
+      : 'Pick two seats. No bots here, you play both hands.');
 
     $('menu').hidden = true;
     $('game').hidden = false;
@@ -338,6 +335,7 @@
     if (!seat.type) classes.push('empty');
     if (seat.type) classes.push(seat.type);
     if (isActive) classes.push('active');
+    if (seat.hands.length > 1) classes.push(`split-${seat.hands.length}`);
     if (selectedSeat === seat.index && betting && seat.type === 'player') classes.push('selected');
 
     let body = '';

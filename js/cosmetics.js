@@ -1125,6 +1125,8 @@ html .cos-sw-faces.cos-sw-faces[data-face="${id}"] .card::after { ${after} }\n`;
   if (doc.readyState === 'loading') doc.addEventListener('DOMContentLoaded', apply); else setTimeout(apply, 0);
 
   root.Cosmetics = {
+    /** CSS variables of the equipped felt, or null for the default felt (scenes use this to match their painted edges). */
+    feltVars: () => FELTS[state.equipped.felt] || null,
     RARITIES, TYPES, CATALOG,
     get: (id) => byId[id],
     equipped: () => Object.assign({}, state.equipped),

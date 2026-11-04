@@ -182,3 +182,64 @@ body[data-scene] .seat .leave {
   box-shadow: inset 0 0 0 1px rgba(251, 246, 230, 0.35);
 }
 body[data-scene] .seat .leave:hover, body[data-scene] .seat .leave:focus-visible { background: var(--lose); color: #fff; }
+
+/* ---------- fix round (table thread): no overlaps on the stage ---------- */
+/* Chip values sit on the chip itself, so the rack fits its box and nothing is cut off. */
+body[data-stage] .controls .chip-btn { position: relative; gap: 0; }
+body[data-stage] .controls .chip-btn span {
+  position: absolute; inset: 0; display: grid; place-items: center; font-size: 8px; color: #fff; pointer-events: none;
+  text-shadow: 1px 0 0 #000, -1px 0 0 #000, 0 1px 0 #000, 0 -1px 0 #000, 1px 1px 0 #000;
+}
+body[data-stage] .controls { justify-content: center; }
+/* The table message stays on one line so it never runs into the seat tags below it. */
+body[data-view="3d"] .message { max-width: 760px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Smaller, tighter cards on the stage so neighbouring hands and name tags don't collide. */
+body[data-view="3d"] .table { --card-w: 40px; --card-h: 57px; }
+body[data-view="3d"] .seat .card + .card { margin-left: calc(var(--card-w) * -0.62); }
+body[data-view="3d"] .card .corner { top: 4px; left: 4px; gap: 2px; }
+body[data-view="3d"] .card .rank { font-size: 8px; }
+body[data-view="3d"] .card .corner .px-suit { width: 7px; height: 7px; }
+body[data-view="3d"] .card .pip { right: 4px; bottom: 4px; }
+body[data-view="3d"] .card .pip .px-suit { width: 14px; height: 14px; }
+/* Name tags always draw above cards, from any seat. */
+body[data-view="3d"] .seats > .seat { z-index: 1; }
+body[data-view="3d"] .seats > .seat .seat-head { position: relative; z-index: 3; }
+body[data-view="3d"] .seats > .seat.active { z-index: 2; }
+/* The name tag sits under the cards, so a growing hand never pushes it into the table text;
+   split hands line up side by side instead of stacking up the felt. */
+body[data-view="3d"] .seats > .seat:not(.empty) { flex-direction: column-reverse; }
+body[data-view="3d"] .seat .hands { flex-direction: row; align-items: flex-end; gap: 2px; width: auto; }
+body[data-view="3d"] .seat.split-3 .hands, body[data-view="3d"] .seat.split-4 .hands { zoom: 0.8; }
+body[data-view="3d"] .seat .hand-info { gap: 3px; }
+/* A little more room between the table text and the nearest hands. */
+body[data-view="3d"] .table-print { margin-top: 6px; }
+body[data-view="3d"] .seats > .seat:nth-child(3), body[data-view="3d"] .seats > .seat:nth-child(5) { bottom: 26px; }
+body[data-view="3d"] .seats > .seat:nth-child(4) { bottom: 6px; }
+
+/* ---------- fix round 2: round bet circle, name tags inside the felt ---------- */
+/* The betting circle is a fixed circle; chips stack up out of it and the amount sits under it. */
+body[data-view="3d"] .bet-spot {
+  position: relative; width: 50px; height: 50px; min-width: 0; min-height: 0; padding: 0; flex: none;
+  display: block; margin-bottom: 14px;
+}
+body[data-view="3d"] .bet-spot.empty { display: grid; place-items: center; margin-bottom: 0; }
+body[data-view="3d"] .bet-spot .stack { position: absolute; left: 50%; bottom: 8px; width: 34px; transform: translateX(-50%); }
+body[data-view="3d"] .bet-spot .stack-chip { width: 34px; height: 34px; }
+body[data-view="3d"] .bet-spot .stack-chip .px-chip { width: 34px; height: 34px; }
+body[data-view="3d"] .bet-spot .bet-amount {
+  position: absolute; left: 50%; top: 100%; transform: translate(-50%, -6px); white-space: nowrap; font-size: 8px; padding: 2px 4px;
+}
+/* Seats sit a little higher and smaller near the camera so every name tag stays on the felt, clear of the rail. */
+body[data-view="3d"] .table .dealer { min-height: 92px; }
+body[data-view="3d"] .table-print { margin-top: 0; }
+body[data-view="3d"] .seat-head { min-height: 14px; }
+body[data-view="3d"] .seat-name { font-size: 15px; }
+body[data-view="3d"] .seats > .seat { width: 136px; }
+body[data-view="3d"] .seats > .seat:nth-child(1) { left: 858px; bottom: 172px; transform: translateX(-50%) scale(0.72); }
+body[data-view="3d"] .seats > .seat:nth-child(2) { left: 772px; bottom: 104px; transform: translateX(-50%) scale(0.8); }
+body[data-view="3d"] .seats > .seat:nth-child(3) { left: 643px; bottom: 40px; transform: translateX(-50%) scale(0.88); }
+body[data-view="3d"] .seats > .seat:nth-child(4) { left: 488px; bottom: 16px; transform: translateX(-50%) scale(0.94); }
+body[data-view="3d"] .seats > .seat:nth-child(5) { left: 333px; bottom: 40px; transform: translateX(-50%) scale(0.88); }
+body[data-view="3d"] .seats > .seat:nth-child(6) { left: 204px; bottom: 104px; transform: translateX(-50%) scale(0.8); }
+body[data-view="3d"] .seats > .seat:nth-child(7) { left: 118px; bottom: 172px; transform: translateX(-50%) scale(0.72); }
+body[data-view="3d"] .seat .hand-info, body[data-view="3d"] .seat .hand-info * { white-space: nowrap; }
