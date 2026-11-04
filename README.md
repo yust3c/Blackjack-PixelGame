@@ -2,9 +2,12 @@
 
 A pixel-art blackjack game that plays like a real casino table.
 
-### [▶ Play it here](https://yust3c.github.io/Blackjack-PixelGame/)
+## How to play
 
-Or download the repository and open `index.html` in your browser. No install needed.
+1. Click **Code → Download ZIP** at the top of this page (or clone the repository).
+2. Unzip it and open `index.html` in your browser.
+
+No install and no internet needed. With a connection it also loads the two pixel fonts.
 
 ## Modes
 
