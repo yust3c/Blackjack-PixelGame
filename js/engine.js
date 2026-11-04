@@ -306,20 +306,31 @@
       await this.pause();
     }
 
+    // Insurance is offered seat by seat, in playing order: each of your seats becomes the
+    // active one and gets its own question, like a turn. The dealer peeks after the last.
     async offerInsurance(order) {
-      const pending = [];
+      const asked = [];
       for (const seat of order) {
         const hand = seat.hands[0];
-        if (seat.type === 'player' && this.bankroll >= hand.bet / 2) pending.push(seat.index);
-        else hand.insuranceDecided = true; // bots never take insurance
+        if (seat.type !== 'player') { hand.insuranceDecided = true; continue; } // bots never take insurance
+        asked.push(seat);
       }
-      if (pending.length === 0) return;
+      if (asked.length === 0) return;
       this.phase = 'insurance';
-      this.insurancePending = pending;
-      this.say('Dealer shows an ace. Insurance? It costs half your bet and pays 2 to 1.');
-      this.update();
-      await this.waitFor('insurance');
+      for (const seat of asked) {
+        const hand = seat.hands[0];
+        const cost = hand.bet / 2;
+        if (this.bankroll < cost) { hand.insuranceDecided = true; continue; }
+        this.active = { seat: seat.index, hand: 0 };
+        this.insurancePending = [seat.index];
+        this.say(hand.natural
+          ? `${seat.name}: blackjack! Dealer shows an ace. Take even money?`
+          : `Dealer shows an ace. ${seat.name}: insure for ${NS.formatChips(cost)}? Pays 2 to 1.`);
+        this.update();
+        await this.waitFor('insurance');
+      }
       this.insurancePending = [];
+      this.active = null;
       this.phase = 'playing';
     }
 

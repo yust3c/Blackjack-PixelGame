@@ -41,7 +41,7 @@ Progress lives in the browser you play in, and it carries over when you download
 
 ## Controls
 
-Click a seat to sit or to add a bot, click chips to bet, then press **Deal** (or `Enter`). On your turn: `H` hit, `S` stand, `D` double, `P` split, `R` surrender.
+Click a seat to sit or to add a bot, click chips to bet, then press **Deal** (or `Enter`). On your turn: `H` hit, `S` stand, `D` double, `P` split, `R` surrender. When the dealer shows an ace, each of your seats is asked about insurance in turn: `I` take it, `N` decline.
 
 ## Made with
 

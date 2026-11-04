@@ -465,15 +465,17 @@
         ${problem ? `<p class="hint">${problem}</p>` : ''}`;
       return;
     }
-    if (game.phase === 'insurance') {
+    if (game.phase === 'insurance' && game.active) {
+      // Same spot and format as the action bar: one question for the highlighted seat.
+      const i = game.active.seat;
+      const hand = game.seats[i].hands[0];
       const take = game.trueCount >= 3;
-      c.innerHTML = (game.insurancePending || []).map((i) => {
-        const hand = game.seats[i].hands[0];
-        const rec = (yes) => (hints && take === yes ? ' recommended' : '');
-        return `<div class="row insurance">Seat ${i + 1}: insure for ${fmt(hand.bet / 2)}?
-          <button class="btn${rec(true)}" data-ins="${i}" data-take="1">Yes</button>
-          <button class="btn btn-ghost${rec(false)}" data-ins="${i}" data-take="0">No</button></div>`;
-      }).join('');
+      const rec = (yes) => (hints && take === yes ? ' recommended' : '');
+      const yes = hand.natural ? 'Even money' : `Insurance ${fmt(hand.bet / 2)}`;
+      const no = hand.natural ? 'No, play it' : 'No insurance';
+      c.innerHTML = `<div class="row actions">
+        <button class="btn act${rec(true)}" data-ins="${i}" data-take="1">${yes} <kbd>I</kbd></button>
+        <button class="btn act btn-ghost${rec(false)}" data-ins="${i}" data-take="0">${no} <kbd>N</kbd></button></div>`;
       return;
     }
     if (myTurn()) {
@@ -633,6 +635,8 @@
     if (game.phase === 'playing') {
       const map = { h: 'hit', s: 'stand', d: 'double', p: 'split', r: 'surrender' };
       if (map[key]) doAct(map[key]);
+    } else if (game.phase === 'insurance' && game.active && (key === 'i' || key === 'n')) {
+      doInsurance(game.active.seat, key === 'i');
     } else if (game.phase === 'betting' && key === 'enter' && !e.target.closest('button')) {
       startDeal();
     }
