@@ -100,8 +100,62 @@
       hint: 'Secret. Lucky number, lucky suit.' },
     { id: 'completionist',  rarity: 'secret',    group: 'Secret',     name: 'Completionist',    desc: 'Unlock every other achievement.', secret: true,
       hint: 'Secret. Collect everything.' },
+    // ---------- round 4 ----------
+    { id: 'split_first', rarity: 'common', group: 'Skill', name: 'Splitter', desc: 'Split a pair for the first time.' },
+    { id: 'push_first', rarity: 'common', group: 'Luck', name: 'Even Steven', desc: 'Push a hand with the dealer.' },
+    { id: 'overeager', rarity: 'common', group: 'Luck', name: 'Overeager', desc: 'Bust 5 hands in a row.' },
+    { id: 'company', rarity: 'common', group: 'Table', name: 'Good Company', desc: 'Play a round with 3 or more bots at the table.' },
+    { id: 'doubler', rarity: 'common', group: 'Totals', name: 'Double Down', desc: 'Double down 25 times.', counter: ['doubles',  25] },
+    { id: 'penny_pincher', rarity: 'common', group: 'Totals', name: 'Penny Pincher', desc: 'Win 25 hands at the table minimum bet.', counter: ['minWins',  25] },
+    { id: 'soft_21', rarity: 'common', group: 'Luck', name: 'Soft Landing', desc: 'Make a soft 21 with 3 or more cards.' },
+    { id: 'tourist', rarity: 'common', group: 'Table', name: 'Tourist', desc: 'Play a hand against all four dealers.' },
+    { id: 'corner_regular', rarity: 'rare', group: 'Table', name: 'Corner Regular', desc: 'Play 250 hands at The Corner with Old Tito.', counter: ['hands_easy',  250] },
+    { id: 'hotel_guest', rarity: 'rare', group: 'Table', name: 'Long Stay', desc: 'Play 250 hands at the Grand Hotel with Madame Odette.', counter: ['hands_medium',  250] },
+    { id: 'tactical_retreat', rarity: 'rare', group: 'Totals', name: 'Tactical Retreat', desc: 'Surrender 15 hands.', counter: ['surrenders',  15] },
+    { id: 'twin_aces', rarity: 'rare', group: 'Luck', name: 'Twin Aces', desc: 'Split Aces and make 21 on both hands.' },
+    { id: 'daredevil', rarity: 'rare', group: 'Skill', name: 'Daredevil', desc: 'Hit on 20 and still win the hand.' },
+    { id: 'standoff', rarity: 'rare', group: 'Luck', name: 'Standoff', desc: 'Push your blackjack against the dealer’s blackjack.' },
+    { id: 'last_chip', rarity: 'rare', group: 'Skill', name: 'Last Chip', desc: 'Win a round when you had 25 chips or fewer left.' },
+    { id: 'night_shift', rarity: 'rare', group: 'Milestones', name: 'Night Shift', desc: 'Play 150 hands in one session.' },
+    { id: 'neon_owl', rarity: 'epic', group: 'Table', name: 'Neon Regular', desc: 'Play 250 hands at Neon with Vinnie.', counter: ['hands_hard',  250] },
+    { id: 'vip_member', rarity: 'epic', group: 'Table', name: 'Members Only', desc: 'Play 250 hands in the VIP Lounge with Mr. Valdez.', counter: ['hands_expert',  250] },
+    { id: 'seven_charlie', rarity: 'epic', group: 'Luck', name: 'Seven-Card Charlie', desc: 'Win a hand holding 7 cards.' },
+    { id: 'steady_hands', rarity: 'epic', group: 'Skill', name: 'Steady Hands', desc: 'Play 50 hands in a row without busting.', counter: ['noBustStreak',  50] },
+    { id: 'dealer_collapse', rarity: 'epic', group: 'Luck', name: 'Domino Effect', desc: 'See the dealer bust 5 rounds in a row.' },
+    { id: 'split_double', rarity: 'epic', group: 'Skill', name: 'Split Decision', desc: 'Split, double on both hands and win both.' },
+    { id: 'by_the_book', rarity: 'epic', group: 'Skill', name: 'By the Book', desc: 'Play 100 hands in a row following basic strategy.', counter: ['bookStreak',  100] },
+    { id: 'speedrun', rarity: 'epic', group: 'Challenge', name: 'Speedrun', desc: 'Beat a Challenge in 30 rounds or fewer.' },
+    { id: 'rigged', rarity: 'legendary', group: 'Luck', name: 'Rigged?', desc: 'The dealer gets blackjack 3 rounds in a row.' },
+    { id: 'professor', rarity: 'legendary', group: 'Skill', name: 'The Professor', desc: 'Play 500 hands in a row following basic strategy.', counter: ['bookStreak',  500] },
+    { id: 'lifetime', rarity: 'legendary', group: 'Milestones', name: 'Lifetime Member', desc: 'Play 10000 hands.', counter: ['hands',  10000] },
+    { id: 'lone_wolf', rarity: 'legendary', group: 'Challenge', name: 'Lone Wolf', desc: 'Beat Hard with no bots at the table.' },
+    { id: 'wolf_expert', rarity: 'legendary', group: 'Challenge', name: 'Apex Predator', desc: 'Beat Expert using only 2 seats every round.' },
+    { id: 'high_society', rarity: 'legendary', group: 'Skill', name: 'High Society', desc: 'Win 5 hands in a row with a 500 bet.' },
+    { id: 'bankrupt', rarity: 'common', group: 'Challenge', name: 'Busted Flat', desc: 'Lose a Challenge by running out of chips.' },
+    { id: 'shuffler', rarity: 'common', group: 'Totals', name: 'New Shoe', desc: 'Sit through 50 reshuffles.', counter: ['shuffles',  50] },
+    { id: 'perfect_pair', rarity: 'common', group: 'Luck', name: 'Perfect Pair', desc: 'Get dealt two identical cards (same rank and suit).' },
+    { id: 'insomniac', rarity: 'common', group: 'Milestones', name: 'Insomniac', desc: 'Play a hand between 3 and 5 in the morning.' },
+    { id: 'halfway', rarity: 'common', group: 'Endless', name: 'Halfway There', desc: 'Reach the 4th objective in any Endless run.' },
+    { id: 'bot_whisperer', rarity: 'rare', group: 'Table', name: 'Bot Whisperer', desc: 'Win a round where every bot at the table loses.' },
+    { id: 'disciplined', rarity: 'rare', group: 'Skill', name: 'Disciplined', desc: 'Bet the table minimum 20 times while the true count is -2 or lower.', counter: ['disciplined',  20] },
+    { id: 'nerves_of_steel', rarity: 'rare', group: 'Skill', name: 'Nerves of Steel', desc: 'Stand on 12 against a dealer 10 and win.' },
+    { id: 'weekend_warrior', rarity: 'rare', group: 'Milestones', name: 'Seven Days', desc: 'Play on 7 different days.', counter: ['daysPlayed',  7] },
+    { id: 'phoenix', rarity: 'rare', group: 'Challenge', name: 'Phoenix', desc: 'Beat a Challenge difficulty after losing it 3 times.' },
+    { id: 'split_blackjack', rarity: 'rare', group: 'Luck', name: 'Split Natural', desc: 'Split Aces and draw a 10-value card on one of them.' },
+    { id: 'full_recovery', rarity: 'epic', group: 'Skill', name: 'Full Recovery', desc: 'Lose 5 rounds in a row, then win the next 5.' },
+    { id: 'pro_counter', rarity: 'epic', group: 'Skill', name: 'Pro Counter', desc: 'Win 10 hands bet at 250+ while the true count is +3 or higher.', counter: ['proCount',  10] },
+    { id: 'double_or_nothing', rarity: 'epic', group: 'Totals', name: 'Double or Nothing', desc: 'Win 100 doubled hands.', counter: ['doublesWon',  100] },
+    { id: 'seven_up', rarity: 'legendary', group: 'Table', name: 'Seven Up', desc: 'Play all 7 seats yourself and win on every one in one round.' },
+    { id: 'dead_mans_hand', rarity: 'secret', group: 'Secret', name: 'Dead Man’s Hand', desc: 'Split black Aces and draw a black 8 on each.', secret: true,
+      hint: "Secret. Aces and eights." },
+    { id: 'wolf_endless', rarity: 'secret', group: 'Secret', name: 'Blood Moon', desc: 'Complete Endless on Hard with no bots at the table.', secret: true,
+      hint: "Secret. The pack stays home, forever." },
+    { id: 'wolf_endless_expert', rarity: 'secret', group: 'Secret', name: 'Silver Moon', desc: 'Complete Endless on Expert using only 2 seats every round.', secret: true,
+      hint: 'Secret. Alone at the very top, for as long as it takes.' },
+    { id: 'darkest_run', rarity: 'insanity', group: 'Secret', name: 'The Darkest Run', desc: 'Complete Endless on Expert using only 2 seats, without ever splitting, doubling or surrendering.', secret: true,
+      hint: 'Secret. The darkest run there is.' },
   ];
-  const RANK = { common: 0, rare: 1, epic: 2, legendary: 3, secret: 4 };
+  const RANK = { common: 0, rare: 1, epic: 2, legendary: 3, secret: 4, insanity: 5 };
   LIST.sort((a, b) => RANK[a.rarity] - RANK[b.rarity]);
   const byId = Object.fromEntries(LIST.map((a) => [a.id, a]));
 
@@ -109,11 +163,18 @@
   // Saved progress
   // ======================================================================
   const SAVE_KEY = 'blackjack-achievements-v1';
-  const blank = () => ({ unlocked: {}, stats: { hands: 0, rounds: 0, blackjacks: 0, handsWon: 0, chipsWon: 0, doublesWon: 0, dealerBusts: 0 } });
+  const blank = () => ({
+    unlocked: {},
+    stats: { hands: 0, rounds: 0, blackjacks: 0, handsWon: 0, chipsWon: 0, doublesWon: 0, dealerBusts: 0,
+      doubles: 0, surrenders: 0, minWins: 0, shuffles: 0, daysPlayed: 0, disciplined: 0, proCount: 0,
+      hands_easy: 0, hands_medium: 0, hands_hard: 0, hands_expert: 0, noBustStreak: 0, bookStreak: 0, bustStreak: 0, highStreak: 0, dealerBJStreak: 0 },
+    days: {},   // 'YYYY-MM-DD' -> true, for Seven Days
+    losses: {}, // difficulty -> Challenges lost, for Phoenix
+  });
   let save = blank();
   try {
     const raw = root.localStorage.getItem(SAVE_KEY);
-    if (raw) { const s = JSON.parse(raw); save = { unlocked: s.unlocked || {}, stats: Object.assign(blank().stats, s.stats || {}) }; }
+    if (raw) { const s = JSON.parse(raw); save = { unlocked: s.unlocked || {}, stats: Object.assign(blank().stats, s.stats || {}), days: s.days || {}, losses: s.losses || {} }; }
   } catch (e) { /* no storage */ }
   function persist() { try { root.localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) { /* ignore */ } }
 
@@ -141,6 +202,7 @@
       mode: o.mode || 'practice', difficulty: o.difficulty || null, start: o.start || 0,
       lowest: Infinity, alwaysAboveStart: true,
       bjStreak: 0, winStreak: 0, doubleStreak: 0, pushStreak: 0, insuranceLost: 0, dealerBustStreak: 0, countBefore: 0,
+      rounds: 0, hands: 0, maxSeats: 0, hadBots: false, usedTricks: false, lossStreak: 0, winsAfter: 0, recovering: false, lostCounted: false,
     };
   }
   const counts = () => session && session.mode !== 'practice';
@@ -148,6 +210,34 @@
   const value = (cards) => (BJ ? BJ.handValue(cards).total : 0);
   const isBJ = (cards) => (BJ ? BJ.isBlackjack(cards) : false);
   const won = (h) => h.result === 'win' || h.result === 'blackjack';
+
+  // Watch the player's own decisions (basic strategy, splits, doubles, hitting on 20) without touching ui.js.
+  if (BJ && BJ.Game && !BJ.Game.prototype.__achWrapped) {
+    const applyAction = BJ.Game.prototype.applyAction;
+    BJ.Game.prototype.applyAction = function (seat, h, action) {
+      try {
+        const hand = seat && seat.hands && seat.hands[h];
+        if (hand && seat.type === 'player' && counts()) {
+          const { total } = BJ.handValue(hand.cards);
+          if (BJ.basicStrategy) {
+            const rec = BJ.basicStrategy(hand.cards, this.dealerUpCard(), this.availableActions(seat.index, h));
+            hand.achDecisions = (hand.achDecisions || 0) + 1;
+            if (rec !== action) hand.achOffBook = true;
+          }
+          if ((action === 'hit' || action === 'double') && total === 20) hand.achHitOn20 = true;
+          if (action === 'split' || action === 'double' || action === 'surrender') session.usedTricks = true;
+          if (action === 'split') { // the new hand inherits the book so far
+            hand.achSplitFrom = hand.cards.slice(0, 2);
+          }
+        }
+      } catch (e) { /* tracking must never break the game */ }
+      return applyAction.call(this, seat, h, action);
+    };
+    BJ.Game.prototype.__achWrapped = true;
+  }
+
+  const isBlack = (c) => c.suit === '♠' || c.suit === '♣';
+  function today() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
 
   function roundEnd(game) {
     if (!counts()) return [];
@@ -180,7 +270,16 @@
       if (session.bjStreak >= 2) unlock('double_natural');
       if (session.bjStreak >= 3) unlock('hat_trick');
 
+      const first2 = seat.hands[0].cards;
+      if (first2.length >= 2 && first2[0].rank === first2[1].rank && first2[0].suit === first2[1].suit && seat.hands.length === 1) unlock('perfect_pair');
       if (seat.hands.length > 1) { // split
+        unlock('split_first');
+        const aces = seat.hands.every((x) => x.splitAces);
+        if (aces && seat.hands.every((x) => value(x.cards) === 21)) unlock('twin_aces');
+        if (aces && seat.hands.some((x) => x.cards.length === 2 && value(x.cards) === 21)) unlock('split_blackjack');
+        if (aces && seat.hands.length === 2 && seat.hands.every((x) => x.cards.length >= 2 && isBlack(x.cards[0]) && x.cards[1].rank === '8' && isBlack(x.cards[1]))
+          && seat.hands[0].cards[0].suit !== seat.hands[1].cards[0].suit) unlock('dead_mans_hand');
+        if (seat.hands.length === 2 && seat.hands.every((x) => x.doubled && won(x))) unlock('split_double');
         const wins = seat.hands.filter(won).length;
         if (wins === seat.hands.length) unlock('split_sweep');
         if (seat.hands.length >= 4 && wins >= 3) unlock('four_of_a_kind');
@@ -189,6 +288,30 @@
       let seatNet = 0;
       for (const h of seat.hands) {
         save.stats.hands++;
+        session.hands++;
+        if (session.difficulty) save.stats['hands_' + session.difficulty] = (save.stats['hands_' + session.difficulty] || 0) + 1;
+        {
+          const tot = value(h.cards);
+          const busted = h.result === 'bust' || tot > 21;
+          if (h.result === 'push') unlock('push_first');
+          save.stats.bustStreak = busted ? save.stats.bustStreak + 1 : 0;
+          if (save.stats.bustStreak >= 5) unlock('overeager');
+          save.stats.noBustStreak = busted ? 0 : save.stats.noBustStreak + 1;
+          if (h.doubled) save.stats.doubles++;
+          if (h.result === 'surrender') save.stats.surrenders++;
+          const base = h.doubled ? h.bet / 2 : h.bet;
+          if (won(h) && base === game.rules.minBet) save.stats.minWins++;
+          if (!h.fromSplit && base === game.rules.minBet && session.countBefore <= -2) save.stats.disciplined++;
+          if (won(h) && base >= 250 && session.countBefore >= 3) save.stats.proCount++;
+          if (tot === 21 && h.cards.length >= 3 && BJ && BJ.handValue(h.cards).soft) unlock('soft_21');
+          if (won(h) && h.achHitOn20) unlock('daredevil');
+          if (h.natural && dealerBJ && h.result === 'push') unlock('standoff');
+          if (won(h) && h.cards.length >= 7) unlock('seven_charlie');
+          if (won(h) && !h.doubled && h.cards.length >= 2 && tot === 12 && !(BJ && BJ.handValue(h.cards).soft) && dealer[0] && BJ && BJ.cardValue(dealer[0]) === 10) unlock('nerves_of_steel');
+          save.stats.highStreak = won(h) && base >= 500 ? save.stats.highStreak + 1 : 0;
+          if (save.stats.highStreak >= 5) unlock('high_society');
+          if (h.achDecisions) save.stats.bookStreak = h.achOffBook ? 0 : save.stats.bookStreak + 1;
+        }
         roundNet += h.net || 0;
         seatNet += h.net || 0;
         const total = value(h.cards);
@@ -218,16 +341,45 @@
       if (seatNet > 0) seatsWon++;
     }
 
+    session.rounds++;
+    session.maxSeats = Math.max(session.maxSeats, seats.length);
+    if (game.shoe && game.shoe.roundsDealt === 1) save.stats.shuffles++;
+    const day = today();
+    if (!save.days[day]) { save.days[day] = true; save.stats.daysPlayed = Object.keys(save.days).length; }
+    const hour = new Date().getHours();
+    if (hour >= 3 && hour < 5) unlock('insomniac');
+    if (session.hands >= 150) unlock('night_shift');
+    if (['easy', 'medium', 'hard', 'expert'].every((d) => save.stats['hands_' + d] > 0)) unlock('tourist');
+    save.stats.dealerBJStreak = dealerBJ ? save.stats.dealerBJStreak + 1 : 0;
+    if (save.stats.dealerBJStreak >= 3) unlock('rigged');
+    const seatedBots = game.seats.filter((st) => st.type === 'bot');
+    if (seatedBots.length) session.hadBots = true;
     if (dealer.length >= 5 && dealerTotal > 21) unlock('meltdown');
     if (dealerTotal > 21) save.stats.dealerBusts++;
     session.dealerBustStreak = dealerTotal > 21 ? session.dealerBustStreak + 1 : 0;
     if (session.dealerBustStreak >= 3) unlock('dealer_streak');
+    if (session.dealerBustStreak >= 5) unlock('dealer_collapse');
     if (game.seats.length >= 7 && game.seats.every((st) => st.type)) unlock('full_table');
     const bots = game.seats.filter((st) => st.type === 'bot' && st.hands && st.hands.length);
     if (bots.length >= 2 && bots.every((st) => st.hands.every((h) => h.result === 'bust')) && roundNet > 0) unlock('last_standing');
+    if (bots.length >= 3) unlock('company');
+    if (bots.length >= 1 && roundNet > 0 && bots.every((st) => st.hands.every((h) => h.result === 'bust' || h.result === 'lose'))) unlock('bot_whisperer');
+    if (seats.length >= 7 && seatsWon === seats.length) unlock('seven_up');
     const staked = seats.reduce((sum, st) => sum + st.hands.reduce((t, h) => t + (h.bet || 0) + (h.insurance || 0), 0), 0);
     const bankrollBefore = game.bankroll - roundNet;
     if (roundNet > 0 && staked > 0 && bankrollBefore - staked < 5) unlock('all_in');
+    if (roundNet > 0 && bankrollBefore <= 25) unlock('last_chip');
+    if (roundNet < 0) {
+      session.lossStreak++; session.winsAfter = 0; session.recovering = session.lossStreak >= 5;
+    } else if (roundNet > 0) {
+      session.lossStreak = 0;
+      if (session.recovering) { session.winsAfter++; if (session.winsAfter >= 5) unlock('full_recovery'); }
+    } else { session.lossStreak = 0; session.winsAfter = 0; session.recovering = false; }
+    if (session.mode === 'challenge' && game.broke && !session.lostCounted) {
+      session.lostCounted = true;
+      unlock('bankrupt');
+      if (session.difficulty) save.losses[session.difficulty] = (save.losses[session.difficulty] || 0) + 1;
+    }
     // count for the next round's bets (a fresh shoe starts at 0)
     session.countBefore = game.trueCount || 0;
     session.winStreak = roundNet > 0 ? session.winStreak + 1 : 0;
@@ -251,6 +403,11 @@
     if (session.start && session.lowest <= session.start / 4) unlock('comeback');
     if (difficultyId === 'expert' && session.alwaysAboveStart) unlock('flawless');
     if (['easy', 'medium', 'hard', 'expert'].every((d) => save.unlocked['beat_' + d])) unlock('grand_slam');
+    if (session.rounds <= 30) unlock('speedrun');
+    if ((save.losses[difficultyId] || 0) >= 3) unlock('phoenix');
+    if (difficultyId === 'hard' && !session.hadBots) unlock('lone_wolf');
+    if (difficultyId === 'expert' && session.maxSeats <= 2) unlock('wolf_expert');
+    persist();
   }
 
   /** Endless objectives can be one list, or one list per difficulty. */
@@ -264,7 +421,13 @@
     if (!session || session.mode !== 'endless') return;
     if (bankroll >= 2500) unlock('endless_2500');
     if (bankroll >= 10000) unlock('endless_10k');
-    if (difficulty && objectivesReached >= objectivesFor(difficulty).length) unlock('endless_' + difficulty);
+    if (objectivesReached >= 4) unlock('halfway');
+    if (difficulty && objectivesReached >= objectivesFor(difficulty).length) {
+      unlock('endless_' + difficulty);
+      if (difficulty === 'hard' && !session.hadBots) unlock('wolf_endless');
+      if (difficulty === 'expert' && session.maxSeats <= 2) unlock('wolf_endless_expert');
+      if (difficulty === 'expert' && session.maxSeats <= 2 && !session.usedTricks) unlock('darkest_run');
+    }
     if (['easy', 'medium', 'hard', 'expert'].every((d) => save.unlocked['endless_' + d])) unlock('endless_all');
     if (bankroll >= 100000) unlock('whale');
   }
@@ -296,11 +459,16 @@
   const queue = [];
   let showing = false;
   let toastEl = null;
-  const KIND = { back: 'card back', felt: 'felt', chips: 'chip set', face: 'card faces' };
+  const KIND = { back: 'card back', felt: 'felt', chips: 'chip set', face: 'card faces', title: 'title' };
   function rewardLine(id, reward) {
     const all = root.Cosmetics ? root.Cosmetics.rewardsFor(id) : [reward];
-    if (all.length > 1) return `New set: ${reward.set || reward.name} (${all.map((r) => KIND[r.type]).join(', ')})`;
-    return `New ${KIND[reward.type]}: ${reward.name}`;
+    const pieces = all.filter((r) => r.type !== 'title');
+    const title = all.find((r) => r.type === 'title');
+    const parts = [];
+    if (pieces.length > 1) parts.push(`New set: ${pieces[0].set || pieces[0].name} (${pieces.map((r) => KIND[r.type]).join(', ')})`);
+    else if (pieces.length) parts.push(`New ${KIND[pieces[0].type]}: ${pieces[0].name}`);
+    if (title) parts.push(`${parts.length ? 'title' : 'New title'}: ${title.name}`);
+    return parts.join(' + ');
   }
   function toast(a, reward) {
     queue.push([a, reward]);
@@ -338,6 +506,7 @@
     shown: (id) => { const a = byId[id]; if (!a) return null; return a.secret && !save.unlocked[id] ? { name: '???', desc: a.hint } : { name: a.name, desc: a.desc }; },
     get: (id) => byId[id] || null,
     isUnlocked: (id) => !!save.unlocked[id],
+    stats: () => Object.assign({}, save.stats),
     stats: () => Object.assign({}, save.stats),
     startSession, roundEnd, challengeWon, endlessProgress, syncFromModes,
     unlock, // exposed for testing and the preview page
@@ -846,6 +1015,313 @@
       trophy('silver')(p);
       p.rect(6, 4, 5, 1, RAIN[f]); p.rect(6, 5, 5, 1, RAIN[(f + 1) % 6]); p.rect(7, 6, 3, 1, RAIN[(f + 2) % 6]);
     }, post(p, f) { p.sparkle(f % 2 ? 1 : 14, f % 3 === 0 ? 1 : 12, RAIN[f % 6], f % 2 === 0); } },
+    // ===== batch 4 drafts =====
+    split_first: { draw(p) {
+      p.card(0, 5, 7, 10, '8', null, C.ink); p.card(9, 5, 7, 10, '8', null, C.ink);
+      p.poly([[3, 3], [6, 0], [6, 2], [10, 2], [10, 0], [13, 3], [10, 6], [10, 4], [6, 4], [6, 6]], C.yellow[1]);
+      p.rect(6, 2, 4, 1, C.yellow[0]);
+    } },
+    push_first: { draw(p) {
+      p.rect(7, 2, 2, 11, C.brown[1]).rect(7, 2, 1, 11, C.brown[0]).rect(4, 13, 8, 2, C.brown[2]);
+      p.rect(1, 3, 14, 1, C.yellow[1]).rect(7, 1, 2, 2, C.yellow[0]);
+      p.line(2, 4, 0, 8, C.grey[2]).line(2, 4, 4, 8, C.grey[2]).line(13, 4, 11, 8, C.grey[2]).line(13, 4, 15, 8, C.grey[2]);
+      p.rect(0, 8, 5, 2, C.yellow[2]).rect(11, 8, 5, 2, C.yellow[2]).rect(0, 8, 5, 1, C.yellow[1]).rect(11, 8, 5, 1, C.yellow[1]);
+    } },
+    overeager: { draw(p) {
+      p.card(2, 2, 11, 13, '22', null, C.red[1]);
+      p.suit('d', 6, 9, C.red[1]);
+      p.disc(13.5, 3, 1.6, 2.4, C.cyan); p.set(13, 1, C.cyan[1]);
+    } },
+    company: { draw(p) {
+      p.rect(7, 0, 2, 2, C.red[1]).rect(7, 2, 2, 2, C.grey[2]);
+      p.rect(2, 4, 12, 9, C.grey[1]).rect(2, 4, 12, 1, C.grey[0]).rect(2, 4, 1, 9, C.grey[0]).rect(13, 5, 1, 8, C.grey[2]);
+      p.rect(4, 6, 3, 3, C.cyan[1]).rect(9, 6, 3, 3, C.cyan[1]).set(4, 6, '#ffffff').set(9, 6, '#ffffff');
+      p.rect(5, 10, 6, 1, C.dark[1]); p.set(6, 10, C.yellow[1]); p.set(9, 10, C.yellow[1]);
+      p.rect(0, 7, 2, 3, C.grey[2]).rect(14, 7, 2, 3, C.grey[2]); p.rect(4, 13, 8, 2, C.grey[2]);
+    } },
+    doubler: { draw(p) {
+      const chip = (cx, cy, r) => { p.disc(cx, cy, 5, 5, r); for (let i = 0; i < 6; i++) { const a = (i / 6) * Math.PI * 2; p.set(cx + Math.cos(a) * 4, cy + Math.sin(a) * 4, C.white); } p.disc(cx, cy, 2.6, 2.6, [r[1], r[1], r[1]], true); };
+      chip(5.5, 5.5, C.blue); chip(10.5, 10.5, C.green); p.text('2', 9, 8, '#ffffff');
+    } },
+    rigged: { frames: 8, dur: 1.6, draw(p, f) {
+      p.card(1, 3, 9, 12, null, null, C.ink, { face: C.red[1] });
+      for (let y = 4; y < 14; y += 2) for (let x = 2; x < 9; x += 2) p.set(x + (y % 4 ? 1 : 0), y, C.red[2]);
+      const sx = [10, 9, 8, 7, 6, 7, 8, 9][f], sy = [6, 7, 8, 9, 9, 8, 7, 6][f];
+      p.ring(sx, sy, 2.6, 4, C.grey[1]); p.disc(sx, sy, 2.6, 2.6, [C.cyan[0], C.cyan[1], C.cyan[1]], true);
+      p.line(sx + 2, sy + 3, sx + 5, sy + 7, C.brown[1]);
+      p.text('A', sx - 1, sy - 2, C.ink);
+    }, post(p, f) { if (f === 0 || f === 4) p.sparkle(f ? 14 : 2, f ? 2 : 1, C.yellow[0], true); } },
+    penny_pincher: { draw(p) {
+      p.disc(8, 9.5, 6.5, 5, C.pink);
+      p.disc(14, 9, 1.6, 2.2, C.pink, true); p.set(14, 8, C.pink[2]); p.set(14, 10, C.pink[2]);
+      p.rect(4, 13, 2, 3, C.pink[2]).rect(9, 13, 2, 3, C.pink[2]);
+      p.poly([[4, 5], [6, 3], [7, 6]], C.pink[1]); p.set(11, 7, C.ink);
+      p.rect(6, 4, 4, 1, C.pink[2]);
+      p.disc(8, 2, 2.2, 2.2, METAL.gold, true); p.rect(7, 1, 1, 2, METAL.gold[2]);
+    } },
+    soft_21: { draw(p) {
+      p.disc(8, 10, 7.5, 4.5, C.pink); p.rect(1, 13, 14, 1, C.pink[2]);
+      p.set(1, 7, C.pink[1]); p.set(14, 7, C.pink[1]);
+      p.card(4, 1, 8, 10, 'A', null, C.ink); p.suit('h', 6, 6, C.red[1]);
+      p.disc(8, 12.5, 6.5, 2.4, C.pink);
+    } },
+    tourist: { draw(p) {
+      p.rect(5, 2, 6, 2, C.brown[2]).rect(6, 3, 4, 1, null);
+      p.rect(1, 4, 14, 11, C.brown[1]).rect(1, 4, 14, 1, C.brown[0]).rect(1, 14, 14, 1, C.brown[2]);
+      p.rect(1, 9, 14, 1, C.brown[2]);
+      p.disc(4.5, 7, 2, 1.6, C.red, true); p.rect(9, 11, 4, 3, C.blue[1]); p.set(10, 12, C.white);
+      p.disc(11, 6.5, 1.8, 1.8, C.yellow, true); p.rect(3, 11, 3, 2, C.green[1]);
+    } },
+    corner_regular: { draw(p) {
+      p.rect(2, 6, 10, 9, C.white).rect(2, 6, 10, 1, C.paper).rect(10, 7, 2, 8, C.shade);
+      p.ring(12.5, 10, 1.4, 2.6, C.shade);
+      p.rect(3, 6, 8, 2, C.brown[2]); p.rect(3, 10, 8, 2, C.red[1]);
+      p.line(5, 1, 4, 4, C.grey[1]).line(8, 0, 9, 4, C.grey[1]);
+    } },
+    hotel_guest: { draw(p) {
+      p.ring(4, 5, 1.6, 3.4, METAL.gold[1]); p.ring(4, 5, 1.6, 2.2, METAL.gold[0]);
+      p.rect(7, 4, 7, 2, METAL.gold[1]).rect(7, 4, 7, 1, METAL.gold[0]).rect(11, 6, 1, 2, METAL.gold[2]).rect(13, 6, 1, 3, METAL.gold[2]);
+      p.line(4, 8, 6, 10, C.brown[2]);
+      p.poly([[4, 10], [11, 10], [13, 12], [11, 15], [4, 15]], C.red[1]); p.rect(4, 10, 7, 1, C.red[0]);
+      p.text('7', 6, 11, C.white);
+    } },
+    tactical_retreat: { draw(p) {
+      p.ring(8, 8, 3, 6, (x, y) => (y > 8 && x > 3 ? null : y < 5 ? C.green[0] : C.green[1]));
+      p.poly([[11, 9], [16, 9], [13.5, 14]], C.green[1]);
+      p.rect(2, 9, 3, 5, C.green[2]);
+    } },
+    twin_aces: { draw(p) {
+      p.card(0, 2, 8, 13, 'A', 's', C.ink); p.card(8, 2, 8, 13, 'A', 'c', C.ink);
+    }, post(p) { p.sparkle(8, 1, C.yellow[0]); } },
+    daredevil: { draw(p) {
+      p.card(1, 4, 9, 11, '20', null, C.ink);
+      p.poly([[12, 0], [15, 0], [12, 6], [15, 6], [8, 15], [10, 8], [7, 8]], C.yellow[1]);
+      p.line(12, 1, 10, 7, C.yellow[0]);
+    } },
+    standoff: { draw(p) {
+      p.card(0, 1, 6, 9, 'A', null, C.ink); p.card(10, 1, 6, 9, 'A', null, C.red[1]);
+      p.card(1, 6, 5, 9, 'K', null, C.ink); p.card(10, 6, 5, 9, 'K', null, C.red[1]);
+      p.rect(7, 6, 2, 1, C.yellow[1]).rect(7, 9, 2, 1, C.yellow[1]);
+    } },
+    last_chip: { draw(p) {
+      p.disc(8, 9, 6, 6, C.red);
+      for (let i = 0; i < 8; i++) { const a = (i / 8) * Math.PI * 2; p.set(8 + Math.cos(a) * 5, 9 + Math.sin(a) * 5, C.white); }
+      p.disc(8, 9, 3.4, 3.4, [C.red[1], C.red[1], C.red[1]], true);
+      p.text('1', 7, 7, '#ffffff');
+      p.line(3, 1, 5, 3, C.yellow[1]).line(13, 1, 11, 3, C.yellow[1]).line(8, 0, 8, 1, C.yellow[1]);
+    } },
+    night_shift: { draw(p) {
+      for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+        const d1 = Math.hypot(x + 0.5 - 7, y + 0.5 - 8), d2 = Math.hypot(x + 0.5 - 10.5, y + 0.5 - 5.5);
+        if (d1 < 6.5 && d2 > 5.2) p.set(x, y, d2 < 6.4 ? C.yellow[0] : x < 4 ? C.yellow[1] : C.yellow[2]);
+      }
+    }, post(p) { p.sparkle(13, 3, C.white); p.set(14, 11, C.white); p.set(11, 14, C.yellow[0]); } },
+    neon_owl: { frames: 6, dur: 1.8, draw(p, f) {
+      const n = f === 4 ? [C.pink[2], C.pink[2], C.pink[2]] : C.pink;
+      p.poly([[2, 1], [5, 4], [11, 4], [14, 1], [14, 10], [8, 15], [2, 10]], n[1]);
+      p.poly([[5, 9], [11, 9], [8, 14]], n[0]);
+      const eye = f === 2 ? (x) => p.rect(x - 1, 7, 3, 1, C.cyan[2]) : (x) => { p.disc(x + 0.5, 7.5, 2.4, 2.4, C.cyan, true); p.set(x, 7, OUT); };
+      eye(5); eye(10);
+      p.poly([[7, 9], [9, 9], [8, 11]], C.yellow[1]);
+    } },
+    vip_member: { draw(p) {
+      p.rect(0, 4, 16, 10, METAL.gold[1]).rect(0, 4, 16, 1, METAL.gold[0]).rect(0, 13, 16, 1, METAL.gold[2]);
+      p.rect(0, 7, 16, 2, C.dark[1]);
+      p.poly([[2, 11], [2, 9.5], [3.5, 10.5], [4.5, 9], [5.5, 10.5], [7, 9.5], [7, 11]], C.red[1]);
+      p.rect(9, 10, 5, 1, METAL.gold[2]).rect(9, 12, 3, 1, METAL.gold[2]);
+      p.rect(2, 5, 3, 1, '#ffffff');
+    } },
+    seven_charlie: { frames: 7, dur: 1.8, draw(p, f) {
+      const shown = f + 1;
+      for (let i = 0; i < shown; i++) {
+        const x = 1 + i * 1.4, y = Math.round(5 - i * 0.8);
+        p.card(Math.round(x), y, 7, 11, null, null, C.ink);
+        p.rect(Math.round(x), y, 1, 11, C.shade);
+        if (i === shown - 1) { p.text(String(shown), Math.round(x) + 2, y + 1, i % 2 ? C.red[1] : C.ink); p.suit(i % 2 ? 'h' : 's', Math.round(x) + 1, y + 6, i % 2 ? C.red[1] : C.ink); }
+      }
+    }, post(p, f) { if (f === 6) p.sparkle(14, 1, C.yellow[0], true); } },
+    steady_hands: { draw(p) {
+      p.rect(0, 6, 16, 5, C.green[1]).rect(0, 6, 16, 1, C.green[0]).rect(0, 10, 16, 1, C.green[2]);
+      p.rect(5, 7, 6, 3, C.cyan[0]); p.rect(7, 7, 2, 3, C.cyan[1]); p.set(7, 7, '#ffffff');
+      p.rect(4, 7, 1, 3, C.ink).rect(11, 7, 1, 3, C.ink);
+      p.rect(1, 8, 2, 1, C.green[2]).rect(13, 8, 2, 1, C.green[2]);
+    } },
+    dealer_collapse: { frames: 6, dur: 1.4, draw(p, f) {
+      for (let i = 0; i < 4; i++) {
+        const fall = Math.max(0, Math.min(3, f - i));
+        const x = 2 + i * 3, lean = [0, 1, 2, 4][fall];
+        p.poly([[x, 15], [x + 2, 15], [x + 2 + lean, 4 + lean * 0.4], [x + lean, 4 + lean * 0.4]], i % 2 ? C.white : C.shade);
+        p.set(x + 1 + Math.round(lean * 0.6), 7 + Math.round(lean * 0.2), C.ink);
+        p.set(x + 1 + Math.round(lean * 0.3), 12, C.ink);
+      }
+    } },
+    split_double: { draw(p) {
+      p.card(0, 6, 7, 10, '9', null, C.ink); p.card(9, 6, 7, 10, '9', null, C.red[1]);
+      const chip = (cx) => { p.disc(cx, 3, 3.4, 2.6, C.green); p.rect(cx - 2, 3, 5, 1, C.green[2]); };
+      chip(3.5); chip(12.5);
+      p.text('2', 6, 0, C.yellow[1]);
+    } },
+    by_the_book: { frames: 6, dur: 1.5, draw(p, f) {
+      p.rect(0, 4, 16, 10, C.brown[1]).rect(0, 13, 16, 1, C.brown[2]);
+      p.rect(1, 3, 7, 10, C.white).rect(8, 3, 7, 10, C.paper).rect(7, 3, 2, 10, C.shade);
+      for (let y = 5; y < 12; y += 2) { p.rect(2, y, 4, 1, C.grey[2]); p.rect(10, y, 4, 1, C.grey[2]); }
+      const flip = [null, 11, 9, 7, 5, null][f];
+      if (flip !== null) p.poly([[8, 3], [flip, 1 + Math.abs(8 - flip) / 2], [flip, 11 + Math.abs(8 - flip) / 3], [8, 13]], C.white);
+      if (f === 5) p.line(10, 8, 11, 10, C.green[1]).line(11, 10, 14, 5, C.green[1]);
+    } },
+    speedrun: { frames: 8, dur: 1.6, draw(p, f) {
+      p.rect(6, 0, 4, 2, C.grey[1]); p.rect(12, 2, 2, 2, C.grey[2]);
+      p.disc(8, 9, 6.5, 6.5, C.grey); p.disc(8, 9, 5, 5, [C.white, C.white, C.paper]);
+      [[8, 5], [12, 9], [8, 13], [4, 9]].forEach(([x, y]) => p.set(x, y, C.ink));
+      const a = (f / 8) * Math.PI * 2 - Math.PI / 2;
+      p.line(8, 9, 8 + Math.cos(a) * 4, 9 + Math.sin(a) * 4, C.red[1]);
+      p.set(8, 9, C.ink);
+    } },
+    professor: { frames: 6, dur: 1.4, draw(p, f) {
+      p.poly([[0, 6], [8, 2], [16, 6], [8, 10]], C.dark[1]); p.line(1, 6, 8, 3, C.dark[0]);
+      p.poly([[4, 8], [12, 8], [12, 12], [8, 13], [4, 12]], C.dark[2]);
+      const sw = [0, 1, 2, 1, 0, -1][f];
+      p.line(8, 6, 13, 7, C.yellow[1]); p.line(13, 7, 13 + sw, 12, C.yellow[1]); p.rect(12 + sw, 12, 3, 2, C.yellow[2]);
+      p.rect(7, 5, 2, 2, C.yellow[0]);
+    } },
+    lifetime: { frames: 8, dur: 2.4, draw(p, f) {
+      p.rect(1, 2, 14, 13, C.white).rect(1, 2, 14, 4, C.red[1]).rect(1, 2, 14, 1, C.red[0]).rect(14, 3, 1, 12, C.shade);
+      p.rect(4, 0, 2, 4, C.grey[1]).rect(10, 0, 2, 4, C.grey[1]);
+      const d = String((f * 7 + 1) % 31 + 1).padStart(2, '0');
+      p.text(d, 4, 8, C.ink);
+      if (f % 2) p.poly([[11, 15], [15, 11], [15, 15]], C.shade);
+    } },
+    lone_wolf: { frames: 6, dur: 1.8, draw(p) {
+      p.disc(11.5, 4.5, 4, 4, C.yellow);
+      p.poly([[1, 15], [2, 8], [3, 5], [5, 7], [7, 4], [8, 7], [11, 9], [12, 11], [9, 11], [8, 15]], C.dark[0]);
+      p.line(3, 6, 2, 12, C.dark[1]); p.set(6, 8, C.yellow[1]);
+    }, post(p, f) { const s = [[1, 1], [6, 2], [14, 12], [3, 3], [12, 14], [7, 0]][f]; p.set(s[0], s[1], C.white); if (f % 3 === 0) p.sparkle(1, 2, C.white); } },
+    high_society: { frames: 6, dur: 1.5, draw(p) {
+      p.rect(4, 0, 8, 8, C.dark[1]).rect(4, 0, 2, 8, C.dark[0]).rect(4, 6, 8, 2, C.red[1]);
+      p.rect(1, 8, 14, 2, C.dark[1]).rect(1, 8, 14, 1, C.dark[0]);
+      p.ring(10, 12.5, 1.6, 2.8, METAL.gold[1]); p.disc(10, 12.5, 1.6, 1.6, [C.cyan[0], C.cyan[0], C.cyan[1]], true);
+      p.line(8, 13, 4, 15, METAL.gold[2]);
+    }, post(p, f) { if (f === 2) p.sparkle(11, 11, '#ffffff', true); if (f === 3) p.set(11, 11, '#ffffff'); } },
+    dead_mans_hand: { frames: 8, dur: 2, draw(p) {
+      p.card(0, 3, 7, 11, 'A', null, C.ink); p.card(8, 3, 7, 11, '8', null, C.ink);
+      p.card(1, 5, 7, 11, 'A', 's', C.ink); p.card(9, 5, 7, 11, '8', 'c', C.ink);
+    }, post(p, f) {
+      for (let i = 0; i < 3; i++) {
+        const k = (f + i * 3) % 8; if (k > 5) continue;
+        const x = 2 + i * 5 + (k % 2), y = 2 - Math.floor(k / 2);
+        p.set(x, y, k < 3 ? C.grey[0] : C.grey[2]); p.set(x + 1, y, k < 2 ? C.grey[1] : null);
+      }
+    } },
+    // ===== batch 4b drafts =====
+    bot_whisperer: { draw(p) {
+      p.rect(7, 0, 2, 2, C.green[1]).rect(7, 2, 2, 2, C.grey[2]);
+      p.rect(2, 4, 12, 9, C.grey[1]).rect(2, 4, 12, 1, C.grey[0]).rect(2, 4, 1, 9, C.grey[0]).rect(13, 5, 1, 8, C.grey[2]);
+      p.line(4, 6, 6, 8, C.red[1]).line(6, 6, 4, 8, C.red[1]).line(9, 6, 11, 8, C.red[1]).line(11, 6, 9, 8, C.red[1]);
+      p.rect(5, 10, 6, 1, C.dark[1]); p.rect(0, 7, 2, 3, C.grey[2]).rect(14, 7, 2, 3, C.grey[2]); p.rect(4, 13, 8, 2, C.grey[2]);
+    } },
+    full_recovery: { frames: 5, dur: 1.5, draw(p, f) {
+      p.rect(2, 3, 11, 11, C.grey[1]).rect(2, 3, 11, 1, C.grey[0]).rect(13, 6, 2, 5, C.grey[2]);
+      p.rect(3, 4, 9, 9, C.dark[2]);
+      const ramp = [C.red, C.orange, C.yellow, C.green, C.green][f];
+      for (let i = 0; i <= f; i++) p.rect(4 + i * 2 - (i === 4 ? 0 : 0), 5, 1, 7, ramp[1]).rect(4 + i * 2, 5, 1, 1, ramp[0]);
+    }, post(p, f) { if (f === 4) p.sparkle(14, 1, C.yellow[0], true); } },
+    shuffler: { draw(p) {
+      for (let i = 0; i < 4; i++) { p.rect(0, 12 - i * 1, 6, 1, i % 2 ? C.blue[1] : C.blue[2]); p.rect(10, 12 - i * 1, 6, 1, i % 2 ? C.blue[1] : C.blue[2]); }
+      p.rect(0, 13, 6, 2, C.blue[2]).rect(10, 13, 6, 2, C.blue[2]);
+      for (let i = 0; i < 7; i++) {
+        const t = i / 6, x = 2 + t * 12, y = 9 - Math.sin(t * Math.PI) * 7;
+        p.rect(Math.round(x), Math.round(y), 1, 3, i % 2 ? C.blue[0] : C.white);
+      }
+    } },
+    pro_counter: { draw(p) {
+      p.rect(0, 1, 16, 14, C.brown[1]).rect(1, 2, 14, 12, C.dark[2]).rect(0, 1, 16, 1, C.brown[0]);
+      for (let r = 0; r < 4; r++) {
+        p.rect(1, 3 + r * 3, 14, 1, C.grey[2]);
+        const n = [3, 1, 4, 2][r];
+        for (let i = 0; i < 5; i++) { const x = i < n ? 2 + i * 2 : 6 + i * 2; p.rect(x, 2 + r * 3, 2, 3, [C.red, C.yellow, C.green, C.blue][r][1]); p.set(x, 2 + r * 3, '#ffffff'); }
+      }
+    } },
+    disciplined: { draw(p) {
+      p.disc(8, 10, 6, 5.4, C.blue); for (let i = 0; i < 8; i++) { const a = (i / 8) * Math.PI * 2; p.set(8 + Math.cos(a) * 5, 10 + Math.sin(a) * 4.4, C.white); }
+      p.ring(8, 4.5, 2, 3.4, (x, y) => (y < 5 ? C.grey[1] : null));
+      p.rect(5, 6, 6, 6, METAL.gold[1]).rect(5, 6, 6, 1, METAL.gold[0]).rect(10, 7, 1, 5, METAL.gold[2]);
+      p.rect(7, 8, 2, 2, C.ink).set(8, 10, C.ink);
+    } },
+    seven_up: { frames: 8, dur: 1.6, draw(p, f) {
+      p.disc(8, 12.5, 7.5, 3.5, C.brown, true); p.disc(8, 12.5, 6, 2.4, C.green, true);
+      const seats = [[1.5, 7], [3.2, 4], [5.6, 2], [8, 1.5], [10.4, 2], [12.8, 4], [14.5, 7]];
+      seats.forEach(([x, y], i) => p.disc(x, y + 0.5, 1.5, 1.5, i < f ? METAL.gold : C.dark, i >= f));
+      if (f === 7) p.text('7', 7, 6, C.yellow[0]);
+    } },
+    nerves_of_steel: { draw(p) {
+      p.poly([[1, 5], [3, 2], [6, 2], [8, 4], [10, 2], [13, 2], [15, 5], [15, 7], [8, 14], [1, 7]], (x, y) => (x + y < 9 ? METAL.silver[0] : y > 9 || x > 12 ? METAL.silver[2] : METAL.silver[1]));
+      [[4, 6], [11, 6], [8, 10]].forEach(([x, y]) => p.set(x, y, METAL.silver[2]));
+      p.text('12', 4, 5, C.ink);
+    } },
+    weekend_warrior: { draw(p) {
+      p.rect(0, 2, 16, 13, C.white).rect(0, 2, 16, 4, C.blue[1]).rect(0, 2, 16, 1, C.blue[0]).rect(15, 3, 1, 12, C.shade);
+      p.rect(3, 0, 2, 4, C.grey[1]).rect(11, 0, 2, 4, C.grey[1]);
+      for (let i = 0; i < 7; i++) { const x = 1 + (i % 4) * 4, y = 7 + Math.floor(i / 4) * 4; p.line(x, y + 1, x + 1, y + 2, C.green[1]).line(x + 1, y + 2, x + 3, y, C.green[1]); }
+    } },
+    insomniac: { draw(p) {
+      p.disc(8, 9, 6.5, 6.5, C.red); p.disc(8, 9, 5, 5, [C.white, C.white, C.paper]);
+      p.disc(3, 3, 2.2, 2.2, C.yellow, true); p.disc(13, 3, 2.2, 2.2, C.yellow, true);
+      p.line(8, 9, 8, 5, C.ink).line(8, 9, 11, 9, C.ink);
+      p.rect(3, 15, 2, 1, C.red[2]).rect(11, 15, 2, 1, C.red[2]);
+    }, post(p) { p.text('3', 12, 10, C.yellow[0]); } },
+    bankrupt: { draw(p) {
+      p.rect(1, 5, 14, 10, C.brown[1]).rect(1, 5, 14, 1, C.brown[0]).rect(1, 14, 14, 1, C.brown[2]);
+      p.poly([[1, 5], [15, 5], [13, 2], [3, 2]], C.dark[2]);
+      p.rect(10, 8, 6, 4, C.brown[2]).rect(12, 9, 2, 2, METAL.gold[1]);
+    }, post(p) { p.set(5, 0, C.grey[0]); p.set(4, 1, C.grey[1]); p.set(6, 1, C.grey[1]); p.set(7, 3, C.grey[2]); } },
+    phoenix: { draw(p) {
+      p.poly([[8, 4], [15, 0], [12, 7], [9, 9]], C.orange[1]); p.poly([[8, 4], [1, 0], [4, 7], [7, 9]], C.orange[1]);
+      p.line(14, 1, 10, 7, C.yellow[1]).line(2, 1, 6, 7, C.yellow[1]);
+      p.disc(8, 8, 2.4, 3.2, C.red); p.disc(8, 3.5, 1.6, 1.6, C.red, true); p.set(9, 3, C.yellow[0]);
+      p.poly([[6, 10], [10, 10], [11, 15], [8, 13], [5, 15]], (x, y) => (y > 12 ? C.yellow[1] : C.orange[1]));
+    } },
+    perfect_pair: { draw(p) {
+      p.card(0, 2, 8, 13, 'K', 'h', C.red[1]); p.card(8, 2, 8, 13, 'K', 'h', C.red[1]);
+    }, post(p) { p.sparkle(8, 0, C.yellow[0]); p.set(1, 15, C.yellow[1]); } },
+    split_blackjack: { draw(p) {
+      p.card(0, 5, 8, 11, 'A', null, C.ink); p.card(8, 5, 8, 11, 'J', null, C.ink);
+      p.suit('s', 1, 10, C.ink); p.suit('c', 9, 10, C.ink);
+      p.poly([[3, 3], [6, 0], [6, 2], [10, 2], [10, 0], [13, 3], [10, 6], [10, 4], [6, 4], [6, 6]], C.yellow[1]);
+    } },
+    double_or_nothing: { frames: 6, dur: 1.2, draw(p, f) {
+      const w = [6, 4.5, 1.2, 4.5, 6, 6][f], y = [9, 6, 4, 6, 9, 9][f];
+      p.disc(8, y, w, 6, METAL.gold, f !== 0 && f < 4);
+      if (w > 4) p.text(f < 3 || f > 3 ? '2' : '0', 7, y - 2, METAL.gold[2]);
+      p.rect(4, 15, 8, 1, C.dark[1]);
+    } },
+    halfway: { draw(p) {
+      p.poly([[0, 15], [7, 3], [10, 8], [12, 6], [16, 15]], (x, y) => (y < 7 ? C.white : x < 7 ? C.grey[1] : C.grey[2]));
+      p.rect(7, 0, 1, 9, C.brown[2]); p.poly([[8, 0], [13, 2], [8, 4]], C.red[1]);
+    } },
+    wolf_expert: { frames: 6, dur: 1.8, draw(p) {
+      p.disc(10.5, 5.5, 5, 5, METAL.gold);
+      p.poly([[1, 15], [2, 8], [3, 5], [5, 7], [7, 4], [8, 7], [11, 9], [12, 11], [9, 11], [8, 15]], C.dark[0]);
+      p.line(3, 6, 2, 12, C.dark[1]); p.set(6, 8, C.cyan[1]);
+    }, post(p, f) { const s = [[1, 1], [14, 13], [4, 2], [15, 9], [12, 0], [2, 3]][f]; p.sparkle(s[0], s[1], '#ffffff', f % 2 === 0); } },
+    wolf_endless: { frames: 8, dur: 2.4, draw(p, f) {
+      const pulse = f < 4 ? f : 8 - f;
+      p.disc(8, 7, 6 + pulse * 0.25, 6 + pulse * 0.25, C.red);
+      [[5, 5], [10, 8], [7, 10]].forEach(([x, y]) => { p.set(x, y, C.red[2]); p.set(x + 1, y, C.red[2]); });
+      p.poly([[1, 16], [2, 10], [3, 7], [5, 9], [7, 6], [8, 9], [11, 11], [12, 13], [9, 13], [8, 16]], C.dark[0]);
+    }, post(p, f) { if (f === 3) p.sparkle(14, 1, C.red[0]); } },
+    wolf_endless_expert: { frames: 6, dur: 1.8, draw(p) {
+      p.disc(8.5, 7, 6.5, 6.5, METAL.silver);
+      p.poly([[2, 16], [3, 10], [4, 7], [6, 9], [8, 5], [9, 8], [12, 10], [13, 12], [10, 12], [9, 16]], C.dark[1]);
+      p.line(4, 8, 3, 13, C.dark[0]); p.set(7, 9, C.cyan[1]);
+    }, post(p, f) { [[1, 2], [14, 1], [15, 12], [12, 15], [0, 8], [6, 0]].forEach(([x, y], i) => { if ((i + f) % 3 === 0) p.set(x, (y + f) % 16, '#ffffff'); }); } },
+    darkest_run: { frames: 8, dur: 1.6, draw(p, f) {
+      p.ring(8, 8, 4.5, 7.9, (x, y, d) => {
+        const a = Math.atan2(y + 0.5 - 8, x + 0.5 - 8);
+        const ray = Math.sin(a * 6 + (f * Math.PI) / 4) > 0.2;
+        return d < 5.5 ? C.yellow[0] : ray ? (d < 7 ? C.orange[1] : C.red[1]) : null;
+      });
+      p.disc(8, 8, 4.5, 4.5, BLACK, true);
+    }, post(p) { p.ring(8, 8, 4.5, 5.1, '#ffffff'); p.set(6, 4, C.dark[0]); } },
   };
 
   // ======================================================================

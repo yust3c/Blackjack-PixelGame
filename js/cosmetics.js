@@ -20,12 +20,14 @@
     epic:      { name: 'Epic',      color: '#c069f0' },
     legendary: { name: 'Legendary', color: '#ffb020' },
     secret:    { name: 'Secret',    color: '#ff5a6a' },
+    insanity:  { name: 'Insanity',  color: '#5af2ff' },
   };
   const TYPES = [
     { id: 'back',  name: 'Card backs' },
     { id: 'felt',  name: 'Felts' },
     { id: 'chips', name: 'Chips' },
     { id: 'face',  name: 'Card faces' },
+    { id: 'title', name: 'Titles' },
   ];
 
   // ======================================================================
@@ -811,6 +813,151 @@ html .cos-sw-faces.cos-sw-faces[data-face="${id}"] .card::after { ${after} }\n`;
   // Catalogue
   // ======================================================================
   // `by` is the achievement that unlocks it (see achievements.js). Defaults have none.
+  // ======================================================================
+  // Round 4: new backs, felts, chips and faces
+  // ======================================================================
+  /** Back with free drawing: draw(set, f) paints the 22 x 34 inner area through set(u, v, colour). */
+  function artBack(frames, dur, border, bg, draw) {
+    return () => buildBack(frames, (f) => {
+      const g = backFrame(border, (u, v) => bg(u, v, f), f);
+      const set = (u, v, c) => { u = Math.round(u); v = Math.round(v); if (c && u >= 0 && v >= 0 && u < IW && v < IH) g[v + IN][u + IN] = c; };
+      draw(set, f);
+      return g;
+    }, dur);
+  }
+  function inPoly(pts, x, y) {
+    let inside = false;
+    for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+      const [xi, yi] = pts[i], [xj, yj] = pts[j];
+      if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
+    }
+    return inside;
+  }
+  const fillPoly = (set, pts, c) => { for (let v = 0; v < IH; v++) for (let u = 0; u < IW; u++) if (inPoly(pts, u + 0.5, v + 0.5)) set(u, v, typeof c === 'function' ? c(u, v) : c); };
+  const fillDisc = (set, cx, cy, r, c) => { for (let v = 0; v < IH; v++) for (let u = 0; u < IW; u++) { const d = Math.hypot(u + 0.5 - cx, v + 0.5 - cy); if (d <= r) set(u, v, typeof c === 'function' ? c(u, v, d) : c); } };
+  const bits = (set, rows, x0, y0, c) => rows.forEach((r, y) => [...r].forEach((ch, x) => { if (ch === 'X') set(x0 + x, y0 + y, c); }));
+  const BIG_A = ['.XXX.', 'X...X', 'X...X', 'XXXXX', 'X...X', 'X...X', 'X...X'];
+  const PIP = { s: ['..X..', '.XXX.', 'XXXXX', '..X..', '.XXX.'], h: ['.X.X.', 'XXXXX', 'XXXXX', '.XXX.', '..X..'] };
+  const WOLF = [[0, 34], [1, 26], [3, 21], [5, 18], [6, 13], [8, 15], [9, 12], [11, 16], [15, 19], [16, 22], [12, 22], [11, 26], [13, 34]];
+  const starsAt = (seed, n) => { const r = rand(seed); return Array.from({ length: n }, () => [Math.floor(r() * IW), Math.floor(r() * IH), Math.floor(r() * 8)]); };
+
+  Object.assign(BACKS, {
+    back_twinaces: artBack(1, 1, CREAM, (u, v) => (((u >> 1) + (v >> 1)) % 2 ? '#0f3a22' : '#145030'), (set) => {
+      fillDisc(set, 11, 17, 10.5, (u, v, d) => (d > 9.5 ? '#ffd75e' : d > 8.7 ? '#a07818' : CREAM));
+      bits(set, BIG_A, 3, 9, '#20202a'); bits(set, BIG_A, 14, 9, '#c0303a');
+      bits(set, PIP.s, 3, 18, '#20202a'); bits(set, PIP.h, 14, 18, '#c0303a');
+      for (let i = -3; i <= 3; i++) set(11, 17 + i, '#a07818');
+    }),
+    back_phoenix: artBack(1, 1, '#ffd75e', (u, v) => mix('#5a0a0a', '#1a0204', v / IH), (set) => {
+      fillPoly(set, [[11, 12], [21, 3], [17, 16], [12, 19]], (u, v) => (v < 9 ? '#ffe066' : '#ff9a3a'));
+      fillPoly(set, [[11, 12], [1, 3], [5, 16], [10, 19]], (u, v) => (v < 9 ? '#ffe066' : '#ff9a3a'));
+      fillDisc(set, 11, 16, 3.4, '#d8323a'); fillDisc(set, 11, 10, 2.2, '#d8323a'); set(12, 9, '#ffe066'); set(13, 10, '#ff9a3a');
+      fillPoly(set, [[8, 19], [14, 19], [16, 31], [11, 26], [6, 31]], (u, v) => (v > 25 ? '#ffe066' : '#ff6a2a'));
+    }),
+    back_moonlight: artBack(8, 2.4, '#c0c8e0', (u, v) => mix('#06081a', '#2a3a7a', v / IH), (set, f) => {
+      for (const [x, y, k] of starsAt(91, 22)) if (y < 24) set(x, y, (k + f) % 8 === 0 ? '#ffffff' : (k + f) % 4 === 0 ? '#9ab0e0' : '#4a5a8a');
+      fillDisc(set, 15, 8, 5, (u, v, d) => (d > 4.2 ? '#c8c2ae' : (u * 7 + v * 3) % 11 === 0 ? '#d8d2bc' : '#fbf6e6'));
+      if (f >= 4) for (let i = 0; i < 3; i++) set(1 + (f - 4) * 4 + i, 3 + (f - 4) * 2 + Math.floor(i / 2), i === 2 ? '#ffffff' : '#9ab0e0');
+      fillPoly(set, [[0, 34], [0, 28], [8, 25], [22, 30], [22, 34]], '#000004');
+      fillPoly(set, WOLF.map(([x, y]) => [x + 2, y - 7]), '#000004');
+    }),
+    back_deadwood: artBack(1, 1, '#3a2410', (u, v) => {
+      const plank = Math.floor(v / 6), grain = (u * 3 + plank * 17) % 13;
+      if (v % 6 === 5) return '#2a1606';
+      return grain === 0 ? '#5a3418' : plank % 2 ? '#7a4a24' : '#6a4020';
+    }, (set) => {
+      fillDisc(set, 11, 17, 8.5, (u, v, d) => (d > 7.6 ? '#3a2410' : '#e8d4a8'));
+      const star = []; for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + (i * Math.PI) / 5, r = i % 2 ? 2.6 : 6.4; star.push([11 + Math.cos(a) * r, 17 + Math.sin(a) * r]); }
+      fillPoly(set, star, (u, v) => (u + v < 27 ? '#ffe9a0' : '#c8a03a'));
+      fillDisc(set, 11, 17, 1.4, '#8a6a1a');
+    }),
+    back_bloodmoon: artBack(6, 1.8, '#5a0a10', (u, v) => mix('#2a0408', '#08020a', v / IH), (set, f) => {
+      const pulse = [0, 0.4, 0.8, 1.1, 0.8, 0.4][f];
+      fillDisc(set, 11, 11, 8.6 + pulse, (u, v, d) => (d > 7.8 ? '#5a0a10' : d > 7 ? '#8a0a14' : (u * 5 + v * 7) % 13 === 0 ? '#a01420' : '#d8202e'));
+      for (let u = 0; u < IW; u++) if ((u + f) % 5 < 3) set(u, 20 + ((u + f) % 2), '#3a060c');
+      fillPoly(set, [[0, 34], [0, 27], [9, 25], [22, 30], [22, 34]], '#05020a');
+      fillPoly(set, WOLF.map(([x, y]) => [x + 3, y - 8]), '#05020a');
+    }),
+    back_eclipse: artBack(8, 1.6, '#ffb040', (u, v) => ((u * 13 + v * 7) % 41 === 0 ? '#5a5070' : '#05040a'), (set, f) => {
+      fillDisc(set, 11, 17, 10.4, (u, v, d) => {
+        const a = Math.atan2(v + 0.5 - 17, u + 0.5 - 11);
+        const ray = Math.sin(a * 7 + (f * Math.PI) / 4) > 0.15;
+        if (d < 7.2) return '#ffe9a0';
+        if (!ray) return null;
+        return d < 8.6 ? '#ff9a3a' : '#a03a0a';
+      });
+      fillDisc(set, 11, 17, 6.4, '#000000');
+      set(8, 14, '#1c1626'); set(9, 13, '#1c1626');
+    }),
+  });
+
+  BACKS.back_silverwolf = artBack(6, 2.4, '#e8ecf8', (u, v) => mix('#1a2232', '#05070c', v / IH), (set, f) => {
+    for (const [x, y, k] of starsAt(113, 26)) set(x, (y + f * 2 + k) % IH, (k % 3) ? '#8a94aa' : '#ffffff');
+    fillDisc(set, 11, 14, 9.5, (u, v, d) => (d > 8.8 ? '#6a6e7a' : d > 8 ? '#c8ccd8' : (u * 5 + v * 3) % 9 === 0 ? '#d8dce8' : '#eef0f6'));
+    fillPoly(set, [[3, 26], [5, 18], [7, 12], [9, 15], [11, 9], [13, 14], [17, 17], [18, 20], [14, 20], [13, 26]], '#05070c');
+    set(10, 15, f % 3 === 0 ? '#9ae8ff' : '#5a8ab0');
+    fillPoly(set, [[0, 34], [0, 27], [22, 25], [22, 34]], '#c8ccd8');
+    fillPoly(set, [[0, 34], [0, 29], [22, 27], [22, 34]], '#eef0f6');
+  });
+  Object.assign(FELTS, {
+    felt_silverwolf: { '--felt': '#1c2230', '--felt-dot': '#19202c', '--felt-dark': '#0e121a', '--felt-line': '#e8ecf8',
+                       '--rail': '#8a90a0', '--rail-light': '#c8ccd8', '--rail-dark': '#3a3e4a' },
+    felt_domino:    { '--felt': '#16161c', '--felt-dot': '#121217', '--felt-dark': '#08080c', '--felt-line': '#f4f4f4',
+                      '--rail': '#2a2a33', '--rail-light': '#44444f', '--rail-dark': '#121218' },
+    felt_blacktie:  { '--felt': '#141018', '--felt-dot': '#100c14', '--felt-dark': '#06040a', '--felt-line': '#ffd75e',
+                      '--rail': '#1a1a20', '--rail-light': '#2e2e38', '--rail-dark': '#08080c' },
+    felt_howl:      { '--felt': '#101a34', '--felt-dot': '#0e172e', '--felt-dark': '#080e20', '--felt-line': '#c0d0ff',
+                      '--rail': '#2a2a3a', '--rail-light': '#44445a', '--rail-dark': '#10101a' },
+    felt_deadwood:  { '--felt': '#7a5a32', '--felt-dot': '#6e512d', '--felt-dark': '#4a3418', '--felt-line': '#f0dca8',
+                      '--rail': '#4a2a12', '--rail-light': '#6a4020', '--rail-dark': '#24140a' },
+    felt_bloodmoon: { '--felt': '#3a0a10', '--felt-dot': '#33090e', '--felt-dark': '#1e0408', '--felt-line': '#ff5a5a',
+                      '--rail': '#140a0c', '--rail-light': '#2a1418', '--rail-dark': '#060204' },
+    felt_eclipse:   { '--felt': '#08060c', '--felt-dot': '#060409', '--felt-dark': '#000000', '--felt-line': '#ffb040',
+                      '--rail': '#16121c', '--rail-light': '#2a2232', '--rail-dark': '#06040a' },
+  });
+  function dominoTile() {
+    const pips = [[3, 3], [5, 5], [7, 7], [19, 13], [23, 13], [19, 17], [23, 17]]; let rects = '';
+    for (const [x, y] of pips) rects += `<rect x="${x}" y="${y}" width="1" height="1" fill="#f4f4f4" opacity="0.28"/>`;
+    rects += '<rect x="1" y="1" width="9" height="9" fill="none" stroke="#f4f4f4" stroke-opacity="0.12" stroke-width="0.5"/><rect x="17" y="11" width="9" height="9" fill="none" stroke="#f4f4f4" stroke-opacity="0.12" stroke-width="0.5"/>';
+    return svgUrl(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 22" width="56" height="44" shape-rendering="crispEdges">${rects}</svg>`);
+  }
+  Object.assign(FELT_FX, {
+    felt_silverwolf: () => [[starTile(117, 26, ['#ffffff', '#c8ccd8', '#8a94aa']), 'radial-gradient(circle at 80% 18%, rgba(238, 240, 246, 0.25) 0 7%, transparent 25%)'], ['128px 128px', '100% 100%'], ['16px 128px', '0 0'], '12s', 64],
+    felt_domino: () => [[dominoTile(), 'none'], ['56px 44px', 'auto']],
+    felt_blacktie: () => [['linear-gradient(110deg, transparent 0 42%, rgba(255, 215, 94, 0.10) 46%, rgba(255, 240, 180, 0.22) 50%, rgba(255, 215, 94, 0.10) 54%, transparent 58% 100%)', 'radial-gradient(rgba(255, 215, 94, 0.06) 1px, transparent 1.5px)'], ['800px 100%', '6px 6px'], ['800px 0', '0 0'], '5s', 50],
+    felt_howl: () => [[starTile(97, 18, ['#ffffff', '#c0d0ff', '#6a7ab0']), 'radial-gradient(circle at 85% 15%, rgba(250, 246, 230, 0.35) 0 6%, rgba(160, 180, 255, 0.12) 7% 18%, transparent 30%)'], ['128px 128px', '100% 100%'], ['-128px 0', '0 0'], '50s', 128],
+    felt_deadwood: () => [['radial-gradient(rgba(40, 20, 4, 0.18) 1px, transparent 1.5px)', 'radial-gradient(ellipse at 50% 50%, transparent 40%, rgba(30, 14, 2, 0.45) 100%)'], ['5px 5px', '100% 100%']],
+    felt_bloodmoon: () => [['radial-gradient(circle at 50% -10%, rgba(255, 60, 60, 0.35), transparent 55%)', 'none'], ['100% 100%', 'auto']],
+    felt_eclipse: () => [[starTile(103, 20, ['#ffffff', '#ffd0a0', '#6a6080']), 'radial-gradient(circle at 50% 45%, transparent 0 14%, rgba(255, 176, 64, 0.30) 16%, rgba(255, 120, 30, 0.10) 22%, transparent 32%)'], ['128px 128px', '100% 100%'], ['128px 128px', '0 0'], '80s', 128],
+  });
+
+  Object.assign(CHIP_SETS, {
+    chips_silverwolf: { stripe: 'spin', spin: ['#ffffff', '#c8ccd8', '#6a6e7a'], colors: (m, d, l) => [mix(grey(m), '#2a3040', 0.45), '#0a0c12', '#e8ecf8'] },
+    chips_duel:     { stripe: '#f4f4f4', colors: (m, d, l) => [mix(grey(m), '#000000', 0.55), '#000000', mix(grey(l), '#ffffff', 0.4)] },
+    chips_twins:    { stripe: (m) => mix(m, '#000000', 0.45), colors: (m, d, l) => [m, mix(d, '#000000', 0.3), mix(m, '#ffffff', 0.75)] },
+    chips_abacus:   { stripe: '#f4e0b0', colors: (m, d, l) => [mix(m, '#a0683a', 0.7), '#3a1e0a', mix(l, '#e8c890', 0.7)] },
+    chips_lucky7:   { stripe: 'spin', spin: ['#ffffff', '#ff4f6a', '#ffd75e'], colors: (m, d, l) => [mix(m, '#d8a020', 0.55), '#4a3608', '#fff6c0'] },
+    chips_deadwood: { stripe: '#e8c890', colors: (m, d, l) => [mix(m, '#8a6a3a', 0.6), '#2a1a0a', mix(l, '#d0b080', 0.6)] },
+    chips_bloodmoon: { stripe: 'beat', colors: (m, d, l) => [mix(m, '#8a0a14', 0.7), '#100204', '#ff6a6a'] },
+    chips_eclipse:  { stripe: 'spin', spin: ['#fff6c0', '#ff9a3a', '#a03a0a'], colors: (m, d, l) => ['#050508', '#000000', '#ffd75e'] },
+  });
+
+  Object.assign(FACE_FX, {
+    face_silverwolf: { vars: { '--card': '#e8ecf4', '--card-ink': '#1a2030', '--card-red': '#8a1a2a' },
+      shadow: 'inset 0 0 0 2px #3a3e4a, inset 0 0 0 4px #c8ccd8, inset 0 0 0 5px #6a6e7a, inset -4px -4px 0 5px #d4d8e2',
+      after: 'linear-gradient(135deg, transparent 0 42%, rgba(255, 255, 255, 0.7) 46%, rgba(190, 220, 255, 0.6) 50%, transparent 56% 100%) 0 0 / 400% 100%', opacity: 0.35, anim: 'cos-holo 4s steps(40) infinite' },
+    face_charlie: { vars: { '--card': '#fbf6e6', '--card-ink': '#1a347a', '--card-red': '#c0303a' },
+      shadow: 'inset 0 0 0 2px #1a347a, inset 0 0 0 4px #fbf6e6, inset 0 0 0 5px #9ab0e0, inset -4px -4px 0 5px #e8e0c8' },
+    face_deadwood: { vars: { '--card': '#e8d4a8', '--card-ink': '#3a2410', '--card-red': '#8a2a14' },
+      shadow: 'inset 0 0 0 2px #3a2410, inset -4px -4px 0 2px #d0b888',
+      after: 'radial-gradient(rgba(90, 50, 10, 0.18) 1px, transparent 1.5px) 0 0 / 5px 5px', opacity: 1 },
+    face_bloodmoon: { vars: { '--card': '#eef0f6', '--card-ink': '#1e1e28', '--card-red': '#c0101e' },
+      shadow: 'inset 0 0 0 2px #2a0a10, inset 0 0 0 4px #c0101e, inset -4px -4px 0 4px #dcdfe8' },
+    face_eclipse: { vars: { '--card': '#100c14', '--card-ink': '#ffe9c0', '--card-red': '#ff7a3a' },
+      shadow: 'inset 0 0 0 2px #000, inset 0 0 0 4px #ffb040, inset -4px -4px 0 4px #1c1620',
+      after: 'linear-gradient(120deg, transparent 0 40%, rgba(255, 176, 64, 0.5) 46%, rgba(255, 240, 200, 0.6) 50%, rgba(255, 176, 64, 0.5) 54%, transparent 60% 100%) 0 0 / 400% 100%', opacity: 0.35, anim: 'cos-holo 3s steps(30) infinite' },
+  });
+
   const CATALOG = [
     { id: 'back_classic',   type: 'back', name: 'Classic Red',   rarity: 'default' },
     { id: 'back_blue',      type: 'back', name: 'Royal Blue',    rarity: 'common',    by: 'first_hand' },
@@ -903,8 +1050,84 @@ html .cos-sw-faces.cos-sw-faces[data-face="${id}"] .card::after { ${after} }\n`;
     { id: 'face_gilded',    type: 'face', name: 'Gilded',        rarity: 'legendary', by: 'untouchable',  animated: true },
   ];
   // Keep each type ordered from default to legendary.
-  const RANK = { default: 0, common: 1, rare: 2, epic: 3, legendary: 4, secret: 5 };
-  const TYPE_ORDER = { back: 0, felt: 1, chips: 2, face: 3 };
+  CATALOG.push(
+    { id: 'back_twinaces',   type: 'back',  name: 'Twin Aces',   rarity: 'rare',      by: 'twin_aces' },
+    { id: 'back_phoenix',    type: 'back',  name: 'Phoenix',     rarity: 'rare',      by: 'phoenix' },
+    { id: 'back_moonlight',  type: 'back',  name: 'Moonlight',   rarity: 'legendary', by: 'lone_wolf', animated: true },
+    { id: 'felt_domino',     type: 'felt',  name: 'Domino',      rarity: 'epic',      by: 'dealer_collapse' },
+    { id: 'felt_blacktie',   type: 'felt',  name: 'Black Tie',   rarity: 'legendary', by: 'high_society', animated: true },
+    { id: 'felt_howl',       type: 'felt',  name: 'Howl',        rarity: 'legendary', by: 'wolf_expert', animated: true },
+    { id: 'chips_duel',      type: 'chips', name: 'Duel',        rarity: 'rare',      by: 'standoff' },
+    { id: 'chips_twins',     type: 'chips', name: 'Twins',       rarity: 'epic',      by: 'split_double' },
+    { id: 'chips_abacus',    type: 'chips', name: 'Abacus',      rarity: 'epic',      by: 'pro_counter' },
+    { id: 'chips_lucky7',    type: 'chips', name: 'Lucky Seven', rarity: 'legendary', by: 'seven_up', animated: true },
+    { id: 'face_charlie',    type: 'face',  name: 'Charlie',     rarity: 'epic',      by: 'seven_charlie' },
+    { id: 'back_deadwood',   type: 'back',  name: 'Deadwood',    rarity: 'secret', by: 'dead_mans_hand', set: 'Deadwood' },
+    { id: 'felt_deadwood',   type: 'felt',  name: 'Deadwood',    rarity: 'secret', by: 'dead_mans_hand', set: 'Deadwood' },
+    { id: 'chips_deadwood',  type: 'chips', name: 'Deadwood',    rarity: 'secret', by: 'dead_mans_hand', set: 'Deadwood' },
+    { id: 'face_deadwood',   type: 'face',  name: 'Deadwood',    rarity: 'secret', by: 'dead_mans_hand', set: 'Deadwood' },
+    { id: 'back_bloodmoon',  type: 'back',  name: 'Blood Moon',  rarity: 'secret', by: 'wolf_endless', animated: true, set: 'Blood Moon' },
+    { id: 'felt_bloodmoon',  type: 'felt',  name: 'Blood Moon',  rarity: 'secret', by: 'wolf_endless', set: 'Blood Moon' },
+    { id: 'chips_bloodmoon', type: 'chips', name: 'Blood Moon',  rarity: 'secret', by: 'wolf_endless', animated: true, set: 'Blood Moon' },
+    { id: 'face_bloodmoon',  type: 'face',  name: 'Blood Moon',  rarity: 'secret', by: 'wolf_endless', set: 'Blood Moon' },
+    { id: 'back_silverwolf',  type: 'back',  name: 'Silver Wolf', rarity: 'secret', by: 'wolf_endless_expert', animated: true, set: 'Silver Wolf' },
+    { id: 'felt_silverwolf',  type: 'felt',  name: 'Silver Wolf', rarity: 'secret', by: 'wolf_endless_expert', animated: true, set: 'Silver Wolf' },
+    { id: 'chips_silverwolf', type: 'chips', name: 'Silver Wolf', rarity: 'secret', by: 'wolf_endless_expert', animated: true, set: 'Silver Wolf' },
+    { id: 'face_silverwolf',  type: 'face',  name: 'Silver Wolf', rarity: 'secret', by: 'wolf_endless_expert', animated: true, set: 'Silver Wolf' },
+    { id: 'back_eclipse',    type: 'back',  name: 'Eclipse',     rarity: 'insanity', by: 'darkest_run', animated: true, set: 'Eclipse' },
+    { id: 'felt_eclipse',    type: 'felt',  name: 'Eclipse',     rarity: 'insanity', by: 'darkest_run', animated: true, set: 'Eclipse' },
+    { id: 'chips_eclipse',   type: 'chips', name: 'Eclipse',     rarity: 'insanity', by: 'darkest_run', animated: true, set: 'Eclipse' },
+    { id: 'face_eclipse',    type: 'face',  name: 'Eclipse',     rarity: 'insanity', by: 'darkest_run', animated: true, set: 'Eclipse' },
+  );  // Titles: one equipped at a time, shown on the Profile.
+  CATALOG.push(
+    { id: 'title_none', type: 'title', name: 'No title', rarity: 'default' },
+    { id: 'title_split_first', type: 'title', name: "The Splitter", rarity: 'common', by: 'split_first' },
+    { id: 'title_push_first', type: 'title', name: "Even Steven", rarity: 'common', by: 'push_first' },
+    { id: 'title_overeager', type: 'title', name: "The Optimist", rarity: 'common', by: 'overeager' },
+    { id: 'title_company', type: 'title', name: "The Host", rarity: 'common', by: 'company' },
+    { id: 'title_doubler', type: 'title', name: "Doubler", rarity: 'common', by: 'doubler' },
+    { id: 'title_penny_pincher', type: 'title', name: "Penny Pincher", rarity: 'common', by: 'penny_pincher' },
+    { id: 'title_soft_21', type: 'title', name: "Soft Hands", rarity: 'common', by: 'soft_21' },
+    { id: 'title_tourist', type: 'title', name: "Tourist", rarity: 'common', by: 'tourist' },
+    { id: 'title_corner_regular', type: 'title', name: "Tito's Friend", rarity: 'rare', by: 'corner_regular' },
+    { id: 'title_hotel_guest', type: 'title', name: "Hotel Guest", rarity: 'rare', by: 'hotel_guest' },
+    { id: 'title_tactical_retreat', type: 'title', name: "The Tactician", rarity: 'rare', by: 'tactical_retreat' },
+    { id: 'title_daredevil', type: 'title', name: "Daredevil", rarity: 'rare', by: 'daredevil' },
+    { id: 'title_last_chip', type: 'title', name: "Survivor", rarity: 'rare', by: 'last_chip' },
+    { id: 'title_night_shift', type: 'title', name: "Night Owl", rarity: 'rare', by: 'night_shift' },
+    { id: 'title_neon_owl', type: 'title', name: "Vinnie's Pal", rarity: 'epic', by: 'neon_owl' },
+    { id: 'title_vip_member', type: 'title', name: "VIP", rarity: 'epic', by: 'vip_member' },
+    { id: 'title_steady_hands', type: 'title', name: "Steady Hands", rarity: 'epic', by: 'steady_hands' },
+    { id: 'title_by_the_book', type: 'title', name: "By the Book", rarity: 'epic', by: 'by_the_book' },
+    { id: 'title_speedrun', type: 'title', name: "Speedrunner", rarity: 'epic', by: 'speedrun' },
+    { id: 'title_rigged', type: 'title', name: "Conspiracy Theorist", rarity: 'legendary', by: 'rigged', animated: true },
+    { id: 'title_professor', type: 'title', name: "Professor", rarity: 'legendary', by: 'professor', animated: true },
+    { id: 'title_lifetime', type: 'title', name: "Part of the Furniture", rarity: 'legendary', by: 'lifetime', animated: true },
+    { id: 'title_lone_wolf', type: 'title', name: "Lone Wolf", rarity: 'legendary', by: 'lone_wolf', animated: true },
+    { id: 'title_wolf_expert', type: 'title', name: "Alpha", rarity: 'legendary', by: 'wolf_expert', animated: true },
+    { id: 'title_high_society', type: 'title', name: "High Society", rarity: 'legendary', by: 'high_society', animated: true },
+    { id: 'title_bankrupt', type: 'title', name: "Broke", rarity: 'common', by: 'bankrupt' },
+    { id: 'title_shuffler', type: 'title', name: "Shuffler", rarity: 'common', by: 'shuffler' },
+    { id: 'title_perfect_pair', type: 'title', name: "Twin Souls", rarity: 'common', by: 'perfect_pair' },
+    { id: 'title_insomniac', type: 'title', name: "Insomniac", rarity: 'common', by: 'insomniac' },
+    { id: 'title_halfway', type: 'title', name: "Climber", rarity: 'common', by: 'halfway' },
+    { id: 'title_bot_whisperer', type: 'title', name: "Bot Whisperer", rarity: 'rare', by: 'bot_whisperer' },
+    { id: 'title_disciplined', type: 'title', name: "Disciplined", rarity: 'rare', by: 'disciplined' },
+    { id: 'title_nerves_of_steel', type: 'title', name: "Ice Cold", rarity: 'rare', by: 'nerves_of_steel' },
+    { id: 'title_weekend_warrior', type: 'title', name: "Regular Face", rarity: 'rare', by: 'weekend_warrior' },
+    { id: 'title_phoenix', type: 'title', name: "Phoenix", rarity: 'rare', by: 'phoenix' },
+    { id: 'title_split_blackjack', type: 'title', name: "Sharp Edge", rarity: 'rare', by: 'split_blackjack' },
+    { id: 'title_full_recovery', type: 'title', name: "Unbreakable", rarity: 'epic', by: 'full_recovery' },
+    { id: 'title_pro_counter', type: 'title', name: "The Count", rarity: 'epic', by: 'pro_counter' },
+    { id: 'title_double_or_nothing', type: 'title', name: "Double or Nothing", rarity: 'epic', by: 'double_or_nothing' },
+    { id: 'title_seven_up', type: 'title', name: "Seven Up", rarity: 'legendary', by: 'seven_up', animated: true },
+    { id: 'title_dead_mans_hand', type: 'title', name: "Gunslinger", rarity: 'secret', by: 'dead_mans_hand', animated: true },
+    { id: 'title_wolf_endless', type: 'title', name: "Blood Moon", rarity: 'secret', by: 'wolf_endless', animated: true },
+    { id: 'title_wolf_endless_expert', type: 'title', name: "Silver Fang", rarity: 'secret', by: 'wolf_endless_expert', animated: true },
+    { id: 'title_darkest_run', type: 'title', name: "Eclipse", rarity: 'insanity', by: 'darkest_run', animated: true },
+  );
+  const RANK = { default: 0, common: 1, rare: 2, epic: 3, legendary: 4, secret: 5, insanity: 6 };
+  const TYPE_ORDER = { back: 0, felt: 1, chips: 2, face: 3, title: 4 };
   CATALOG.sort((a, b) => TYPE_ORDER[a.type] - TYPE_ORDER[b.type] || RANK[a.rarity] - RANK[b.rarity]);
   const byId = Object.fromEntries(CATALOG.map((c) => [c.id, c]));
 
@@ -912,14 +1135,14 @@ html .cos-sw-faces.cos-sw-faces[data-face="${id}"] .card::after { ${after} }\n`;
   // State
   // ======================================================================
   const SAVE_KEY = 'blackjack-cosmetics-v1';
-  const DEFAULTS = { back: 'back_classic', felt: 'felt_classic', chips: 'chips_classic', face: 'face_classic' };
-  const state = { equipped: Object.assign({}, DEFAULTS), previewAll: false };
+  const DEFAULTS = { back: 'back_classic', felt: 'felt_classic', chips: 'chips_classic', face: 'face_classic', title: 'title_none' };
+  const state = { equipped: Object.assign({}, DEFAULTS), previewAll: false, name: 'Player' };
   try {
     const raw = root.localStorage.getItem(SAVE_KEY);
-    if (raw) Object.assign(state.equipped, JSON.parse(raw).equipped || {});
+    if (raw) { const s = JSON.parse(raw); Object.assign(state.equipped, s.equipped || {}); if (typeof s.name === 'string' && s.name.trim()) state.name = s.name; }
   } catch (e) { /* no storage: defaults */ }
   function persist() {
-    try { root.localStorage.setItem(SAVE_KEY, JSON.stringify({ equipped: state.equipped })); } catch (e) { /* ignore */ }
+    try { root.localStorage.setItem(SAVE_KEY, JSON.stringify({ equipped: state.equipped, name: state.name })); } catch (e) { /* ignore */ }
   }
 
   function isUnlocked(id) {
@@ -1017,8 +1240,16 @@ html .cos-sw-faces.cos-sw-faces[data-face="${id}"] .card::after { ${after} }\n`;
           <div class="card red" aria-label="A♥"><span class="corner"><span class="rank">A</span>${SAMPLE_FACE('♥')}</span><span class="pip">${SAMPLE_FACE('♥')}</span></div>
           <div class="card" aria-label="K♣"><span class="corner"><span class="rank">K</span>${SAMPLE_FACE('♣')}</span><span class="pip">${SAMPLE_FACE('♣')}</span></div>
           <div class="card red" aria-label="7♦"><span class="corner"><span class="rank">7</span>${SAMPLE_FACE('♦')}</span><span class="pip">${SAMPLE_FACE('♦')}</span></div></div>`;
+      case 'title':
+        return `<div class="cos-sw-title">${titleHtml(item)}</div>`;
       default: return '';
     }
+  }
+  /** A title as a coloured plate. Legendary and secret titles shimmer. */
+  function titleHtml(item, big) {
+    if (!item || item.id === 'title_none') return `<span class="cos-title cos-title-none${big ? ' big' : ''}">No title</span>`;
+    const r = RARITIES[item.rarity];
+    return `<span class="cos-title${item.animated ? ' shine' : ''}${big ? ' big' : ''}" style="--rar:${r.color}">${esc(item.name)}</span>`;
   }
 
   // ======================================================================
@@ -1029,8 +1260,44 @@ html .cos-sw-faces.cos-sw-faces[data-face="${id}"] .card::after { ${after} }\n`;
   let lockerOnly = null;
   function esc(s) { return String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
 
+  function fmtN(n) { return Math.round(n || 0).toLocaleString('en-US'); }
+  function profileBody() {
+    const A = root.Achievements;
+    const st = A && A.stats ? A.stats() : {};
+    const eq = state.equipped;
+    const t = byId[eq.title];
+    const pieces = ['back', 'felt', 'chips', 'face'].map((k) => byId[eq[k]]).filter(Boolean);
+    const setName = pieces.length === 4 && pieces[0].set && pieces.every((p) => p.set === pieces[0].set) ? pieces[0].set : null;
+    const M = root.Modes && root.Modes.load ? root.Modes.load() : {};
+    const best = Math.max(0, ...Object.values(M.endless || {}).map((r) => (r && r.best) || 0), M.endlessBest || 0);
+    const beaten = Object.values(M.challengeWins || {}).filter(Boolean).length;
+    const achTotal = A ? A.list().length : 0;
+    const achGot = A ? A.list().filter((a) => A.isUnlocked(a.id)).length : 0;
+    const titlesOwned = CATALOG.filter((c) => c.type === 'title' && c.id !== 'title_none' && isUnlocked(c.id)).length;
+    const winRate = st.hands ? ((st.handsWon / st.hands) * 100).toFixed(1) + '%' : '-';
+    const stats = [[fmtN(st.hands), 'Hands played'], [fmtN(st.handsWon), 'Hands won'], [winRate, 'Win rate'], [fmtN(st.blackjacks), 'Blackjacks'],
+      [fmtN(st.chipsWon), 'Chips won'], [fmtN(best), 'Best Endless'], [`${beaten} / 4`, 'Challenges beaten'], [`${achGot} / ${achTotal}`, 'Achievements'], [fmtN(titlesOwned), 'Titles']];
+    const KIND = { back: 'Back', felt: 'Felt', chips: 'Chips', face: 'Faces' };
+    return `<div class="cos-profile">
+      <div>
+        <label class="cos-pf-k" for="cos-pf-name">NAME</label>
+        <input class="cos-pf-name" id="cos-pf-name" data-name maxlength="16" value="${esc(state.name)}" autocomplete="off" spellcheck="false">
+        <div class="cos-pf-k">TITLE</div>
+        <div class="cos-pf-title">${titleHtml(t, true)}<button type="button" class="cos-pf-btn" data-tab="title">Change</button></div>
+        <div class="cos-pf-k">EQUIPPED</div>
+        <div class="cos-pf-eq">${pieces.map((p) => `<figure><div class="cos-pf-sw">${swatch(p)}</div><figcaption>${KIND[p.type]}: ${esc(p.name)}</figcaption></figure>`).join('')}</div>
+        ${setName ? `<div class="cos-pf-set" style="--rar:${RARITIES[pieces[0].rarity].color}">Full set: ${esc(setName)}</div>` : ''}
+      </div>
+      <div>
+        <div class="cos-pf-k">STATS</div>
+        <div class="cos-pf-stats">${stats.map(([v, k]) => `<div><b>${v}</b><span>${k}</span></div>`).join('')}</div>
+      </div>
+    </div>`;
+  }
+
   function lockerBody() {
     const A = root.Achievements;
+    if (lockerTab === 'profile') return profileBody();
     if (lockerTab === 'achievements') {
       if (!A) return '<p class="cos-empty">Achievements are not loaded.</p>';
       return `<ul class="cos-ach-list">${A.list().map((a) => {
@@ -1073,13 +1340,17 @@ html .cos-sw-faces.cos-sw-faces[data-face="${id}"] .card::after { ${after} }\n`;
     const total = A ? A.list().length : 0;
     const got = A ? A.list().filter((a) => A.isUnlocked(a.id)).length : 0;
     let title = 'Collection';
-    let tabs = [{ id: 'achievements', name: 'Achievements' }].concat(TYPES);
+    let tabs = [{ id: 'profile', name: 'Profile' }, { id: 'achievements', name: 'Achievements' }].concat(TYPES);
     let count = `${got} / ${total} achievements`;
     if (lockerOnly === 'achievements') {
       title = 'Achievements'; tabs = []; lockerTab = 'achievements';
+    } else if (lockerOnly === 'profile') {
+      title = 'Profile'; tabs = [{ id: 'profile', name: 'Profile' }, { id: 'title', name: 'Titles' }];
+      if (!['profile', 'title'].includes(lockerTab)) lockerTab = 'profile';
+      count = state.name;
     } else if (lockerOnly === 'cosmetics') {
       title = 'Cosmetics'; tabs = TYPES.slice();
-      if (lockerTab === 'achievements') lockerTab = TYPES[0].id;
+      if (!TYPES.some((t) => t.id === lockerTab)) lockerTab = TYPES[0].id;
       const owned = CATALOG.filter((c) => isUnlocked(c.id)).length;
       count = `${owned} / ${CATALOG.length} unlocked`;
     }
@@ -1109,6 +1380,11 @@ html .cos-sw-faces.cos-sw-faces[data-face="${id}"] .card::after { ${after} }\n`;
         if (t.dataset.tab) { lockerTab = t.dataset.tab; renderLocker(); }
         if (t.dataset.equip) { const it = byId[t.dataset.equip]; equip(it.type, it.id); renderLocker(); }
       });
+      lockerEl.addEventListener('change', (e) => {
+        if (!e.target.matches('[data-name]')) return;
+        state.name = e.target.value.trim().slice(0, 16) || 'Player';
+        persist(); renderLocker();
+      });
       doc.addEventListener('keydown', (e) => { if (e.key === 'Escape' && lockerEl && !lockerEl.hidden) closeLocker(); });
       doc.body.appendChild(lockerEl);
     }
@@ -1134,5 +1410,9 @@ html .cos-sw-faces.cos-sw-faces[data-face="${id}"] .card::after { ${after} }\n`;
     rewardFor: (achievementId) => CATALOG.find((c) => c.by === achievementId) || null,
     rewardsFor: (achievementId) => CATALOG.filter((c) => c.by === achievementId),
     refresh: renderLocker,
+    /** The player's name and equipped title (for the menu or anywhere else that wants them). */
+    playerName: () => state.name,
+    title: () => byId[state.equipped.title] || null,
+    titleHtml,
   };
 })(window);

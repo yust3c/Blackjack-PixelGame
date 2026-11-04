@@ -39,7 +39,8 @@
   function openSection(which) {
     const C = window.Cosmetics;
     if (!C) return;
-    if (which === 'achievements') C.openLocker('achievements', { only: 'achievements' });
+    if (which === 'profile') C.openLocker('profile', { only: 'profile' });
+    else if (which === 'achievements') C.openLocker('achievements', { only: 'achievements' });
     else C.openLocker('back', { only: 'cosmetics' });
   }
 
@@ -147,6 +148,7 @@
         </article>
       </div>
       <div class="menu-extras">
+        ${window.Cosmetics && window.Cosmetics.playerName ? `<button class="btn btn-ghost extra-btn" data-locker="profile">Profile</button>` : ''}
         ${window.Cosmetics ? `<button class="btn btn-ghost extra-btn" data-locker="cosmetics">Cosmetics</button>` : ''}
         ${window.Achievements ? `<button class="btn btn-ghost extra-btn" data-locker="achievements">Achievements${collectionCount()}</button>` : ''}
         <button class="btn btn-ghost extra-btn" data-lore>Lore</button>
