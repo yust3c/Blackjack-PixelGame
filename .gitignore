@@ -4,3 +4,6 @@ Thumbs.db
 .vscode/
 .idea/
 node_modules/
+
+# Personal showcase page (not part of the game)
+gallery.html
