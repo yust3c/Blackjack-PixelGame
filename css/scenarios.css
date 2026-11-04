@@ -1,0 +1,184 @@
+/* Scenes (see js/scenarios.js). Two layouts:
+   - Stage (landscape windows): the room, dealer, table rail, scoreboard and chip tray are one 1536x864 picture, and
+     the game's HTML is placed on the same grid and scaled with it, so everything reads as one scene.
+   - Stacked (phones, narrow windows): the usual layout over the room, with the dealer standing above the table. */
+
+#scene-backdrop {
+  position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden;
+  background: var(--bg);
+}
+#scene-backdrop svg { display: block; image-rendering: pixelated; }
+body[data-scene] { background-image: none; }
+
+/* ============================== stage ============================== */
+body[data-stage] { overflow: hidden; }
+body[data-stage] #scene-backdrop .scene-art svg {
+  position: absolute; left: var(--stage-x); top: var(--stage-y);
+  width: calc(1536px * var(--stage-s)); height: calc(864px * var(--stage-s));
+}
+body[data-stage] #game {
+  position: fixed; left: var(--stage-x); top: var(--stage-y); width: 1536px; height: 864px;
+  transform: scale(var(--stage-s)); transform-origin: 0 0;
+}
+body[data-stage] main { position: absolute; inset: 0; max-width: none; margin: 0; padding: 0; pointer-events: none; }
+body[data-stage] main > * { pointer-events: auto; }
+
+/* top bar sits on the painted scoreboard */
+body[data-stage] .topbar {
+  position: absolute; left: 176px; top: 14px; width: 1184px; height: 46px; margin: 0; padding: 0 12px;
+  background: none; box-shadow: none; clip-path: none; flex-wrap: nowrap;
+}
+body[data-stage] .progress { position: absolute; left: 192px; width: 1152px; top: 62px; height: 10px; margin: 0; padding: 1px; }
+
+/* felt: exactly the painted table's inner shape */
+body[data-stage] .table {
+  position: absolute; left: 216px; top: 256px; width: 1104px; height: 432px; min-height: 0;
+  padding: 16px 40px 26px; box-shadow: none; display: flex; flex-direction: column;
+}
+body[data-stage] .table::after { display: none; }
+body[data-stage] .table .dealer { min-height: 112px; padding-top: 0; gap: 6px; }
+body[data-stage] .table-print { margin: 4px auto 0; }
+body[data-stage] .print-main { font-size: 14px; }
+body[data-stage] .print-sub { font-size: 16px; margin-top: 2px; }
+body[data-stage] .message { margin: 4px 0 6px; }
+body[data-stage] .seats { margin-top: auto; zoom: 0.86; }
+body[data-stage] .seat { min-height: 172px; }
+/* seats follow the table's curve: the outer ones sit higher */
+body[data-stage] .seats > .seat:nth-child(1), body[data-stage] .seats > .seat:nth-child(7) { transform: translateY(-26px); }
+body[data-stage] .seats > .seat:nth-child(2), body[data-stage] .seats > .seat:nth-child(6) { transform: translateY(-10px); }
+
+/* controls sit in the painted chip tray: chips in the slot, buttons below, status lines in the side wings */
+body[data-stage] .controls {
+  position: absolute; left: 336px; width: 864px; top: 730px; height: 130px; min-height: 0; margin: 0;
+  justify-content: flex-start; gap: 6px; background: none;
+}
+body[data-stage] .controls .betting-for { position: absolute; left: 0; top: 10px; width: 180px; font-size: 19px; line-height: 1.2; text-align: left; }
+body[data-stage] .controls .betting-for .hint { display: block; font-size: 16px; text-align: left; }
+body[data-stage] .controls > .hint:not(.dots) { position: absolute; right: 0; top: 10px; width: 180px; font-size: 17px; text-align: right; }
+body[data-stage] .controls .chip-rack { gap: 10px; }
+body[data-stage] .controls .row.actions,
+body[data-stage] .controls .insurance { margin-top: 22px; }
+body[data-stage] .coach { display: none; }
+
+/* the painted dealer breathes and blinks */
+body[data-stage] #scene-backdrop .dl-body { animation: sd-breathe 3.2s steps(1) infinite; }
+
+/* ============================== stacked ============================== */
+/* The art fills the window's height and sits on the floor; narrow screens crop the sides. */
+body[data-scene]:not([data-stage]) #scene-backdrop .scene-art svg {
+  position: absolute; left: 50%; bottom: 0; transform: translateX(-50%);
+  width: max(100vw, 177.78vh); height: auto; aspect-ratio: 16 / 9;
+}
+body[data-scene]:not([data-stage]) main { max-width: 1020px; padding-top: 0; }
+body[data-scene]:not([data-stage]) .topbar { max-width: 1180px; margin-left: auto; margin-right: auto; }
+body[data-scene]:not([data-stage]) .controls {
+  margin-top: 0; padding: 12px 12px 14px; background: var(--rail);
+  box-shadow: inset 0 -4px 0 var(--rail-dark), inset 0 4px 0 var(--rail-dark), inset 4px 0 0 var(--rail-dark), inset -4px 0 0 var(--rail-dark);
+}
+body[data-scene]:not([data-stage]) .coach { margin-top: 12px; background: var(--rail-dark); padding: 10px 12px; }
+body[data-scene]:not([data-stage]) .table { z-index: 1; padding-top: 16px; min-height: 470px; }
+body[data-scene]:not([data-stage]) .table .dealer { min-height: 104px; }
+body[data-scene]:not([data-stage]) .table-print { margin-top: 8px; }
+
+/* Dealer at the room's pixel size (--scene-px), behind the top edge of the table. */
+#scene-dealer {
+  --p: var(--scene-px, 6px);
+  position: relative; display: flex; justify-content: center;
+  height: calc(var(--p) * 21); margin-bottom: calc(var(--p) * -1); pointer-events: none; overflow: hidden;
+}
+#scene-dealer .sd-figure { width: calc(var(--p) * 24); height: calc(var(--p) * 28); }
+#scene-dealer .dealer-sprite { width: 100%; height: 100%; }
+
+/* ============================== shared ============================== */
+.dl-blink { opacity: 0; animation: sd-blink 4.5s steps(1) infinite; }
+@keyframes sd-breathe { 50% { transform: translateY(1px); } }
+@keyframes sd-blink { 0%, 93% { opacity: 0; } 94%, 97% { opacity: 1; } 98% { opacity: 0; } }
+
+/* Intro: the room and its name first, then the cards, seats and buttons fade in. */
+.scene-plate {
+  position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%);
+  display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center;
+  padding: 14px 22px; background: rgba(8, 6, 10, 0.85); box-shadow: inset 0 0 0 4px var(--rail-light, #c9a24a);
+  opacity: 0; transition: opacity 0.3s steps(3);
+}
+.scene-plate b { font-family: var(--font-pixel); font-size: clamp(14px, 2.4vw, 24px); color: var(--gold); text-shadow: 3px 3px 0 #000; }
+.scene-plate span { font-family: var(--font-text); font-size: 22px; color: var(--ink); }
+body.scene-intro .scene-plate { opacity: 1; }
+body[data-scene] #game { transition: opacity 0.6s steps(6); }
+body.scene-intro #game { opacity: 0; }
+
+/* Ambient animation (groups tagged in the SVG). */
+#scene-backdrop .sc-twinkle { animation: sc-twinkle 2.4s steps(1) infinite; }
+#scene-backdrop .sc-blink { animation: sc-blink 1s steps(1) infinite; }
+#scene-backdrop .sc-blink2 { animation: sc-blink 1s steps(1) infinite 0.5s; }
+#scene-backdrop .sc-pulse { animation: sc-pulse 3s steps(3) infinite alternate; }
+#scene-backdrop .sc-pulse2 { animation: sc-pulse 3s steps(3) infinite alternate 1.5s; }
+#scene-backdrop .sc-flicker { animation: sc-flicker 5s steps(1) infinite; }
+#scene-backdrop .sc-flicker2 { animation: sc-flicker 7s steps(1) infinite 2s; }
+#scene-backdrop .sc-chase { animation: sc-blink 1.5s steps(1) infinite; }
+#scene-backdrop .sc-d1 { animation-delay: 0.5s; }
+#scene-backdrop .sc-d2 { animation-delay: 1s; }
+@keyframes sc-twinkle { 0%, 100% { opacity: 1; } 40% { opacity: 0.2; } 70% { opacity: 0.7; } }
+@keyframes sc-blink { 50% { opacity: 0.15; } }
+@keyframes sc-pulse { from { opacity: 0.35; } to { opacity: 1; } }
+@keyframes sc-flicker { 0%, 100% { opacity: 1; } 80% { opacity: 1; } 82% { opacity: 0.1; } 84% { opacity: 1; } 86% { opacity: 0.2; } 88% { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  #scene-backdrop *, #scene-dealer *, .dl-blink { animation: none !important; }
+  body[data-scene] #game { transition: none; }
+}
+
+/* ============================== 3/4 perspective view (stage + data-view="3d") ==============================
+   The felt is a half-moon seen at an angle. Seats become betting spots along the curve: far seats (the sides)
+   are smaller, near seats bigger. Positions are in px on the 1536x864 stage, relative to the felt box. */
+body[data-view="3d"] .table {
+  left: 280px; top: 376px; width: 976px; height: 304px; padding: 6px 0 0; overflow: visible;
+}
+body[data-view="3d"] .table .dealer { min-height: 102px; gap: 4px; }
+body[data-view="3d"] .table .dealer-label { font-size: 8px; }
+body[data-view="3d"] .table-print { margin: 14px auto 0; }
+body[data-view="3d"] .print-main { font-size: 11px; letter-spacing: 1px; }
+body[data-view="3d"] .print-sub { font-size: 14px; }
+body[data-view="3d"] .message { margin: 2px auto 0; max-width: 460px; font-size: 9px; line-height: 1.5; }
+body[data-view="3d"] .seats { position: absolute; inset: 0; margin: 0; zoom: 1; display: block; }
+body[data-view="3d"] .seats > .seat {
+  position: absolute; width: 150px; min-width: 0; max-width: none; min-height: 0; padding: 2px;
+  background: none; box-shadow: none; outline: none; clip-path: none;
+  transform-origin: 50% 100%; gap: 2px;
+}
+body[data-view="3d"] .seats > .seat.selected .seat-head,
+body[data-view="3d"] .seats > .seat.active .seat-head { background: var(--gold); color: var(--card-ink); }
+body[data-view="3d"] .seats > .seat.active { animation: none; }
+body[data-view="3d"] .seat-head { min-height: 16px; justify-content: center; padding: 1px 4px; background: rgba(11, 15, 10, 0.45); }
+body[data-view="3d"] .seat-num { width: 16px; height: 16px; font-size: 7px; }
+body[data-view="3d"] .seat-name { flex: 0 1 auto; font-size: 17px; }
+body[data-view="3d"] .seat-body { flex-direction: row; align-items: flex-end; justify-content: center; gap: 4px; }
+body[data-view="3d"] .seat.empty .seat-body { flex-direction: column; align-items: center; }
+body[data-view="3d"] .seat.empty .seat-body { gap: 3px; }
+body[data-view="3d"] .seat.empty .btn-small { width: 92px; min-height: 24px; padding: 6px 4px 8px; font-size: 7px; }
+body[data-view="3d"] .bet-spot { min-width: 52px; min-height: 52px; padding: 4px; border-radius: 50%; outline: none; box-shadow: inset 0 0 0 2px rgba(233, 210, 122, 0.6); }
+body[data-view="3d"] .hand { padding: 2px; }
+/* seat 1 (first base) is nth-child(1), on the right; seat 7 on the left */
+body[data-view="3d"] .seats > .seat:nth-child(1) { left: 872px; bottom: 158px; transform: translateX(-50%) scale(0.74); }
+body[data-view="3d"] .seats > .seat:nth-child(2) { left: 780px; bottom: 88px; transform: translateX(-50%) scale(0.84); }
+body[data-view="3d"] .seats > .seat:nth-child(3) { left: 647px; bottom: 40px; transform: translateX(-50%) scale(0.93); }
+body[data-view="3d"] .seats > .seat:nth-child(4) { left: 488px; bottom: 20px; transform: translateX(-50%); }
+body[data-view="3d"] .seats > .seat:nth-child(5) { left: 329px; bottom: 40px; transform: translateX(-50%) scale(0.93); }
+body[data-view="3d"] .seats > .seat:nth-child(6) { left: 196px; bottom: 88px; transform: translateX(-50%) scale(0.84); }
+body[data-view="3d"] .seats > .seat:nth-child(7) { left: 104px; bottom: 158px; transform: translateX(-50%) scale(0.74); }
+/* chip tray nearest the camera */
+body[data-view="3d"] .controls { left: 352px; width: 832px; top: 754px; height: 110px; gap: 4px; }
+body[data-view="3d"] .controls .chip-btn .px-chip { width: 42px; height: 42px; }
+body[data-view="3d"] .controls .chip-btn { gap: 2px; font-size: 8px; }
+body[data-view="3d"] .controls .btn { min-height: 36px; padding: 10px 14px 14px; }
+body[data-view="3d"] .controls .betting-for { top: 6px; width: 170px; }
+body[data-view="3d"] .controls > .hint:not(.dots) { top: 6px; width: 170px; }
+body[data-view="3d"] .controls .row.actions,
+body[data-view="3d"] .controls .insurance { margin-top: 30px; }
+
+/* The seat's "×" (leave / remove bot) gets its own dark badge so it reads on any felt or highlighted seat. */
+body[data-scene] .seat .leave {
+  background: rgba(11, 15, 10, 0.8); color: #fbf6e6; padding: 3px 5px; line-height: 1;
+  box-shadow: inset 0 0 0 1px rgba(251, 246, 230, 0.35);
+}
+body[data-scene] .seat .leave:hover, body[data-scene] .seat .leave:focus-visible { background: var(--lose); color: #fff; }

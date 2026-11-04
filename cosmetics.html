@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cosmetics Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/cosmetics.css">
+  <style>
+    .pv { max-width: 1100px; margin: 0 auto; padding: 16px; }
+    .pv h1 { font-family: var(--font-pixel); font-size: 18px; color: var(--gold); text-shadow: 3px 3px 0 var(--rail-dark); margin: 8px 0; }
+    .pv h2 { font-family: var(--font-pixel); font-size: 12px; color: var(--gold); margin: 32px 0 12px; }
+    .pv p.lead { margin: 0 0 16px; color: #d8c8b0; }
+    .pv-top { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    .pv .table { min-height: 0; padding: 32px 24px 32px; }
+    .pv-row { display: flex; justify-content: center; gap: 48px; flex-wrap: wrap; align-items: flex-end; position: relative; z-index: 1; }
+    .pv-col { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .pv-lbl { font-family: var(--font-pixel); font-size: 9px; color: var(--felt-line); }
+    .pv-equipped { font-size: 18px; color: #d8c8b0; text-align: center; margin-top: 4px; }
+    .pv-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+    .pv-btn { font-family: var(--font-pixel); font-size: 10px; border: 0; cursor: pointer; padding: 10px 12px; background: var(--gold); color: #20202a; box-shadow: inset 0 -4px 0 #a07818; }
+    .pv-btn.ghost { background: #4a2e1a; color: #e9c9a0; box-shadow: inset 0 -4px 0 #2a180c; }
+    .pv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+    .pv-item { background: #1a120c; padding: 12px; display: flex; flex-direction: column; gap: 6px; align-items: center; text-align: center;
+      box-shadow: inset 0 0 0 2px var(--rar); cursor: pointer; border: 0; color: inherit; font-family: var(--font-text); font-size: 18px; }
+    .pv-item.on { box-shadow: inset 0 0 0 4px var(--gold); background: #2e2210; }
+    .pv-code { font-family: var(--font-pixel); font-size: 8px; color: #8a7a60; align-self: flex-start; }
+    .pv-art { min-height: 84px; display: flex; align-items: center; }
+    .pv-name { font-family: var(--font-pixel); font-size: 9px; line-height: 1.4; }
+    .pv-ach { font-size: 16px; color: #b8a890; line-height: 1.05; }
+    .pv-ach b { color: #fbf6e6; font-weight: normal; }
+    table.pv-t { width: 100%; border-collapse: collapse; font-size: 18px; }
+    .pv-t th { font-family: var(--font-pixel); font-size: 8px; text-align: left; color: #e9c9a0; padding: 6px; }
+    .pv-t td { padding: 6px; border-top: 2px solid #2e2210; vertical-align: top; }
+    .pv-t .r { font-family: var(--font-pixel); font-size: 7px; text-transform: uppercase; }
+    @media (max-width: 720px) { .pv-row { gap: 20px; } }
+  </style>
+</head>
+<body>
+  <div class="pv">
+    <h1>Cosmetics preview</h1>
+    <p class="lead">Every design is listed below with a code (B1, F2...) so you can tell me which ones to change. Click any item to try it on the table. Nothing here is saved as unlocked.</p>
+
+    <div class="pv-top">
+      <section class="table" aria-label="Preview table">
+        <div class="pv-row">
+          <div class="pv-col"><div class="pv-lbl">Dealer</div><div class="cards" id="pv-dealer"></div></div>
+        </div>
+        <div class="table-print"><div class="print-main">BLACKJACK PAYS 3 TO 2</div></div>
+        <div class="pv-row">
+          <div class="pv-col"><div class="cards" id="pv-hand1"></div><div class="pv-lbl">You</div></div>
+          <div class="pv-col"><div class="cards" id="pv-hand2"></div><div class="pv-lbl">Bet</div></div>
+          <div class="pv-col"><div class="chip-rack" id="pv-rack"></div></div>
+        </div>
+      </section>
+      <div class="pv-equipped" id="pv-equipped"></div>
+      <div class="pv-btns">
+        <button class="pv-btn" type="button" id="pv-locker">Open collection screen</button>
+        <button class="pv-btn ghost" type="button" id="pv-toast">Show a sample unlock</button>
+        <button class="pv-btn ghost" type="button" id="pv-newplayer">Collection as a new player</button>
+        <button class="pv-btn ghost" type="button" id="pv-reset">Back to defaults</button>
+      </div>
+    </div>
+
+    <div id="pv-gallery"></div>
+
+    <h2>Achievements</h2>
+    <table class="pv-t" id="pv-ach"></table>
+  </div>
+
+  <script src="js/engine.js"></script>
+  <script src="js/sprites.js"></script>
+  <script src="js/modes.js"></script>
+  <script src="js/cosmetics.js"></script>
+  <script src="js/achievements.js"></script>
+  <script>
+  (function () {
+    'use strict';
+    const C = window.Cosmetics, A = window.Achievements, PX = window.PixelSprites;
+    const $ = (id) => document.getElementById(id);
+    C.setPreviewAll(true);
+
+    const card = (rank, suit) => {
+      const red = suit === '♥' || suit === '♦';
+      const s = PX.suit(suit);
+      return `<div class="card${red ? ' red' : ''}" aria-label="${rank}${suit}"><span class="corner"><span class="rank">${rank}</span>${s}</span><span class="pip">${s}</span></div>`;
+    };
+    $('pv-dealer').innerHTML = card('10', '♣') + '<div class="card back" aria-label="Face-down card"></div>';
+    $('pv-hand1').innerHTML = card('A', '♠') + card('J', '♣');
+    $('pv-hand2').innerHTML = card('7', '♦') + card('7', '♥') + card('7', '♣');
+    function rack() {
+      $('pv-rack').innerHTML = [5, 10, 20, 50, 100, 250, 500].map((v) => `<span class="chip-btn" style="cursor:default">${PX.chip(v)}<span>${v}</span></span>`).join('');
+    }
+
+    const prefix = { back: 'B', felt: 'F', chips: 'C', face: 'D' };
+    function codeOf(item) {
+      const same = C.CATALOG.filter((c) => c.type === item.type);
+      return prefix[item.type] + same.indexOf(item);
+    }
+
+    function gallery() {
+      const eq = C.equipped();
+      $('pv-gallery').innerHTML = C.TYPES.map((t) => `
+        <h2>${t.name}</h2>
+        <div class="pv-grid">${C.CATALOG.filter((c) => c.type === t.id).map((item) => {
+          const a = item.by ? A.get(item.by) : null;
+          const r = C.RARITIES[item.rarity];
+          return `<button type="button" class="pv-item${eq[item.type] === item.id ? ' on' : ''}" data-id="${item.id}" style="--rar:${r.color}">
+            <span class="pv-code">${codeOf(item)}</span>
+            <div class="pv-art">${C.swatch(item)}</div>
+            <div class="pv-name">${item.name}</div>
+            <div class="cos-rar" style="--rar:${r.color}">${r.name}${item.animated ? ' · animated' : ''}</div>
+            <div class="pv-ach">${a ? `<b>${a.name}</b>: ${a.desc}` : 'Owned from the start'}</div>
+          </button>`;
+        }).join('')}</div>`).join('');
+    }
+
+    function achTable() {
+      $('pv-ach').innerHTML = '<tr><th>Achievement</th><th>How</th><th>Rarity</th><th>Reward</th></tr>' + A.list().map((a) => {
+        const r = C.RARITIES[a.rarity]; const rws = C.rewardsFor(a.id);
+        const rw = rws.length > 1 ? `${rws[0].set} set: ${rws.map(codeOf).join(', ')}` : rws[0] ? codeOf(rws[0]) + ' ' + rws[0].name : '';
+        return `<tr><td>${a.name}</td><td>${a.desc}</td><td class="r" style="color:${r.color}">${r.name}</td><td>${rw}</td></tr>`;
+      }).join('');
+    }
+
+    function equippedLine() {
+      const eq = C.equipped();
+      $('pv-equipped').textContent = 'On the table: ' + Object.values(eq).map((id) => { const i = C.get(id); return codeOf(i) + ' ' + i.name; }).join(' · ');
+    }
+
+    document.addEventListener('cosmetics:change', () => { rack(); gallery(); equippedLine(); });
+    $('pv-gallery').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-id]'); if (!b) return;
+      const item = C.get(b.dataset.id); C.equip(item.type, item.id);
+    });
+    $('pv-locker').addEventListener('click', () => C.openLocker('back'));
+    // Show the collection with nothing unlocked, the way a new player sees it.
+    $('pv-newplayer').addEventListener('click', () => { C.setPreviewAll(false); C.openLocker('achievements'); });
+    document.addEventListener('cosmetics:close', () => C.setPreviewAll(true));
+    let n = 0;
+    const samples = ['worst_beat', 'hat_trick', 'black_jack', 'charlie', 'natural', 'grand_slam'];
+    $('pv-toast').addEventListener('click', () => A.showToast(samples[n++ % samples.length]));
+    $('pv-reset').addEventListener('click', () => { for (const t of C.TYPES) C.equip(t.id, C.CATALOG.find((c) => c.type === t.id).id); });
+
+    rack(); gallery(); achTable(); equippedLine();
+  })();
+  </script>
+</body>
+</html>
