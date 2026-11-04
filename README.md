@@ -1,8 +1,10 @@
 # Blackjack
 
-A pixel-art blackjack game that plays like a real casino table. It runs in the browser with no build step, no server and no install: open `index.html` and play.
+A pixel-art blackjack game that plays like a real casino table.
 
-**Play online:** https://yust3c.github.io/blackjack/ (after GitHub Pages is turned on; see below)
+### [▶ Play it here](https://yust3c.github.io/Blackjack-PixelGame/)
+
+Or download the repository and open `index.html` in your browser. No install needed.
 
 ## Modes
 
@@ -34,35 +36,9 @@ Each difficulty has its own casino and dealer. **Achievements** unlock **cosmeti
 
 Click a seat to sit or to add a bot, click chips to bet, then press **Deal** (or `Enter`). On your turn: `H` hit, `S` stand, `D` double, `P` split, `R` surrender.
 
-## Play locally
+## Made with
 
-Download or clone the repository and open `index.html` in a browser. Everything works offline except the two pixel fonts, which load from Google Fonts and fall back to a monospace font without a connection.
-
-## Publish with GitHub Pages
-
-In the repository on GitHub, open **Settings → Pages**, set **Source** to **Deploy from a branch**, pick `main` and `/ (root)`, and save. After a minute the game is live at `https://<your-user>.github.io/<repo-name>/`.
-
-## Project layout
-
-| Path | What it does |
-| --- | --- |
-| `index.html` | The page |
-| `cosmetics.html` | Preview gallery of every cosmetic and achievement |
-| `css/style.css` | Table, cards, chips, menu and Lore screen |
-| `css/scenarios.css` | Casino scenes and the scaled stage |
-| `css/cosmetics.css` | Cosmetics, achievements screens and toasts |
-| `js/engine.js` | Game rules: shoe, dealing, player actions, payouts, Hi-Lo count |
-| `js/strategy.js` | Basic strategy (6 decks, S17, DAS, late surrender); bots and hints use it |
-| `js/sprites.js` | Pixel-art suit and chip sprites |
-| `js/modes.js` | Difficulties, Endless objectives, saved progress |
-| `js/dealers.js` | Pixel-art dealers |
-| `js/scenarios.js` | The eight casino scenes |
-| `js/cosmetics.js` | Cosmetic catalog and the Cosmetics screen |
-| `js/achievements.js` | Achievements and their trackers |
-| `js/lore.js` | Dealer and scene stories |
-| `js/ui.js` | Menu, modes, practice coach, rendering and input |
-
-All art is generated in code as pixel SVG, so there are no image files.
+Plain HTML, CSS and JavaScript, no libraries. Every card, chip, dealer and casino is pixel art drawn in code.
 
 ## License
 
