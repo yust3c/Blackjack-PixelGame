@@ -579,7 +579,7 @@
   // Import a save file: validate it, store it, then reload so every part of the game reads it fresh.
   function pickSaveFile() {
     const input = document.createElement('input');
-    input.type = 'file'; input.accept = '.json,application/json';
+    input.type = 'file'; input.accept = '.bjsave,.json,.txt';
     input.addEventListener('change', () => {
       const file = input.files && input.files[0];
       if (!file) return;

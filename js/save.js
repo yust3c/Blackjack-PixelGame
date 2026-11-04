@@ -50,12 +50,54 @@
     } catch (e) { /* storage full or blocked: play on with what is there */ }
   }
 
+  // ---------- save file encoding ----------
+  // Exported saves are scrambled and signed so a hand-edited file is refused on import.
+  // The key lives in this file, so this stops casual editing, not a determined cheater
+  // (no offline browser game can fully prevent that).
+  const FILE_TAG = 'BJSAVE1';
+  const SECRET = 'Old Tito keeps the shoe honest // 6d-S17-3:2 // 7f3a91c2e04b';
+  // Four independent 32-bit FNV-1a style hashes = a 128-bit signature.
+  function sign(text) {
+    const str = SECRET + '|' + text + '|' + SECRET;
+    let out = '';
+    for (const seed of [0x811c9dc5, 0x01000193, 0x9e3779b9, 0x85ebca6b]) {
+      let h = seed >>> 0;
+      for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; h ^= h >>> 13; }
+      h = Math.imul(h ^ (h >>> 16), 0x85ebca6b) >>> 0;
+      out += h.toString(16).padStart(8, '0');
+    }
+    return out;
+  }
+  function scramble(bytes) {
+    const out = new Uint8Array(bytes.length);
+    for (let i = 0; i < bytes.length; i++) out[i] = bytes[i] ^ SECRET.charCodeAt(i % SECRET.length) ^ ((i * 131) & 0xff);
+    return out;
+  }
+  const toB64 = (bytes) => { let bin = ''; for (const b of bytes) bin += String.fromCharCode(b); return btoa(bin); };
+  const fromB64 = (b64) => Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+  function encodeFile(obj) {
+    const json = JSON.stringify(obj);
+    const body = toB64(scramble(new TextEncoder().encode(json)));
+    return `${FILE_TAG}.${body}.${sign(body)}`;
+  }
+  // Returns { file } or { error }.
+  function decodeFile(text) {
+    const parts = String(text).trim().split('.');
+    if (parts.length !== 3 || parts[0] !== FILE_TAG) {
+      return { error: String(text).trim().startsWith('{') ? 'This save file was modified or is from an old format, so it cannot be loaded.' : 'That file is not a Blackjack save.' };
+    }
+    const [, body, sig] = parts;
+    if (sign(body) !== sig) return { error: 'This save file was modified, so it cannot be loaded.' };
+    try { return { file: JSON.parse(new TextDecoder().decode(scramble(fromB64(body)))) }; }
+    catch (e) { return { error: 'This save file is damaged.' }; }
+  }
+
   function exportSave() {
     const file = { game: 'blackjack-pixelgame', version: CURRENT, exported: new Date().toISOString(), data: storage ? readAll() : {} };
-    const blob = new Blob([JSON.stringify(file, null, 2)], { type: 'application/json' });
+    const blob = new Blob([encodeFile(file)], { type: 'application/octet-stream' });
     const a = root.document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `blackjack-save-${file.exported.slice(0, 10)}.json`;
+    a.download = `blackjack-save-${file.exported.slice(0, 10)}.bjsave`;
     root.document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   }
@@ -63,8 +105,9 @@
   // Checks a save file and returns { ok, error }. On success the save replaces the current one.
   function importSave(text) {
     if (!storage) return { ok: false, error: 'This browser is not letting the game store progress.' };
-    let file;
-    try { file = JSON.parse(text); } catch (e) { return { ok: false, error: 'That file is not a save file.' }; }
+    const decoded = decodeFile(text);
+    if (decoded.error) return { ok: false, error: decoded.error };
+    const file = decoded.file;
     if (!isObj(file) || file.game !== 'blackjack-pixelgame' || !isObj(file.data)) return { ok: false, error: 'That file is not a Blackjack save.' };
     if (!Number.isInteger(file.version) || file.version < 0) return { ok: false, error: 'The save file is missing its version.' };
     if (file.version > CURRENT) return { ok: false, error: 'This save comes from a newer version of the game. Update the game first.' };
@@ -82,5 +125,5 @@
     return { ok: true };
   }
 
-  root.SaveData = { CURRENT, KEYS, exportSave, importSave, available: !!storage };
+  root.SaveData = { CURRENT, KEYS, exportSave, importSave, encodeFile, decodeFile, available: !!storage };
 })(typeof window !== 'undefined' ? window : globalThis);
