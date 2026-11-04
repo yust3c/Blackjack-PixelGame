@@ -23,7 +23,11 @@ No install and no internet needed. With a connection it also loads the two pixel
 
 - **Endless**: one per difficulty, unlocked by beating that difficulty in Challenge, and set in a space version of its casino. Chase 8 objectives based on the difficulty's goal, then keep going for a high score. Lose when you run out of chips.
 
-Each difficulty has its own casino and dealer. **Achievements** unlock **cosmetics** (card backs, felts, chip sets and card faces, some animated), and the **Lore** section tells the story of every dealer and room. Progress is saved in your browser (localStorage).
+Each difficulty has its own casino and dealer. **Achievements** unlock **cosmetics** (card backs, felts, chip sets and card faces, some animated), and the **Lore** section tells the story of every dealer and room. Progress is saved in your browser.
+
+## Your save
+
+Progress lives in the browser you play in, and it carries over when you download a newer version of the game: older saves are upgraded automatically. To be safe, or to move to another browser or computer, use **Export save** at the bottom of the main menu to download your progress as a file, and **Import save** to load it back.
 
 ## Table rules
 

@@ -504,7 +504,9 @@
       const hadPlayer = this.seatsInRound().some((s) => s.type === 'player');
       if (hadPlayer) {
         const fmt = NS.formatChips;
-        this.say(playerNet > 0 ? `You win ${fmt(playerNet)}.` : playerNet < 0 ? `You lose ${fmt(-playerNet)}.` : 'You break even.');
+        const splitTwentyOne = this.playerSeats().some((s) => s.hands.some((h) => h.fromSplit && isBlackjack(h.cards)));
+        this.say((playerNet > 0 ? `You win ${fmt(playerNet)}.` : playerNet < 0 ? `You lose ${fmt(-playerNet)}.` : 'You break even.') +
+          (splitTwentyOne ? ' (21 after a split is not blackjack.)' : ''));
       }
       // Drop bets the bankroll can no longer cover.
       for (const s of this.playerSeats()) if (this.totalPlayerBets() > this.bankroll) s.bet = 0;

@@ -308,7 +308,7 @@ main { max-width: 1200px; margin: 0 auto; padding: 16px; }
 .diff-name { font-family: var(--font-pixel); font-size: 10px; color: var(--gold); }
 .diff-line { font-size: 17px; color: var(--muted); }
 .star { color: var(--gold); }
-.menu-foot { text-align: center; }
+.menu-foot { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 24px; }
 .link-btn { background: none; border: none; color: var(--muted); font: inherit; font-size: 18px; cursor: pointer; text-decoration: underline; text-underline-offset: 4px; }
 .link-btn:hover, .link-btn:focus-visible { color: var(--ink); }
 

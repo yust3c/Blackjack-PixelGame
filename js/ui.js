@@ -152,6 +152,8 @@
         <button class="btn btn-ghost extra-btn" data-lore>Lore</button>
       </div>
       <div class="menu-foot">
+        ${window.SaveData && window.SaveData.available ? `<button class="link-btn" data-export-save>Export save</button>
+        <button class="link-btn" data-import-save>Import save</button>` : ''}
         <button class="link-btn" data-reset-progress>${resetArmed ? 'Click again to erase all progress' : 'Reset progress'}</button>
       </div>`;
   }
@@ -312,10 +314,12 @@
       <span class="corner"><span class="rank">${card.rank}</span>${sprite}</span><span class="pip">${sprite}</span></div>`;
   }
 
-  function totalLabel(cards) {
+  // "BJ" only for a real blackjack: the first two cards of an unsplit hand. A split hand
+  // with ace + ten is just 21 (casino rule), so it shows 21 and a tooltip says why.
+  function totalLabel(cards, hand) {
     if (!cards.length) return '';
     const { total, soft } = BJ.handValue(cards);
-    if (BJ.isBlackjack(cards)) return 'BJ';
+    if (BJ.isBlackjack(cards) && (!hand || hand.natural)) return 'BJ';
     if (total > 21) return String(total);
     return soft && total < 21 ? `${total - 10}/${total}` : String(total);
   }
@@ -354,7 +358,7 @@
         const tags = [hand.doubled ? 'Doubled' : '', hand.insurance ? `Ins. ${fmt(hand.insurance)}` : ''].filter(Boolean).join(' · ');
         return `<div class="hand${activeHand}${hand.result && betting ? ' finished' : ''}">
           <div class="cards">${hand.cards.map((c) => cardHtml(c, false)).join('')}</div>
-          <div class="hand-info"><span class="total">${totalLabel(hand.cards)}</span>
+          <div class="hand-info"><span class="total"${hand.fromSplit && BJ.isBlackjack(hand.cards) ? ' title="21 after a split counts as 21, not blackjack"' : ''}>${totalLabel(hand.cards, hand)}</span>
             <span class="hand-bet">${fmt(hand.bet)}</span>${result}</div>
           ${tags ? `<div class="hand-tags">${tags}</div>` : ''}
         </div>`;
@@ -565,6 +569,24 @@
     }
   }
 
+  // Import a save file: validate it, store it, then reload so every part of the game reads it fresh.
+  function pickSaveFile() {
+    const input = document.createElement('input');
+    input.type = 'file'; input.accept = '.json,application/json';
+    input.addEventListener('change', () => {
+      const file = input.files && input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const res = window.SaveData.importSave(String(reader.result));
+        if (res.ok) showOverlay('Save imported', '<p>Your progress was loaded.</p>', [{ label: 'OK', run: () => location.reload() }]);
+        else showOverlay('Could not import', `<p>${res.error}</p>`, [{ label: 'OK', run: hideOverlay }]);
+      };
+      reader.readAsText(file);
+    });
+    input.click();
+  }
+
   document.addEventListener('click', (e) => {
     const t = e.target.closest('button, .seat');
     if (!t) return;
@@ -575,6 +597,8 @@
     if (d.locker !== undefined) { openSection(d.locker); return; }
     if (d.lore !== undefined) { showLore(); return; }
     if (d.loreBack !== undefined) { showMenu(); return; }
+    if (d.exportSave !== undefined) { window.SaveData.exportSave(); return; }
+    if (d.importSave !== undefined) { pickSaveFile(); return; }
     if (d.resetProgress !== undefined) {
       if (resetArmed) {
         save = M.blankSave();
