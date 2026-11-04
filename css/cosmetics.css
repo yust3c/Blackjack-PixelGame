@@ -277,7 +277,14 @@ html .cos-sw-faces.cos-sw-faces[data-face="face_heartbreak"] .card::after {
   width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
   font-family: var(--font-pixel); font-size: 16px; background: #0b0f0a; color: var(--rar);
 }
-.cos-ach.got .cos-ach-icon { background: var(--rar); color: #20202a; }
+.cos-ach.got .cos-ach-icon { box-shadow: inset 0 0 0 2px var(--rar); }
+.cos-ach.locked .ach-icon { filter: brightness(0.22) saturate(0); animation: none; }
+/* achievement logos (drawn by AchievementIcons in achievements.js) */
+.ach-icon { display: block; width: var(--s); height: var(--s); background-size: calc(var(--frames) * 100%) 100%; background-repeat: no-repeat; image-rendering: pixelated; }
+.ach-icon.anim { animation: ach-frames var(--dur) steps(var(--frames)) infinite; }
+@keyframes ach-frames { from { background-position-x: 0; } to { background-position-x: calc(var(--frames) * var(--s) * -1); } }
+.cos-toast-icon { flex: none; padding: 4px; background: #0b0f0a; box-shadow: inset 0 0 0 2px var(--rar); }
+@media (prefers-reduced-motion: reduce) { .ach-icon.anim { animation: none; } }
 .cos-ach-name { font-family: var(--font-pixel); font-size: 10px; line-height: 1.5; }
 .cos-ach-name .cos-rar { margin-left: 6px; }
 .cos-ach-desc { font-size: 18px; color: #d8c8b0; }

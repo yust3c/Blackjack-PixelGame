@@ -1042,7 +1042,7 @@ html .cos-sw-faces.cos-sw-faces[data-face="${id}"] .card::after { ${after} }\n`;
         const prog = !got && a.progress ? a.progress() : null;
         const shown = A.shown(a.id);
         return `<li class="cos-ach ${got ? 'got' : 'locked'}" style="--rar:${r.color}">
-          <div class="cos-ach-icon">${got ? '★' : '?'}</div>
+          <div class="cos-ach-icon">${(got || !a.secret) && root.AchievementIcons ? root.AchievementIcons.html(a.id, 32) : '?'}</div>
           <div class="cos-ach-text">
             <div class="cos-ach-name">${esc(shown.name)} <span class="cos-rar">${r.name}</span></div>
             <div class="cos-ach-desc">${esc(shown.desc)}</div>
