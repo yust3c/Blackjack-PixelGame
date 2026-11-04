@@ -1124,6 +1124,10 @@ html .cos-sw-faces.cos-sw-faces[data-face="${id}"] .card::after { ${after} }\n`;
     { id: 'title_dead_mans_hand', type: 'title', name: "Gunslinger", rarity: 'secret', by: 'dead_mans_hand', animated: true },
     { id: 'title_wolf_endless', type: 'title', name: "Blood Moon", rarity: 'secret', by: 'wolf_endless', animated: true },
     { id: 'title_wolf_endless_expert', type: 'title', name: "Silver Fang", rarity: 'secret', by: 'wolf_endless_expert', animated: true },
+    { id: 'title_worst_beat', type: 'title', name: "Heartbroken", rarity: 'secret', by: 'worst_beat', animated: true },
+    { id: 'title_suited_royalty', type: 'title', name: "Royal Blood", rarity: 'secret', by: 'suited_royalty', animated: true },
+    { id: 'title_seventh_heaven', type: 'title', name: "Heaven Sent", rarity: 'secret', by: 'seventh_heaven', animated: true },
+    { id: 'title_completionist', type: 'title', name: "Platinum", rarity: 'secret', by: 'completionist', animated: true },
     { id: 'title_darkest_run', type: 'title', name: "Eclipse", rarity: 'insanity', by: 'darkest_run', animated: true },
   );
   const RANK = { default: 0, common: 1, rare: 2, epic: 3, legendary: 4, secret: 5, insanity: 6 };
