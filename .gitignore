@@ -9,3 +9,7 @@ node_modules/
 gallery.html
 cosmetics.html
 gallery-share.html
+
+# Test saves (e.g. everything unlocked), never committed
+dev/
+*.bjsave
