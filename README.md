@@ -25,6 +25,10 @@ No install and no internet needed. With a connection it also loads the two pixel
 
 Each difficulty has its own casino and dealer. **Achievements** unlock **cosmetics** (card backs, felts, chip sets and card faces, some animated), and the **Lore** section tells the story of every dealer and room. Progress is saved in your browser.
 
+## Sound
+
+The game has chiptune sound effects, and each dealer talks in their own voice. Secret card backs and sets come with their own sounds. Open **Settings** in the main menu to change the volume or turn the set sounds off. Press `M` anywhere to mute. Sound starts after your first click, because browsers block it until then.
+
 ## Your save
 
 Challenge and Endless runs are saved after every hand, so you can leave and pick a run up later: click the same difficulty and choose **Continue**. Leaving in the middle of a hand loses that hand's bets.
@@ -43,11 +47,11 @@ Progress lives in the browser you play in, and it carries over when you download
 
 ## Controls
 
-Click a seat to sit or to add a bot, click chips to bet, then press **Deal** (or `Enter`). On your turn: `H` hit, `S` stand, `D` double, `P` split, `R` surrender. When the dealer shows an ace, each of your seats is asked about insurance in turn: `I` take it, `N` decline.
+Click a seat to sit or to add a bot, click chips to bet, then press **Deal** (or `Enter`). On your turn: `H` hit, `S` stand, `D` double, `P` split, `R` surrender. When the dealer shows an ace, each of your seats is asked about insurance in turn: `I` take it, `N` decline. `M` mutes or unmutes the sound.
 
 ## Made with
 
-Plain HTML, CSS and JavaScript, no libraries. Every card, chip, dealer and casino is pixel art drawn in code.
+Plain HTML, CSS and JavaScript, no libraries. Every card, chip, dealer and casino is pixel art drawn in code, and every sound is generated in code too.
 
 ## License
 

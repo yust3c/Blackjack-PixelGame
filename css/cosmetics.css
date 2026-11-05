@@ -367,3 +367,6 @@ html .cos-sw-faces.cos-sw-faces[data-face="face_heartbreak"] .card::after {
   100% { --holo: #ff4fd8; }
 }
 @media (prefers-reduced-motion: reduce) { :root { animation: none; } }
+
+/* Unknown Signal card faces: a scan line rolls down the card */
+@keyframes cos-ghost-sweep { from { background-position: 0 100%, 0 0; } to { background-position: 0 -33%, 0 0; } }

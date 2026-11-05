@@ -27,6 +27,146 @@
     { id: 'lowChips',   label: 'Low on chips',     when: 'Bankroll drops under 10% of the start', chance: 0.7 },
   ];
 
+  // ------------------------------------------------------------ SECRETS
+  // Timed, not event based: between hands, about once a minute, each has a small chance (see `chance`), once per session.
+  // A line can be several bubbles in a row. {next} = the real next card in the shoe, {wrong} = a card it is not.
+  // Seeing all 9 ids unlocks the secret achievement (achievements thread). Set greetings are extra and don't count.
+  const SECRETS = {
+    orbitGlitch: {
+      id: 't1t0_glitch', scene: 'orbit', chance: 0.03, glitch: true,
+      // the first bubble is a random normal T1-T0 line that scrambles as it types
+      after: ['...', 'REBOOTING. Please hold.', 'Sorry, kid. That never happened.'],
+    },
+    corner: { id: 'secret_corner', chance: 0.02, lines: [
+      'Did I ever tell you about the three blackjacks?',
+      'Rainy night, \'98. A kid in a yellow raincoat sat right there.',
+      'Blackjack. Blackjack. Blackjack. I never saw her again.',
+      '...Anyway. Place your bets, kid.'] },
+    orbit: { id: 'secret_orbit', chance: 0.02, lines: [
+      'Kid. Can I tell you something?',
+      'I keep a file called tito_laugh.wav.',
+      'I play it when the station is quiet. Don\'t tell the engineers.'] },
+    deco: { id: 'secret_deco', chance: 0.02, lines: [
+      'Sai, chéri, una volta ho barato anch\'io.',
+      'Einmal. Nur einmal.',
+      'Pardon. Where were we?'] },
+    liner: { id: 'secret_liner', chance: 0.02, lines: [
+      '*kzzt* ...Liner, this is the Vega. Is the captain\'s table open?',
+      'Negative, Vega. The captain is dealing.',
+      'Apologies, darling. Old friends.'] },
+    neon: { id: 'secret_neon', chance: 0.02, lines: [
+      'Okay. Confession time, my friend.',
+      'Most of my stories? True. Every word.',
+      'The ace of spades and the senator? Made it up.',
+      'Tell anyone and the smile costs you forty.'] },
+    mars: { id: 'secret_mars', chance: 0.02, lines: [
+      'Eye\'s scanning the shoe... got it.',
+      'Next card: {wrong}. Guaranteed.',
+      '(It was not guaranteed.)'] },
+    vip: { id: 'secret_vip', chance: 0.02, lines: [
+      '...',
+      'You remind me of someone.',
+      'Never mind. Your bet.'] },
+    horizon: { id: 'secret_horizon', chance: 0.02, lines: [
+      'The next card out of the shoe is {next}.',
+      'I have already seen it. Many times.'] },
+  };
+
+  // Greeting when the player sits down wearing all 4 pieces (back, felt, chips, faces) of one secret set.
+  const SET_GREETINGS = {
+    'Heartbreak': {
+      corner: 'Ah, kid. Somebody broke your heart at a table once, eh?',
+      orbit: 'Heartbreak detected. Want a hug? I have arms.',
+      deco: 'Heartbreak suits you, darling. It suits all the best players.',
+      liner: 'Broken hearts are welcome aboard. We have the best view for it.',
+      neon: 'Oof, the Heartbreak set. Who hurt you, buddy?',
+      mars: 'Heartbreak on Mars. Two moons and nobody to hold.',
+      vip: 'I know that deck. I am sorry for your loss.',
+      horizon: 'Hearts break here too. Slower.',
+    },
+    'King of Hearts': {
+      corner: 'Well, look at that. Royalty at my little table.',
+      orbit: 'Your Majesty. Bowing subroutine engaged.',
+      deco: 'Your Majesty. The Grand Hotel is honoured.',
+      liner: 'All hands, the King is aboard.',
+      neon: 'The King himself! Drinks are on... you, actually.',
+      mars: 'Long live the King of Mars!',
+      vip: 'Your Majesty. Your usual table.',
+      horizon: 'I have dealt to many kings. You are the last.',
+    },
+    'Seventh Heaven': {
+      corner: 'Lucky sevens! The old slots would\'ve loved you, kid.',
+      orbit: 'Seven, seven, seven. Jackpot protocol... standing by.',
+      deco: 'Seventh heaven. Très chanceux, darling.',
+      liner: 'Seven sevens, seven seas, seven stars. Welcome.',
+      neon: 'Triple sevens! Somebody call the slot machine!',
+      mars: 'Sevens everywhere. My eye is seeing double. Triple.',
+      vip: 'Sevens. A lucky man. Or a patient one.',
+      horizon: 'Seven is a holy number, even here.',
+    },
+    'Platinum': {
+      corner: 'Platinum. Kid, you\'ve done it all. I\'m proud of you.',
+      orbit: 'Platinum. 100% completion. Tito would cry. I would too, if I could.',
+      deco: 'Platinum. You have seen every trick, haven\'t you?',
+      liner: 'Platinum on deck. The crew salutes you.',
+      neon: 'PLATINUM? Okay. Okay. I\'m impressed. Don\'t tell anyone.',
+      mars: 'Platinum. Even my eye has to squint.',
+      vip: 'Platinum. There is nothing left to teach you.',
+      horizon: 'Platinum. You finished everything. Now there is only time.',
+    },
+    'Deadwood': {
+      corner: 'Aces and eights. Sit with your back to the wall, kid.',
+      orbit: 'Aces and eights. Historical file: unlucky. Proceed.',
+      deco: 'The dead man\'s hand. Bold choice for a dinner jacket.',
+      liner: 'An outlaw aboard. Keep your hands where I can see them.',
+      neon: 'Whoa, cowboy. This town ain\'t big enough. Sit down.',
+      mars: 'A cowboy on Mars. Red dust, dead man\'s hand. Fits.',
+      vip: 'Aces and eights. I keep my back to the wall too.',
+      horizon: 'The dead man\'s hand. He is still playing it, somewhere.',
+    },
+    'Blood Moon': {
+      corner: 'Blood moon tonight. Came alone, kid? Like a lone wolf.',
+      orbit: 'Lunar eclipse logged. Red. Alone. Respect.',
+      deco: 'No pack tonight, darling? How very wolfish.',
+      liner: 'A lone wolf aboard. The moon turned red to greet you.',
+      neon: 'Blood Moon! Lone wolf, no bots, no fear. I love it.',
+      mars: 'Two moons out there and both just turned red.',
+      vip: 'You play alone. So do I.',
+      horizon: 'The moon is red at every edge of time.',
+    },
+    'Silver Wolf': {
+      corner: 'Silver wolf. You climbed the whole mountain alone, kid.',
+      orbit: 'Silver Wolf. Two seats, all the way up. Impressive.',
+      deco: 'Silver suits you. So does solitude.',
+      liner: 'The silver wolf. The stars have been howling about you.',
+      neon: 'Silver Wolf! Alone at the top, huh? Lonely up there?',
+      mars: 'Silver Wolf. Even the dust storms stop to watch.',
+      vip: 'Alone at the very top. I know the view.',
+      horizon: 'A silver wolf at the end of time. I expected you.',
+    },
+    'Eclipse': {
+      corner: 'Eclipse. Kid... nobody plays it that clean. Nobody.',
+      orbit: 'Eclipse detected. No splits. No doubles. Error: awe.',
+      deco: 'The darkest run. Darling, I am speechless. Almost.',
+      liner: 'All lights dim. The Eclipse is aboard.',
+      neon: 'The Eclipse set. I\'m taking my sunglasses off for this one.',
+      mars: 'Eclipse. My eye just shut off out of respect.',
+      vip: 'The darkest run. ...Welcome, sir.',
+      horizon: 'Eclipse. You are the only one who made it this far.',
+    },
+    'Unknown Signal': {
+      corner: 'You heard them all, didn\'t you, kid? Every secret.',
+      orbit: 'Unknown signal detected. That... is my frequency.',
+      deco: 'You have been listening at keyholes, darling.',
+      liner: 'Unknown signal on all channels. Welcome aboard, listener.',
+      neon: 'You heard all my secrets? Nice suit. Keep your mouth shut.',
+      mars: 'My eye picks up your signal. Spooky, colonist.',
+      vip: 'You have heard everything. Then you know to say nothing.',
+      horizon: 'You collected every whisper. I was saving them for you.',
+    },
+  };
+
+
   const P = {
     // ------------------------------------------------------------ EASY
     corner: {
@@ -202,5 +342,5 @@
     },
   };
 
-  root.DealerPhrases = Object.assign(P, { EVENTS });
+  root.DealerPhrases = Object.assign(P, { EVENTS, SECRETS, SET_GREETINGS });
 })(window);

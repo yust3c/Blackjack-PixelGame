@@ -150,6 +150,8 @@
       hint: "Secret. Aces and eights." },
     { id: 'wolf_endless', rarity: 'secret', group: 'Secret', name: 'Blood Moon', desc: 'Complete Endless on Hard with no bots at the table.', secret: true,
       hint: "Secret. The pack stays home, forever." },
+    { id: 'off_the_record', rarity: 'secret', group: 'Secret', name: 'Off the Record', desc: 'Hear every dealer’s secret line.', secret: true,
+      hint: 'Secret. Some dealers only talk when they think nobody is listening.' },
     { id: 'wolf_endless_expert', rarity: 'secret', group: 'Secret', name: 'Silver Moon', desc: 'Complete Endless on Expert using only 2 seats every round.', secret: true,
       hint: 'Secret. Alone at the very top, for as long as it takes.' },
     { id: 'darkest_run', rarity: 'insanity', group: 'Secret', name: 'The Darkest Run', desc: 'Complete Endless on Expert using only 2 seats, without ever splitting, doubling or surrendering.', secret: true,
@@ -511,6 +513,16 @@
   }
 
   syncFromModes();
+
+  // Off the Record: the speech bubbles report each secret line the first time it shows.
+  function checkSecretLines() {
+    const T = root.DealerTalk;
+    if (T && T.SECRET_IDS && T.secretsSeen && T.SECRET_IDS.every((id) => T.secretsSeen().includes(id))) unlock('off_the_record');
+  }
+  if (root.document) {
+    root.document.addEventListener('dealertalk:secret', (e) => { const d = e.detail || {}; if (d.seen && d.total && d.seen.length >= d.total) unlock('off_the_record'); });
+    root.addEventListener && root.addEventListener('load', checkSecretLines);
+  }
 
   root.Achievements = {
     list: () => LIST.slice(),
@@ -1326,6 +1338,16 @@
       p.poly([[2, 16], [3, 10], [4, 7], [6, 9], [8, 5], [9, 8], [12, 10], [13, 12], [10, 12], [9, 16]], C.dark[1]);
       p.line(4, 8, 3, 13, C.dark[0]); p.set(7, 9, C.cyan[1]);
     }, post(p, f) { [[1, 2], [14, 1], [15, 12], [12, 15], [0, 8], [6, 0]].forEach(([x, y], i) => { if ((i + f) % 3 === 0) p.set(x, (y + f) % 16, '#ffffff'); }); } },
+    off_the_record: { frames: 8, dur: 1.6, draw(p, f) {
+      const bob = [0, 0, 1, 1, 1, 0, 0, -1][f], glitch = f === 3 || f === 6;
+      const Q = ['.XXXXX.', 'XXXXXXX', 'XX...XX', '.....XX', '....XXX', '...XXX.', '..XXX..', '..XX...', '.......', '..XX...', '..XX...'];
+      const body = (dx, c, shade) => Q.forEach((r, y) => [...r].forEach((ch, x) => { if (ch === 'X') p.set(4 + x + dx + (glitch && y === 5 ? 1 : 0), 2 + y + bob, y > 6 && shade ? shade : c); }));
+      if (glitch) { body(-1, '#ff3ad0'); body(1, '#3ad8ff'); }
+      body(0, '#e8fff8', '#9ae8d8');
+    }, post(p, f) {
+      for (let x = 0; x < 16; x++) if ((x + f * 3) % 6 < 2) p.set(x, 15, '#3ad8ff');
+      if (f === 6) for (let x = 2; x < 14; x++) p.set(x, 9, x % 2 ? '#ff3ad0' : '#ffffff');
+    } },
     darkest_run: { frames: 8, dur: 1.6, draw(p, f) {
       p.ring(8, 8, 4.5, 7.9, (x, y, d) => {
         const a = Math.atan2(y + 0.5 - 8, x + 0.5 - 8);

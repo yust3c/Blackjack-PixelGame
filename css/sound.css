@@ -1,0 +1,40 @@
+/* Settings screen (js/gamesounds.js) and the muted badge. Same pixel look as the rest of the menu. */
+.snd-panel {
+  --px: 4px;
+  max-width: 560px; width: 100%; margin: 0 auto; padding: 24px 22px 18px;
+  background: var(--felt); box-shadow: inset 0 0 0 4px var(--felt-dark), inset 0 0 0 8px var(--rail);
+  clip-path: polygon(0 4px,4px 4px,4px 0,calc(100% - 4px) 0,calc(100% - 4px) 4px,100% 4px,100% calc(100% - 4px),calc(100% - 4px) calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,4px calc(100% - 4px),0 calc(100% - 4px));
+}
+.snd-panel h2 { margin: 0 0 6px; font-family: var(--font-pixel); font-size: 14px; color: var(--gold); text-shadow: 2px 2px 0 var(--rail-dark); }
+.snd-row { display: grid; grid-template-columns: minmax(0, 150px) minmax(0, 1fr) 52px; align-items: center; gap: 12px; margin: 18px 0; }
+.snd-row label, .snd-label { font-family: var(--font-pixel); font-size: 10px; line-height: 1.4; }
+.snd-note { display: block; font-family: var(--font-text); font-size: 17px; color: #d6e8c8; margin-top: 4px; line-height: 1; }
+.snd-row output { font-family: var(--font-pixel); font-size: 10px; text-align: right; }
+.snd-row.snd-toggle { grid-template-columns: 1fr auto; }
+.snd-row.dim { opacity: 0.45; }
+@media (max-width: 520px) {
+  .snd-row { grid-template-columns: 1fr 52px; }
+  .snd-row label { grid-column: 1 / -1; }
+}
+.snd-panel input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 26px; background: transparent; cursor: pointer; margin: 0; }
+.snd-panel input[type=range]::-webkit-slider-runnable-track { height: 8px; background: linear-gradient(var(--gold), var(--gold)) 0 / var(--fill, 50%) 100% no-repeat, var(--felt-dark); box-shadow: 0 0 0 2px var(--rail-dark); }
+.snd-panel input[type=range]::-moz-range-track { height: 8px; background: var(--felt-dark); box-shadow: 0 0 0 2px var(--rail-dark); }
+.snd-panel input[type=range]::-moz-range-progress { height: 8px; background: var(--gold); }
+.snd-panel input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 22px; margin-top: -7px; background: var(--ink); border: 0; border-radius: 0; box-shadow: inset 0 0 0 2px var(--btn-edge), inset 0 -4px 0 2px #cfc6a8; }
+.snd-panel input[type=range]::-moz-range-thumb { width: 14px; height: 22px; background: var(--ink); border: 0; border-radius: 0; box-shadow: inset 0 0 0 2px var(--btn-edge), inset 0 -4px 0 2px #cfc6a8; }
+.snd-panel input[type=range]:focus-visible { outline: 2px dashed var(--gold); outline-offset: 3px; }
+.snd-switch {
+  font-family: var(--font-pixel); font-size: 10px; min-width: 70px; min-height: 40px; padding: 8px 12px 12px; border: none; cursor: pointer;
+  background: var(--rail-dark); color: var(--muted); box-shadow: inset 0 0 0 2px #000;
+}
+.snd-switch[aria-pressed="true"] { background: var(--gold); color: var(--btn-ink); box-shadow: inset 0 0 0 2px var(--btn-edge), inset 0 -4px 0 2px #c99a1e; }
+.snd-switch.danger[aria-pressed="true"] { background: var(--lose); color: var(--ink); box-shadow: inset 0 0 0 2px var(--btn-edge), inset 0 -4px 0 2px #a8342c; }
+.snd-switch:focus-visible { outline: 2px dashed var(--gold); outline-offset: 3px; }
+
+.snd-muted {
+  position: fixed; right: 12px; bottom: 12px; z-index: 50; display: flex; align-items: center; gap: 8px;
+  font-family: var(--font-pixel); font-size: 8px; color: var(--ink); background: rgba(11, 15, 10, 0.85);
+  border: none; padding: 8px 10px; cursor: pointer; box-shadow: inset 0 0 0 2px var(--rail);
+}
+.snd-muted[hidden] { display: none; }
+.snd-muted svg { width: 22px; height: 18px; }

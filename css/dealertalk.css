@@ -41,3 +41,10 @@
 @keyframes db-out { to { transform: scale(.6); opacity: 0; } }
 @keyframes db-shake { 0% { translate: -3px 0; } 50% { translate: 3px 0; } 100% { translate: 0 0; } }
 @media (prefers-reduced-motion: reduce) { #dealer-bubble, #dealer-bubble * { animation: none !important; } }
+
+/* secret lines: a faint violet bubble with a star; the T1-T0 glitch is a dark, flickering terminal bubble */
+#dealer-bubble.db-secret { --db-bg: #efe2ff; --db-who: #6a3aa8; }
+#dealer-bubble.db-secret .db-who::after { content: " \2605"; }
+#dealer-bubble.db-glitch { --db-bg: #0e1a24; --db-ink: #7ff0ff; --db-who: #ff3a6a; --db-line: #7ff0ff; text-shadow: 2px 0 #ff3a6a, -2px 0 #3affd0; }
+#dealer-bubble.db-glitch.db-pop { animation: db-pop .2s steps(3) both, db-glitch .14s steps(2) .2s infinite; }
+@keyframes db-glitch { 0% { translate: 2px 0; } 50% { translate: -3px 1px; } 100% { translate: 0 0; } }

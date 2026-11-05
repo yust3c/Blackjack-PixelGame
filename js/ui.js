@@ -28,6 +28,7 @@
     hideOverlay();
     if (window.Scenarios) Scenarios.clear(); // the menu never shows a scene
     if (window.DealerTalk) DealerTalk.stop();
+    if (window.GameSounds) { GameSounds.stop(); GameSounds.closeSettings(); }
     $('game').hidden = true;
     $('lore').hidden = true;
     $('menu').hidden = false;
@@ -160,6 +161,7 @@
         ${window.Cosmetics ? `<button class="btn btn-ghost extra-btn" data-locker="cosmetics">Cosmetics</button>` : ''}
         ${window.Achievements ? `<button class="btn btn-ghost extra-btn" data-locker="achievements">Achievements${collectionCount()}</button>` : ''}
         <button class="btn btn-ghost extra-btn" data-lore>Lore</button>
+        ${window.GameSounds ? `<button class="btn btn-ghost extra-btn" data-settings>Settings</button>` : ''}
       </div>
       <div class="menu-foot">
         ${window.SaveData && window.SaveData.available ? `<button class="link-btn" data-export-save>Export save</button>
@@ -295,6 +297,8 @@
     if (window.Scenarios) Scenarios.applyForMode(type, diffId);
     // The scene's dealer comments on the game in speech bubbles (js/dealertalk.js).
     if (window.DealerTalk) DealerTalk.start(game, window.Scenarios ? Scenarios.forMode(type, diffId) : null);
+    // Table sounds follow the game (js/gamesounds.js).
+    if (window.GameSounds) GameSounds.start(game);
   }
 
   // ======================================================================
@@ -322,6 +326,7 @@
         save.challengeWins[d.id] = true;
         clearRun('challenge', d.id);
         if (window.Achievements) window.Achievements.challengeWon(d.id);
+        if (window.GameAudio) setTimeout(() => window.GameAudio.play('goal'), 1200);
         M.store(save);
         showOverlay(`${d.name} beaten!`, `
           <p>You reached ${fmt(g.bankroll)} chips. The goal was ${d.target}.</p>
@@ -353,6 +358,7 @@
     M.store(save);
     if (window.Achievements) window.Achievements.endlessProgress(d.id, endlessIndex, g.bankroll);
     if (reached.length) {
+      if (window.GameAudio) setTimeout(() => window.GameAudio.play('goal'), 1200);
       const last = endlessIndex >= objectives.length;
       g.say(last
         ? `All ${objectives.length} objectives done! Keep going for a high score.`
@@ -684,6 +690,7 @@
     if (d.start !== undefined) { if (resumable(d.start)) chooseRun(d.start, d.diff); else startMode(d.start, d.diff); return; }
     if (d.locker !== undefined) { openSection(d.locker); return; }
     if (d.lore !== undefined) { showLore(); return; }
+    if (d.settings !== undefined) { window.GameSounds.openSettings(); return; }
     if (d.loreBack !== undefined) { showMenu(); return; }
     if (d.exportSave !== undefined) { window.SaveData.exportSave(); return; }
     if (d.importSave !== undefined) { pickSaveFile(); return; }

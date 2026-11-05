@@ -958,6 +958,46 @@ html .cos-sw-faces.cos-sw-faces[data-face="${id}"] .card::after { ${after} }\n`;
       after: 'linear-gradient(120deg, transparent 0 40%, rgba(255, 176, 64, 0.5) 46%, rgba(255, 240, 200, 0.6) 50%, rgba(255, 176, 64, 0.5) 54%, transparent 60% 100%) 0 0 / 400% 100%', opacity: 0.35, anim: 'cos-holo 3s steps(30) infinite' },
   });
 
+
+  // ----- Unknown Signal: secret kit for hearing every secret dealer line -----
+  const GHOST = [ // 12 x 13 question mark
+    '...XXXXXX...', '..XXXXXXXX..', '.XXX....XXX.', '.XX......XX.', '.........XX.', '........XXX.', '......XXXX..',
+    '.....XXXX...', '.....XXX....', '.....XXX....', '............', '.....XXX....', '.....XXX....',
+  ];
+  BACKS.back_ghost = artBack(8, 1.6, '#5affd8', (u, v, f) => {
+    if (v === (f * 5) % IH || v === (f * 5 + 1) % IH) return '#123a36';
+    const n = (u * 7 + v * 13 + f * 5) % 23;
+    return n === 0 ? '#2a5a54' : v % 2 ? '#061214' : '#0a1c1e';
+  }, (set, f) => {
+    const glitch = f === 3 || f === 6;
+    const bob = [0, 0, 1, 1, 1, 0, 0, -1][f];
+    const ghost = (dx, body, eye, rows) => GHOST.forEach((r, y) => {
+      const shift = glitch && rows.includes(y) ? 2 : 0;
+      [...r].forEach((ch, x) => { if (ch !== '.') set(5 + x + dx + shift, 9 + y + bob, ch === 'o' ? eye : body); });
+    });
+    if (glitch) { ghost(-1, '#ff3ad0', '#ff3ad0', [2, 6, 11]); ghost(1, '#3ad8ff', '#3ad8ff', [2, 6, 11]); }
+    ghost(0, f % 4 === 1 ? '#e8fff8' : '#b8fff0', '#061214', [2, 6, 11]);
+    for (let u = 0; u < IW; u++) if ((u + f * 3) % 7 < 2) set(u, 28, '#1e4a44');
+    if (f === 6) for (let u = 3; u < 19; u++) set(u, 5, (u % 3) ? '#ff3ad0' : '#3ad8ff');
+  });
+  FELTS.felt_ghost = { '--felt': '#0b1a1c', '--felt-dot': '#0a1719', '--felt-dark': '#040c0d', '--felt-line': '#5affd8',
+                       '--rail': '#16262a', '--rail-light': '#24383c', '--rail-dark': '#060e10' };
+  function staticTile(seed) {
+    const r = rand(seed); const S = 64; let rects = '';
+    for (let i = 0; i < 70; i++) {
+      const x = Math.floor(r() * S), y = Math.floor(r() * S), w = 1 + Math.floor(r() * 3);
+      const c = ['#5affd8', '#ffffff', '#ff3ad0', '#3ad8ff'][Math.floor(r() * 4)];
+      rects += `<rect x="${x}" y="${y}" width="${w}" height="1" fill="${c}" opacity="${(0.12 + r() * 0.3).toFixed(2)}"/>`;
+    }
+    return svgUrl(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${S} ${S}" width="${S * 2}" height="${S * 2}" shape-rendering="crispEdges">${rects}</svg>`);
+  }
+  FELT_FX.felt_ghost = () => [[staticTile(131), 'repeating-linear-gradient(0deg, rgba(90, 255, 216, 0.05) 0 2px, transparent 2px 4px)'], ['128px 128px', '100% 4px'], ['0 128px', '0 4px'], '1.2s', 12];
+  CHIP_SETS.chips_ghost = { stripe: 'spin', spin: ['#ffffff', '#ff3ad0', '#3ad8ff'], colors: (m, d, l) => [mix(grey(m), '#0e3a36', 0.6), '#020808', '#b8fff0'] };
+  FACE_FX.face_ghost = { vars: { '--card': '#dcfff6', '--card-ink': '#0a2a2a', '--card-red': '#d0207a' },
+    shadow: 'inset 2px 0 0 0 #ff3ad0, inset -2px 0 0 0 #3ad8ff, inset 0 0 0 4px #0e3a36, inset -4px -4px 0 4px #c0ece2',
+    after: 'linear-gradient(180deg, transparent 0 44%, rgba(90, 255, 216, 0.55) 47%, rgba(255, 255, 255, 0.7) 50%, rgba(255, 58, 208, 0.4) 53%, transparent 56% 100%) 0 0 / 100% 400%, repeating-linear-gradient(0deg, rgba(10, 42, 42, 0.10) 0 1px, transparent 1px 3px)',
+    opacity: 0.6, anim: 'cos-ghost-sweep 2.4s steps(24) infinite' };
+
   const CATALOG = [
     { id: 'back_classic',   type: 'back', name: 'Classic Red',   rarity: 'default' },
     { id: 'back_blue',      type: 'back', name: 'Royal Blue',    rarity: 'common',    by: 'first_hand' },
@@ -1128,6 +1168,11 @@ html .cos-sw-faces.cos-sw-faces[data-face="${id}"] .card::after { ${after} }\n`;
     { id: 'title_suited_royalty', type: 'title', name: "Royal Blood", rarity: 'secret', by: 'suited_royalty', animated: true },
     { id: 'title_seventh_heaven', type: 'title', name: "Heaven Sent", rarity: 'secret', by: 'seventh_heaven', animated: true },
     { id: 'title_completionist', type: 'title', name: "Platinum", rarity: 'secret', by: 'completionist', animated: true },
+    { id: 'back_ghost',  type: 'back',  name: 'Unknown Signal', rarity: 'secret', by: 'off_the_record', animated: true, set: 'Unknown Signal' },
+    { id: 'felt_ghost',  type: 'felt',  name: 'Unknown Signal', rarity: 'secret', by: 'off_the_record', animated: true, set: 'Unknown Signal' },
+    { id: 'chips_ghost', type: 'chips', name: 'Unknown Signal', rarity: 'secret', by: 'off_the_record', animated: true, set: 'Unknown Signal' },
+    { id: 'face_ghost',  type: 'face',  name: 'Unknown Signal', rarity: 'secret', by: 'off_the_record', animated: true, set: 'Unknown Signal' },
+    { id: 'title_off_the_record', type: 'title', name: "Eavesdropper", rarity: 'secret', by: 'off_the_record', animated: true },
     { id: 'title_darkest_run', type: 'title', name: "Eclipse", rarity: 'insanity', by: 'darkest_run', animated: true },
   );
   const RANK = { default: 0, common: 1, rare: 2, epic: 3, legendary: 4, secret: 5, insanity: 6 };
