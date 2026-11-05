@@ -422,3 +422,35 @@ main { max-width: 1200px; margin: 0 auto; padding: 16px; }
   .extra-btn { min-width: 0; flex: 1 1 40%; }
 }
 .run-line { color: var(--gold); }
+
+/* ---------- Practice: coach beside the table, everything on one screen ---------- */
+@media (min-width: 1100px) {
+  main.with-coach {
+    max-width: 1500px; display: grid; grid-template-columns: minmax(0, 1fr) 280px; column-gap: 16px; align-items: start;
+  }
+  main.with-coach > .progress, main.with-coach > .table, main.with-coach > .controls { grid-column: 1; }
+  main.with-coach > .coach { grid-column: 2; grid-row: 1 / span 2; margin-top: 0; position: sticky; top: 16px; }
+  main.with-coach .coach-head { flex-direction: column; align-items: flex-start; }
+  main.with-coach .seat { min-width: 100px; }
+  main.with-coach .seats { flex-wrap: nowrap; }
+  main.with-coach .count { gap: 16px; }
+  main.with-coach .coach p { font-size: 19px; }
+  main.with-coach .legend { font-size: 15px !important; }
+}
+/* Shorter windows: tighten the table so the action buttons stay in view. */
+@media (min-width: 701px) and (max-height: 820px) {
+  body:not([data-stage]) main { padding-top: 8px; padding-bottom: 4px; }
+  body:not([data-stage]) .topbar { margin-top: 8px; padding-top: 8px; padding-bottom: 8px; }
+  body:not([data-stage]) .table { min-height: 0; padding: 20px 24px 30px; }
+  body:not([data-stage]) .dealer { min-height: 104px; gap: 6px; }
+  body:not([data-stage]) .table-print { margin: 8px auto 4px; }
+  body:not([data-stage]) .print-sub { margin-top: 2px; }
+  body:not([data-stage]) .message { margin: 4px 0 8px; }
+  body:not([data-stage]) .seat { min-height: 160px; }
+  body:not([data-stage]) .controls { margin-top: 12px; min-height: 0; gap: 10px; }
+  /* betting: seat info, chips and buttons share rows instead of stacking three high */
+  body:not([data-stage]) .controls:has(.chip-rack) { flex-direction: row; flex-wrap: wrap; justify-content: center; column-gap: 20px; }
+  body:not([data-stage]) .controls .betting-for { flex-basis: 100%; text-align: center; }
+}
+/* The top bar's margin no longer pushes the page 12px past the window (no stray scrollbar). */
+body { display: flow-root; }

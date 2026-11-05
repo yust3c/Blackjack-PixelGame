@@ -588,6 +588,7 @@
 
   function renderCoach() {
     const el = $('coach');
+    el.parentElement.classList.toggle('with-coach', !!coach); // Practice: the coach sits beside the table
     if (!coach) { el.hidden = true; return; }
     el.hidden = false;
     let advice = '';
