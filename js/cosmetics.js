@@ -998,6 +998,48 @@ html .cos-sw-faces.cos-sw-faces[data-face="${id}"] .card::after { ${after} }\n`;
     after: 'linear-gradient(180deg, transparent 0 44%, rgba(90, 255, 216, 0.55) 47%, rgba(255, 255, 255, 0.7) 50%, rgba(255, 58, 208, 0.4) 53%, transparent 56% 100%) 0 0 / 100% 400%, repeating-linear-gradient(0deg, rgba(10, 42, 42, 0.10) 0 1px, transparent 1px 3px)',
     opacity: 0.6, anim: 'cos-ghost-sweep 2.4s steps(24) infinite' };
 
+
+  // ----- The House: code screen, blueprint felt, debug chips, test-card faces -----
+  const BRACKETS = ['..X.....X..', '.X...X...X.', 'X....X....X', '.X..X....X.', '..X.X...X..'];
+  BACKS.back_house = artBack(6, 1.8, '#5a8aff', () => '#0a1030', (set, f) => {
+    const lines = [[1, 9, '#ff6ad0'], [3, 13, '#9ad0ff'], [3, 7, '#ffd75e'], [1, 15, '#6aff9a'], [5, 10, '#9ad0ff'], [3, 6, '#ff6ad0'], [1, 12, '#ffd75e'], [3, 14, '#6aff9a'], [1, 8, '#9ad0ff'], [5, 11, '#ffd75e'], [3, 9, '#6aff9a'], [1, 13, '#ff6ad0']];
+    for (let i = 0; i < 12; i++) {
+      const [x, w, c] = lines[(i + f * 2) % lines.length], y = 2 + i * 2.6;
+      if (y > 9 && y < 17) continue;
+      for (let u = 0; u < w; u++) set(x + u, Math.round(y), c);
+    }
+    bits(set, BRACKETS, 5, 11, '#ffffff');
+    if (f % 2 === 0) for (let v = 11; v < 16; v++) { set(17, v, '#ffffff'); set(18, v, '#ffffff'); }
+  });
+  FELTS.felt_house = { '--felt': '#1a3a8a', '--felt-dot': '#18357e', '--felt-dark': '#0e2258', '--felt-line': '#cfe2ff',
+                       '--rail': '#1a2440', '--rail-light': '#2e3c66', '--rail-dark': '#0a1020' };
+  function blueprintTile() {
+    let r = '';
+    for (let i = 0; i < 64; i += 8) r += `<rect x="${i}" y="0" width="0.5" height="64" fill="#cfe2ff" opacity="${i % 32 ? 0.08 : 0.2}"/><rect x="0" y="${i}" width="64" height="0.5" fill="#cfe2ff" opacity="${i % 32 ? 0.08 : 0.2}"/>`;
+    return svgUrl(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="128" height="128">${r}</svg>`);
+  }
+  FELT_FX.felt_house = () => [[blueprintTile(), 'radial-gradient(ellipse at 50% 50%, transparent 50%, rgba(10, 16, 48, 0.4) 100%)'], ['128px 128px', '100% 100%'], ['128px 128px', '0 0'], '24s', 128];
+  CHIP_SETS.chips_house = { stripe: 'spin', spin: ['#ff3aff', '#3aff6a', '#3ad8ff'], colors: (m, d, l) => [mix(m, '#1a3a8a', 0.55), '#0a1030', '#e0f0ff'] };
+  FACE_FX.face_house = { vars: { '--card': '#fbfbff', '--card-ink': '#14183a', '--card-red': '#e0204a' },
+    shadow: 'inset 0 0 0 2px #14183a, inset -4px -4px 0 2px #e4e6f4',
+    after: 'linear-gradient(90deg, #ff3a3a 0 16%, #ffd23a 16% 33%, #3aff6a 33% 50%, #3ad8ff 50% 66%, #3a5aff 66% 83%, #ff3aff 83% 100%) 0 100% / 100% 4px no-repeat', opacity: 0.9 };
+
+  // ----- Hitman: black and gold, a crosshair sweeping the back -----
+  BACKS.back_hitman = artBack(8, 2.4, '#d8b040', (u, v) => ((u + v) % 2 ? '#0c0c0e' : '#08080a'), (set, f) => {
+    const cx = [7, 9, 11, 13, 15, 13, 11, 9][f], cy = [13, 15, 17, 19, 17, 15, 17, 15][f];
+    fillDisc(set, cx, cy, 6.6, (u, v, d) => (d > 5.8 ? '#d8b040' : null));
+    for (let i = -8; i <= 8; i++) { if (Math.abs(i) > 2) { set(cx + i, cy, '#d8b040'); set(cx, cy + i, '#d8b040'); } }
+    if (f % 2 === 0) set(cx, cy, '#ff2a2a');
+    for (let u = 0; u < IW; u++) if (u % 3 === 0) { set(u, 1, '#3a3020'); set(u, IH - 2, '#3a3020'); }
+  });
+  FELTS.felt_hitman = { '--felt': '#121214', '--felt-dot': '#0f0f11', '--felt-dark': '#060608', '--felt-line': '#d8b040',
+                        '--rail': '#1a1814', '--rail-light': '#3a3020', '--rail-dark': '#080806' };
+  FELT_FX.felt_hitman = () => [['linear-gradient(180deg, transparent 0 49.6%, rgba(216, 176, 64, 0.45) 49.6% 50.4%, transparent 50.4% 100%)', 'radial-gradient(ellipse at 50% 50%, transparent 35%, rgba(0, 0, 0, 0.55) 100%)'], ['100% 200%', '100% 100%'], ['0 200%', '0 0'], '6s', 60];
+  CHIP_SETS.chips_hitman = { stripe: 'spin', spin: ['#ffd75e', '#c0101e', '#fff6c0'], colors: (m, d, l) => [mix(grey(m), '#000000', 0.7), '#000000', '#d8b040'] };
+  FACE_FX.face_hitman = { vars: { '--card': '#f4efe2', '--card-ink': '#0c0c0e', '--card-red': '#a0101a' },
+    shadow: 'inset 0 0 0 2px #000, inset 0 0 0 3px #d8b040, inset -4px -4px 0 3px #e0d8c4',
+    after: 'linear-gradient(120deg, transparent 0 44%, rgba(216, 176, 64, 0.45) 48%, rgba(255, 246, 192, 0.6) 50%, rgba(216, 176, 64, 0.45) 52%, transparent 56% 100%) 0 0 / 400% 100%', opacity: 0.4, anim: 'cos-holo 3.2s steps(32) infinite' };
+
   const CATALOG = [
     { id: 'back_classic',   type: 'back', name: 'Classic Red',   rarity: 'default' },
     { id: 'back_blue',      type: 'back', name: 'Royal Blue',    rarity: 'common',    by: 'first_hand' },
@@ -1172,6 +1214,16 @@ html .cos-sw-faces.cos-sw-faces[data-face="${id}"] .card::after { ${after} }\n`;
     { id: 'felt_ghost',  type: 'felt',  name: 'Unknown Signal', rarity: 'secret', by: 'off_the_record', animated: true, set: 'Unknown Signal' },
     { id: 'chips_ghost', type: 'chips', name: 'Unknown Signal', rarity: 'secret', by: 'off_the_record', animated: true, set: 'Unknown Signal' },
     { id: 'face_ghost',  type: 'face',  name: 'Unknown Signal', rarity: 'secret', by: 'off_the_record', animated: true, set: 'Unknown Signal' },
+    { id: 'back_house',   type: 'back',  name: 'The House', rarity: 'secret', by: 'house_name', animated: true, set: 'The House' },
+    { id: 'felt_house',   type: 'felt',  name: 'The House', rarity: 'secret', by: 'house_name', animated: true, set: 'The House' },
+    { id: 'chips_house',  type: 'chips', name: 'The House', rarity: 'secret', by: 'house_name', animated: true, set: 'The House' },
+    { id: 'face_house',   type: 'face',  name: 'The House', rarity: 'secret', by: 'house_name', set: 'The House' },
+    { id: 'title_house_name', type: 'title', name: "The Creator", rarity: 'secret', by: 'house_name', animated: true },
+    { id: 'back_hitman',  type: 'back',  name: 'Hitman', rarity: 'secret', by: 'whisper_name', animated: true, set: 'Hitman' },
+    { id: 'felt_hitman',  type: 'felt',  name: 'Hitman', rarity: 'secret', by: 'whisper_name', animated: true, set: 'Hitman' },
+    { id: 'chips_hitman', type: 'chips', name: 'Hitman', rarity: 'secret', by: 'whisper_name', animated: true, set: 'Hitman' },
+    { id: 'face_hitman',  type: 'face',  name: 'Hitman', rarity: 'secret', by: 'whisper_name', animated: true, set: 'Hitman' },
+    { id: 'title_whisper_name', type: 'title', name: "El Sicario", rarity: 'secret', by: 'whisper_name', animated: true },
     { id: 'title_off_the_record', type: 'title', name: "Eavesdropper", rarity: 'secret', by: 'off_the_record', animated: true },
     { id: 'title_darkest_run', type: 'title', name: "Eclipse", rarity: 'insanity', by: 'darkest_run', animated: true },
   );
@@ -1330,7 +1382,7 @@ html .cos-sw-faces.cos-sw-faces[data-face="${id}"] .card::after { ${after} }\n`;
     return `<div class="cos-profile">
       <div>
         <label class="cos-pf-k" for="cos-pf-name">NAME</label>
-        <input class="cos-pf-name" id="cos-pf-name" data-name maxlength="16" value="${esc(state.name)}" autocomplete="off" spellcheck="false">
+        <input class="cos-pf-name" id="cos-pf-name" data-name maxlength="24" value="${esc(state.name)}" autocomplete="off" spellcheck="false">
         <div class="cos-pf-k">TITLE</div>
         <div class="cos-pf-title">${titleHtml(t, true)}<button type="button" class="cos-pf-btn" data-tab="title">Change</button></div>
         <div class="cos-pf-k">EQUIPPED</div>
@@ -1431,8 +1483,9 @@ html .cos-sw-faces.cos-sw-faces[data-face="${id}"] .card::after { ${after} }\n`;
       });
       lockerEl.addEventListener('change', (e) => {
         if (!e.target.matches('[data-name]')) return;
-        state.name = e.target.value.trim().slice(0, 16) || 'Player';
+        state.name = e.target.value.trim().slice(0, 24) || 'Player';
         persist(); renderLocker();
+        doc.dispatchEvent(new CustomEvent('cosmetics:name', { detail: { name: state.name } }));
       });
       doc.addEventListener('keydown', (e) => { if (e.key === 'Escape' && lockerEl && !lockerEl.hidden) closeLocker(); });
       doc.body.appendChild(lockerEl);

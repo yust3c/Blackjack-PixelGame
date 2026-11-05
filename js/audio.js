@@ -343,6 +343,32 @@
         for (const n of ['A4', 'E5', 'C#6']) tone({ at: 1.4, f: n, dur: 1.3, hold: 0.5, attack: 0.2, vol: 0.06, wave: 'sine', vib: { rate: 5, depth: 0.015 }, wet: 0.5 });
       },
     },
+    'The House': {                                        // an old home computer: key clicks, boot beeps, a level-clear jingle
+      card_deal: (o) => { swish(o.pan, 0.12); noise({ at: 0.05, f: 4500, dur: 0.012, vol: 0.14, q: 4, pan: o.pan }); tone({ at: 0.05, f: jitter(1200, 0.05), dur: 0.02, vol: 0.04, wave: 'square', pan: o.pan }); },
+      card_flip: (o) => { seq(['C6', 'G6'], 0.05, { dur: 0.05, vol: 0.06, wave: 'square', pan: o.pan }); },
+      shuffle: () => riffle(0, (t) => { for (let i = 0; i < 9; i++) noise({ at: t + i * 0.06 + Math.random() * 0.02, f: jitter(4200, 0.2), dur: 0.012, vol: 0.13, q: 4 }); tone({ at: t + 0.6, f: 'C6', dur: 0.08, vol: 0.05, wave: 'square' }); }),
+      win: () => { seq(['C5', 'E5', 'G5', 'C6'], 0.07, { dur: 0.09, vol: 0.1, duty: 0.25 }); tone({ at: 0.3, f: 'E6', dur: 0.3, vol: 0.09, duty: 0.25 }); },
+      lose: () => { tone({ f: 'A3', dur: 0.18, vol: 0.12, wave: 'square' }); tone({ at: 0.22, f: 'E3', dur: 0.4, vol: 0.12, wave: 'square' }); },
+      blackjack: () => {
+        tone({ f: 'C4', dur: 0.5, vol: 0.1, wave: 'square', attack: 0.02 }); tone({ f: 'C5', dur: 0.5, vol: 0.06, wave: 'square' });   // power-on
+        seq(['C5', 'E5', 'G5', 'C6', 'E6', 'G6'], 0.06, { at: 0.55, dur: 0.08, vol: 0.09, duty: 0.25 });
+        chord(['C6', 'E6', 'G6'], 0.95, 0.7, { vol: 0.08, duty: 0.25 }); seq(['C3', 'G3', 'C4'], 0.12, { at: 0.95, dur: 0.15, vol: 0.25, wave: 'triangle' });
+      },
+    },
+    'Hitman': {                                           // silenced shots, a cocked hammer, a ticking watch, a lonely whistle
+      card_deal: (o) => { swish(o.pan, 0.11); noise({ at: 0.05, f: 900, to: 300, dur: 0.07, vol: 0.22, filter: 'lowpass', pan: o.pan }); },
+      card_flip: (o) => { noise({ f: 5000, dur: 0.015, vol: 0.2, q: 6, pan: o.pan }); noise({ at: 0.07, f: 3500, dur: 0.02, vol: 0.22, q: 6, pan: o.pan }); },
+      shuffle: () => riffle(0, (t) => { for (let i = 0; i < 4; i++) noise({ at: t + i * 0.25, f: i % 2 ? 3800 : 4600, dur: 0.012, vol: 0.12, q: 8 }); }),
+      win: () => { seq(['E5', 'A5', 'B5', 'E6'], 0.16, { dur: 0.22, vol: 0.07, wave: 'sine', vib: { rate: 6, depth: 0.015 }, wet: 0.5 }); tone({ at: 0.64, f: 'E6', to: 'D6', slide: 0.4, dur: 0.6, vol: 0.06, wave: 'sine', vib: { rate: 6, depth: 0.02 }, wet: 0.6 }); },
+      lose: () => { seq(['A3', 'G3', 'E3'], 0.25, { dur: 0.35, vol: 0.12, wave: 'sawtooth', wet: 0.3 }); noise({ at: 0.8, f: 600, to: 200, dur: 0.12, vol: 0.25, filter: 'lowpass' }); },
+      blackjack: () => {
+        noise({ f: 5000, dur: 0.015, vol: 0.2, q: 6 }); noise({ at: 0.08, f: 3500, dur: 0.02, vol: 0.22, q: 6 });                    // cock
+        noise({ at: 0.45, f: 1100, to: 250, dur: 0.12, vol: 0.4, filter: 'lowpass' });                                               // silenced shot
+        [0.75, 0.86, 0.94].forEach((d, i) => bell(d, 3400 - i * 300, 0.04, { dur: 0.15 }));                                            // the casing bounces
+        seq(['E5', 'A5', 'B5', 'C6', 'B5', 'A5', 'E6'], 0.17, { at: 1.15, dur: 0.24, vol: 0.07, wave: 'sine', vib: { rate: 6, depth: 0.015 }, wet: 0.6 });
+        chord(['A2', 'E3'], 1.15, 1.4, { vol: 0.12, wave: 'triangle', wet: 0.4 });
+      },
+    },
     'Eclipse': {                                          // a black hole: deep groans, things falling in, time slowing down
       card_deal: (o) => {                                 // the card is pulled in: the swish slows and sinks, then a sub thump
         noise({ f: 1400, to: 120, dur: 0.26, vol: 0.18, q: 1.2, pan: o.pan });

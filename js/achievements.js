@@ -152,6 +152,10 @@
       hint: "Secret. The pack stays home, forever." },
     { id: 'off_the_record', rarity: 'secret', group: 'Secret', name: 'Off the Record', desc: 'Hear every dealer’s secret line.', secret: true,
       hint: 'Secret. Some dealers only talk when they think nobody is listening.' },
+    { id: 'house_name', rarity: 'secret', group: 'Secret', name: 'The House', desc: 'Go by the name of the one who built the house.', secret: true,
+      hint: 'Secret. The house always knows its own name.' },
+    { id: 'whisper_name', rarity: 'secret', group: 'Secret', name: 'Hitman', desc: 'Go by a name that is only ever whispered.', secret: true,
+      hint: 'Secret. Some names are whispered, not spoken.' },
     { id: 'wolf_endless_expert', rarity: 'secret', group: 'Secret', name: 'Silver Moon', desc: 'Complete Endless on Expert using only 2 seats every round.', secret: true,
       hint: 'Secret. Alone at the very top, for as long as it takes.' },
     { id: 'darkest_run', rarity: 'insanity', group: 'Secret', name: 'The Darkest Run', desc: 'Complete Endless on Expert using only 2 seats, without ever splitting, doubling or surrendering.', secret: true,
@@ -522,6 +526,25 @@
   if (root.document) {
     root.document.addEventListener('dealertalk:secret', (e) => { const d = e.detail || {}; if (d.seen && d.total && d.seen.length >= d.total) unlock('off_the_record'); });
     root.addEventListener && root.addEventListener('load', checkSecretLines);
+  }
+
+  // Name achievements: the player's name is compared by hash only, so the names never appear in the code.
+  const NAME_KEYS = { l4241obop9: 'house_name', '24os373tvu0': 'whisper_name' };
+  function nameKey(str, seed = 0x5eed) {
+    let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
+    for (let i = 0; i < str.length; i++) { const c = str.charCodeAt(i); h1 = Math.imul(h1 ^ c, 2654435761); h2 = Math.imul(h2 ^ c, 1597334677); }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+    return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
+  }
+  function checkName(name) {
+    const clean = String(name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
+    const id = NAME_KEYS[nameKey(clean)];
+    if (id) unlock(id);
+  }
+  if (root.document) {
+    root.document.addEventListener('cosmetics:name', (e) => checkName(e.detail && e.detail.name));
+    root.addEventListener && root.addEventListener('load', () => { if (root.Cosmetics && root.Cosmetics.playerName) checkName(root.Cosmetics.playerName()); });
   }
 
   root.Achievements = {
@@ -1347,6 +1370,17 @@
     }, post(p, f) {
       for (let x = 0; x < 16; x++) if ((x + f * 3) % 6 < 2) p.set(x, 15, '#3ad8ff');
       if (f === 6) for (let x = 2; x < 14; x++) p.set(x, 9, x % 2 ? '#ff3ad0' : '#ffffff');
+    } },
+    house_name: { frames: 4, dur: 1.2, draw(p, f) {
+      p.rect(1, 2, 14, 12, '#0a1030');
+      [[3, 4, 5, '#ff6ad0'], [3, 6, 8, '#9ad0ff'], [5, 8, 6, '#ffd75e'], [3, 10, 4, '#6aff9a']].forEach(([x, y, w, c]) => p.rect(x, y, w, 1, c));
+      if (f < 2) p.rect(10, 9, 2, 3, '#ffffff');
+    }, post(p) { p.line(0, 1, 15, 1, '#5a8aff'); p.line(0, 14, 15, 14, '#5a8aff'); } },
+    whisper_name: { frames: 8, dur: 2.4, draw(p, f) {
+      const cx = [6, 7, 8, 9, 10, 9, 8, 7][f];
+      p.ring(cx, 8, 5.2, 6.3, '#d8b040');
+      for (let i = -7; i <= 7; i++) if (Math.abs(i) > 1) { p.set(cx + i, 8, '#d8b040'); p.set(cx, 8 + i, '#d8b040'); }
+      if (f % 2 === 0) p.set(cx, 8, '#ff2a2a');
     } },
     darkest_run: { frames: 8, dur: 1.6, draw(p, f) {
       p.ring(8, 8, 4.5, 7.9, (x, y, d) => {
