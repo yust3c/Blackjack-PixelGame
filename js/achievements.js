@@ -205,6 +205,18 @@
       rounds: 0, hands: 0, maxSeats: 0, hadBots: false, usedTricks: false, lossStreak: 0, winsAfter: 0, recovering: false, lostCounted: false,
     };
   }
+  // Continue (ui.js): a saved run carries its session trackers, so streaks and
+  // "never dropped below the start" keep counting across a break.
+  function sessionState() {
+    return session ? Object.assign({}, session, { lowest: session.lowest === Infinity ? null : session.lowest }) : null;
+  }
+  function resumeSession(saved, opts) {
+    startSession(opts);
+    if (saved && typeof saved === 'object') {
+      for (const k of Object.keys(session)) if (k in saved && k !== 'mode' && k !== 'difficulty') session[k] = saved[k];
+      if (typeof session.lowest !== 'number') session.lowest = Infinity;
+    }
+  }
   const counts = () => session && session.mode !== 'practice';
 
   const value = (cards) => (BJ ? BJ.handValue(cards).total : 0);
@@ -508,7 +520,7 @@
     isUnlocked: (id) => !!save.unlocked[id],
     stats: () => Object.assign({}, save.stats),
     stats: () => Object.assign({}, save.stats),
-    startSession, roundEnd, challengeWon, endlessProgress, syncFromModes,
+    startSession, resumeSession, sessionState, roundEnd, challengeWon, endlessProgress, syncFromModes,
     unlock, // exposed for testing and the preview page
     showToast: (id) => byId[id] && toast(byId[id], root.Cosmetics ? root.Cosmetics.rewardFor(id) : null),
     reset: () => { save = blank(); persist(); },

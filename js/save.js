@@ -5,12 +5,17 @@
 
   // Bump CURRENT and add a step to MIGRATIONS whenever a new game version changes the
   // shape of a save. Steps upgrade old data in place and never throw it away.
-  const CURRENT = 1;
+  const CURRENT = 2;
   const META_KEY = 'blackjack-meta';
   const KEYS = { progress: 'blackjack-save-v1', achievements: 'blackjack-achievements-v1', cosmetics: 'blackjack-cosmetics-v1' };
   const MIGRATIONS = {
     // 0 -> 1: saves from before versioning already have the v1 shape, so nothing to change.
     1: (data) => data,
+    // 1 -> 2: Continue was added; the progress save gets a place for runs in progress.
+    2: (data) => {
+      if (isObj(data.progress) && !isObj(data.progress.runs)) data.progress.runs = {};
+      return data;
+    },
   };
 
   const storage = (() => { try { const s = root.localStorage; s.getItem(META_KEY); return s; } catch (e) { return null; } })();

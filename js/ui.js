@@ -100,6 +100,11 @@
       ${rows || '<p class="tagline">No scenes installed.</p>'}`;
   }
 
+  function runLine(type, diffId) {
+    const run = savedRun(type, diffId);
+    return run ? `<span class="diff-line run-line">▶ Continue: ${fmt(run.bankroll)} chips</span>` : '';
+  }
+
   function renderMenu() {
     const wins = save.challengeWins;
     const diffs = M.DIFFICULTIES.map((d) => `
@@ -107,6 +112,7 @@
         <span class="diff-name">${d.name}${wins[d.id] ? ' <span class="star">★</span>' : ''}</span>
         <span class="diff-line">Start ${d.start} → Goal ${d.target}</span>
         <span class="diff-line">Bets ${d.minBet}-${d.maxBet} · ${d.maxBots === 0 ? 'No bots' : `${d.maxBots} bot${d.maxBots === 1 ? '' : 's'} max`}</span>
+        ${runLine('challenge', d.id)}
       </button>`).join('');
 
     const anyUnlocked = M.DIFFICULTIES.some((d) => wins[d.id]);
@@ -121,6 +127,7 @@
         <span class="diff-name">${d.name}</span>
         <span class="diff-line">Objectives ${rec.objectives}/${total}</span>
         <span class="diff-line">Best ${fmt(rec.best)}</span>
+        ${runLine('endless', d.id)}
       </button>`;
     }).join('');
     const endless = `<p>Keep playing a difficulty you've beaten. Chase 8 objectives, then go for a high score. Run out of chips and it's over.</p>
@@ -176,7 +183,64 @@
   // ======================================================================
   // Starting a mode
   // ======================================================================
-  function startMode(type, diffId) {
+  // ======================================================================
+  // Continue: Challenge and Endless runs are saved after every hand
+  // ======================================================================
+  // A run is saved when a hand ends (with the shoe, so the count carries on) and again when
+  // cards are dealt, with that hand's bets already taken and no shoe. Closing the game mid-hand
+  // therefore loses those bets and reshuffles, so quitting can't undo a bad hand or peek at cards.
+  const runKey = (type, diffId) => `${type}:${diffId}`;
+  const resumable = (type) => type === 'challenge' || type === 'endless';
+  function savedRun(type, diffId) { return (save.runs || {})[runKey(type, diffId)] || null; }
+  function snapshot(g, midHand) {
+    return {
+      type: mode.type, difficulty: mode.difficulty, savedAt: Date.now(),
+      bankroll: midHand ? g.bankroll - g.totalPlayerBets() : g.bankroll,
+      seats: g.seats.map((s) => ({ type: s.type, name: s.name, bet: s.bet })),
+      botNameIndex: g._botNameIndex, handNumber: g.handNumber, endlessIndex,
+      shoe: midHand ? null : { cards: g.shoe.cards, roundsDealt: g.shoe.roundsDealt, runningCount: g.runningCount },
+      achievements: window.Achievements && window.Achievements.sessionState ? window.Achievements.sessionState() : null,
+    };
+  }
+  function storeRun(g, midHand) {
+    if (!mode || !resumable(mode.type) || g !== game) return;
+    if (!save.runs) save.runs = {};
+    save.runs[runKey(mode.type, mode.difficulty)] = snapshot(g, midHand);
+    M.store(save);
+  }
+  function clearRun(type, diffId) {
+    if (save.runs && save.runs[runKey(type, diffId)]) { delete save.runs[runKey(type, diffId)]; M.store(save); }
+  }
+  function restoreRun(g, run) {
+    g.bankroll = run.bankroll;
+    g.handNumber = run.handNumber || 0;
+    g._botNameIndex = run.botNameIndex || 0;
+    run.seats.forEach((s, i) => {
+      if (!g.seats[i] || !s.type) return;
+      Object.assign(g.seats[i], { type: s.type, name: s.name, bet: s.type === 'player' ? s.bet : 0, hands: [] });
+    });
+    if (run.shoe && Array.isArray(run.shoe.cards) && run.shoe.cards.length > g.rules.reshuffleMinCards) {
+      g.shoe.cards = run.shoe.cards;
+      g.shoe.roundsDealt = run.shoe.roundsDealt || 0;
+      g.runningCount = run.shoe.runningCount || 0;
+    }
+    // Drop bets the bankroll can't cover any more.
+    for (const s of g.playerSeats()) if (g.totalPlayerBets() > g.bankroll) s.bet = 0;
+  }
+  // Clicking a difficulty with a saved run asks whether to continue it or start over.
+  function chooseRun(type, diffId) {
+    const run = savedRun(type, diffId);
+    if (!run) { startMode(type, diffId); return; }
+    const d = M.DIFFICULTIES.find((x) => x.id === diffId);
+    showOverlay(`${type === 'endless' ? 'Endless' : 'Challenge'} · ${d.name}`,
+      `<p>You have a saved run here: ${fmt(run.bankroll)} chips after ${run.handNumber} hands.</p>`, [
+        { label: 'Continue', primary: true, run: () => startMode(type, diffId, run) },
+        { label: 'Start over', run: () => { clearRun(type, diffId); startMode(type, diffId); } },
+        { label: 'Back', run: hideOverlay },
+      ]);
+  }
+
+  function startMode(type, diffId, run) {
     let rules;
     let label;
     if (type === 'practice') {
@@ -193,7 +257,7 @@
       rules = { startingBankroll: d.start, minBet: d.minBet, maxBet: d.maxBet, maxBots: d.maxBots };
       label = `Endless · ${d.name}`;
       coach = null;
-      endlessIndex = 0;
+      endlessIndex = run ? run.endlessIndex || 0 : 0;
       const rec = M.endlessRecord(save, d.id);
       rec.best = Math.max(rec.best, d.start);
       M.store(save);
@@ -203,10 +267,18 @@
     selectedSeat = null;
     game = new BJ.Game({ rules, onUpdate: render, onRoundEnd: roundEnd });
 
-    // The table starts empty: the player picks their seats and any bots.
-    game.say(game.rules.maxBots > 0
-      ? 'Pick a seat. Two bets are needed: play two seats or add a bot.'
-      : 'Pick two seats. No bots here, you play both hands.');
+    if (run) {
+      restoreRun(game, run);
+      const first = game.playerSeats()[0];
+      selectedSeat = first ? first.index : null;
+      game.say(`Welcome back. ${fmt(game.bankroll)} chips, hand ${game.handNumber + 1}.${run.shoe ? '' : ' The last hand was left unfinished, so its bets are lost.'}`);
+    } else {
+      if (resumable(type)) clearRun(type, diffId);
+      // The table starts empty: the player picks their seats and any bots.
+      game.say(game.rules.maxBots > 0
+        ? 'Pick a seat. Two bets are needed: play two seats or add a bot.'
+        : 'Pick two seats. No bots here, you play both hands.');
+    }
 
     $('menu').hidden = true;
     $('game').hidden = false;
@@ -215,7 +287,11 @@
     hideOverlay();
     render();
     // Challenge and Endless play in their difficulty's room (js/scenarios.js); Practice keeps the plain table.
-    if (window.Achievements) window.Achievements.startSession({ mode: type, difficulty: diffId || null, start: rules.startingBankroll });
+    if (window.Achievements) {
+      const opts = { mode: type, difficulty: diffId || null, start: rules.startingBankroll };
+      if (run && run.achievements && window.Achievements.resumeSession) window.Achievements.resumeSession(run.achievements, opts);
+      else window.Achievements.startSession(opts);
+    }
     if (window.Scenarios) Scenarios.applyForMode(type, diffId);
     // The scene's dealer comments on the game in speech bubbles (js/dealertalk.js).
     if (window.DealerTalk) DealerTalk.start(game, window.Scenarios ? Scenarios.forMode(type, diffId) : null);
@@ -227,6 +303,7 @@
   function roundEnd(g) {
     if (g !== game) return; // a game abandoned mid-hand finishing in the background
     if (window.Achievements) window.Achievements.roundEnd(g);
+    storeRun(g, false);
 
     if (mode.type === 'practice') {
       if (g.broke) {
@@ -243,6 +320,7 @@
       if (g.bankroll >= d.target) {
         const firstEver = !save.challengeWins[d.id];
         save.challengeWins[d.id] = true;
+        clearRun('challenge', d.id);
         if (window.Achievements) window.Achievements.challengeWon(d.id);
         M.store(save);
         showOverlay(`${d.name} beaten!`, `
@@ -252,6 +330,7 @@
           { label: 'Play again', run: () => startMode('challenge', d.id) },
         ]);
       } else if (g.broke) {
+        clearRun('challenge', d.id);
         showOverlay('Busted out', `<p>You're out of chips. The goal was ${d.target}.</p>`, [
           { label: 'Try again', primary: true, run: () => startMode('challenge', d.id) },
           { label: 'Menu', run: showMenu },
@@ -281,6 +360,7 @@
       render();
     }
     if (g.broke) {
+      clearRun('endless', d.id);
       showOverlay('Game over', `
         <p>You're out of chips.</p>
         <p>Objectives this run: ${endlessIndex}/${objectives.length}</p>
@@ -600,7 +680,7 @@
     const d = t.dataset;
 
     if (d.overlay !== undefined) { const b = overlayButtons[+d.overlay]; if (b) b.run(); return; }
-    if (d.start !== undefined) { startMode(d.start, d.diff); return; }
+    if (d.start !== undefined) { if (resumable(d.start)) chooseRun(d.start, d.diff); else startMode(d.start, d.diff); return; }
     if (d.locker !== undefined) { openSection(d.locker); return; }
     if (d.lore !== undefined) { showLore(); return; }
     if (d.loreBack !== undefined) { showMenu(); return; }
@@ -651,18 +731,24 @@
     if (game.dealProblem()) { render(); return; }
     if (coach) coach.feedback = null;
     const g = game;
+    storeRun(g, true); // quitting mid-hand loses this hand's bets
     g.deal().catch((err) => { console.error(err); g.say('Something went wrong. Go back to the menu and start again.'); render(); });
   }
 
   $('to-menu').addEventListener('click', () => {
     if (!game) return;
     if (game.phase === 'betting' && mode.type === 'practice') { showMenu(); return; }
-    const lose = mode.type === 'practice' ? '' : '<p>This run ends and its chips are lost.</p>';
-    showOverlay('Leave the table?', lose || '<p>Your practice chips are not saved.</p>', [
+    if (mode.type !== 'practice' && game.phase === 'betting') { storeRun(game, false); showMenu(); return; }
+    const lose = mode.type === 'practice' ? '<p>Your practice chips are not saved.</p>'
+      : '<p>Your run is saved, but this hand is unfinished: its bets are lost.</p>';
+    showOverlay('Leave the table?', lose, [
       { label: 'Leave', primary: true, run: showMenu },
       { label: 'Stay', run: hideOverlay },
     ]);
   });
+
+  // Closing the tab between hands keeps seat and bet changes made since the last hand.
+  window.addEventListener('pagehide', () => { if (game && mode && game.phase === 'betting') storeRun(game, false); });
 
   // Cosmetics and achievements live in their own scripts; keep the screen in sync with them.
   document.addEventListener('cosmetics:change', () => { if (game) render(); });

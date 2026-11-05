@@ -27,6 +27,8 @@ Each difficulty has its own casino and dealer. **Achievements** unlock **cosmeti
 
 ## Your save
 
+Challenge and Endless runs are saved after every hand, so you can leave and pick a run up later: click the same difficulty and choose **Continue**. Leaving in the middle of a hand loses that hand's bets.
+
 Progress lives in the browser you play in, and it carries over when you download a newer version of the game: older saves are upgraded automatically. To be safe, or to move to another browser or computer, use **Export save** at the bottom of the main menu to download your progress as a file, and **Import save** to load it back.
 
 ## Table rules

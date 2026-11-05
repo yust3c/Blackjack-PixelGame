@@ -19,7 +19,8 @@
 
   const SAVE_KEY = 'blackjack-save-v1';
   // endless: { [difficultyId]: { objectives: number reached, best: highest bankroll } }
-  const blankSave = () => ({ challengeWins: {}, endless: {} });
+  // runs: { 'endless:easy': snapshot, ... } saved runs a player can continue (see ui.js)
+  const blankSave = () => ({ challengeWins: {}, endless: {}, runs: {} });
   function endlessRecord(save, id) {
     if (!save.endless[id]) save.endless[id] = { objectives: 0, best: 0 };
     return save.endless[id];
@@ -30,6 +31,7 @@
       const raw = root.localStorage.getItem(SAVE_KEY);
       const save = raw ? Object.assign(blankSave(), JSON.parse(raw)) : blankSave();
       if (!save.endless || typeof save.endless !== 'object') save.endless = {};
+      if (!save.runs || typeof save.runs !== 'object') save.runs = {};
       return save;
     } catch (e) {
       return blankSave();
