@@ -190,17 +190,18 @@
       tone({ at: 0.95, f: 'A2', dur: 1.7, hold: 0.6, vol: 0.3, wave: 'triangle' });
       for (let i = 0; i < 8; i++) tone({ at: 1.5 + i * 0.07, f: jitter(3000 + i * 220, 0.05), dur: 0.06, vol: 0.04, duty: 0.125, pan: i % 2 ? 0.6 : -0.6, wet: 0.5 });
     },
-    insanity_unlock: () => {                              // Eclipse: the screen-shaking one, glitchy rainbow arps over a sub drop
-      tone({ f: 220, to: 40, dur: 1.0, slide: 0.9, vol: 0.35, wave: 'sine' });
-      for (let i = 0; i < 16; i++) tone({ at: i * 0.045, f: jitter(1800, 0.5), dur: 0.03, vol: 0.06, duty: 0.125, pan: Math.random() * 1.6 - 0.8 });
-      noise({ at: 0.75, f: 8000, to: 200, dur: 0.35, vol: 0.2, filter: 'lowpass' });
-      const arp = ['C5', 'D#5', 'G5', 'A#5', 'D6', 'G6'];
-      for (let r = 0; r < 3; r++) seq(arp, 0.05, { at: 1.1 + r * 0.32, dur: 0.07, vol: 0.09, duty: r % 2 ? 0.125 : 0.25, pan: r % 2 ? 0.4 : -0.4, wet: 0.4 });
-      for (const [n, v, d] of [['C4', 0.1, 0.25], ['G4', 0.08, 0.125], ['D#5', 0.07, 0.125], ['A#5', 0.06, 0.125]]) {
-        tone({ at: 2.1, f: n, dur: 1.6, hold: 0.6, vol: v, duty: d, vib: { rate: 5, depth: 0.01 }, wet: 0.5 });
-        tone({ at: 2.1, f: hz(n) * 1.006, dur: 1.6, hold: 0.6, vol: v * 0.6, duty: d, wet: 0.5 });
+    insanity_unlock: () => {                              // The Darkest Run: everything spirals into a black hole, then a vast dark chord
+      let t = 0, gap = 0.16;
+      for (let i = 0; i < 24; i++) { tone({ at: t, f: 700 * Math.pow(0.93, i), dur: 0.1, vol: 0.08, wave: 'triangle', pan: Math.sin(i * 1.1) * 0.9, wet: 0.4 }); t += gap; gap *= 0.88; }
+      noise({ f: 2000, to: 50, dur: 1.4, vol: 0.2, filter: 'lowpass', attack: 0.4 });
+      tone({ f: 120, to: 30, slide: 1.4, dur: 1.5, vol: 0.4, wave: 'sine' });
+      tone({ at: 1.5, f: 80, to: 22, dur: 1.4, vol: 0.55, wave: 'sine' });                                  // the boom
+      noise({ at: 1.5, f: 400, to: 60, dur: 1.2, vol: 0.3, filter: 'lowpass' });
+      for (const [n, v] of [['C2', 0.14], ['G2', 0.1], ['D#3', 0.08], ['A#3', 0.06], ['D4', 0.04]]) {
+        tone({ at: 1.7, f: n, dur: 2.4, hold: 1.0, attack: 0.5, vol: v, wave: 'sawtooth', wet: 0.5 });
+        tone({ at: 1.7, f: hz(n) * 1.008, dur: 2.4, hold: 1.0, attack: 0.5, vol: v * 0.7, wave: 'sine', wet: 0.5 });
       }
-      tone({ at: 2.1, f: 'C2', dur: 1.8, hold: 0.7, vol: 0.35, wave: 'triangle' });
+      for (let i = 0; i < 6; i++) tone({ at: 2.3 + i * 0.22, f: hz('G4') * (1 - i * 0.03), dur: 0.5, vol: 0.05, wave: 'triangle', pan: i % 2 ? 0.6 : -0.6, wet: 0.6 });
     },
     // --- menus
     ui_click: () => { tone({ f: 1320, dur: 0.035, vol: 0.08, duty: 0.25 }); },
@@ -330,16 +331,51 @@
       lose: () => { noise({ f: 1500, to: 400, dur: 1.0, vol: 0.12, q: 5, attack: 0.25 }); tone({ f: 'B4', to: 'E4', slide: 0.8, dur: 0.9, vol: 0.05, wave: 'sine', wet: 0.5 }); },
       blackjack: () => { howl(0, 440, 0.1, 0.7); howl(0.35, 554, 0.07, 0.7); howl(0.7, 660, 0.06, 0.7); noise({ f: 500, to: 2000, dur: 1.6, vol: 0.07, q: 5, attack: 0.5 }); },
     },
-    'Eclipse': {
-      card_deal: (o) => { noise({ f: 800, to: 5000, dur: 0.12, vol: 0.14, q: 1.5, attack: 0.09, pan: o.pan }); tone({ at: 0.1, f: 55, dur: 0.1, vol: 0.35, wave: 'sine', pan: o.pan }); },   // a reversed swish
-      card_flip: (o) => { tone({ f: 'C5', to: 'C4', slide: 0.12, dur: 0.15, vol: 0.06, duty: 0.125, pan: o.pan }); tone({ f: hz('C5') * 1.01, to: 'C4', slide: 0.12, dur: 0.15, vol: 0.05, duty: 0.25, pan: o.pan }); },
-      shuffle: () => riffle(0, (t) => tone({ at: t, f: 40, to: 80, slide: 0.4, dur: 0.6, vol: 0.35, wave: 'sine' })),
-      win: () => { tone({ f: 40, to: 80, slide: 0.4, dur: 0.6, vol: 0.32, wave: 'sine' }); seq(['C5', 'D#5', 'G5', 'A#5', 'D6', 'G6'], 0.045, { at: 0.3, dur: 0.08, vol: 0.08, duty: 0.125, wet: 0.4 }); },
-      lose: () => { tone({ f: 160, to: 35, slide: 0.8, dur: 0.9, vol: 0.32, wave: 'sine' }); tone({ f: 'D#5', to: 'D#4', slide: 0.8, dur: 0.9, vol: 0.05, duty: 0.125, wet: 0.4 }); },
+    'Unknown Signal': {                                   // radio static, a tuning dial and morse from somewhere far away
+      card_deal: (o) => { swish(o.pan, 0.12); noise({ at: 0.06, f: 2500, dur: 0.05, vol: 0.08, q: 6, pan: o.pan }); },
+      card_flip: (o) => { tone({ f: 600, to: 2400, slide: 0.12, dur: 0.14, vol: 0.04, wave: 'sine', pan: o.pan }); noise({ f: 3000, dur: 0.12, vol: 0.06, q: 1, pan: o.pan }); },
+      shuffle: () => riffle(0, (t) => { noise({ at: t, f: 1800, dur: 0.4, vol: 0.12, q: 0.6, attack: 0.05 }); tone({ at: t + 0.1, f: 300, to: 1600, slide: 0.3, dur: 0.35, vol: 0.04, wave: 'sine' }); }),
+      win: () => { [0, 0.09, 0.18, 0.36, 0.54].forEach((d, i) => tone({ at: d, f: 880, dur: i > 2 ? 0.15 : 0.06, vol: 0.06, wave: 'sine', wet: 0.3 })); tone({ at: 0.8, f: 'A5', dur: 0.5, vol: 0.06, wave: 'sine', vib: { rate: 6, depth: 0.02 }, wet: 0.4 }); },
+      lose: () => { tone({ f: 880, to: 220, slide: 0.6, dur: 0.7, vol: 0.06, wave: 'sine', vib: { rate: 9, depth: 0.03 } }); noise({ at: 0.3, f: 2500, dur: 0.6, vol: 0.12, q: 0.5, attack: 0.2 }); },
       blackjack: () => {
-        tone({ f: 40, to: 100, slide: 0.6, dur: 0.8, vol: 0.32, wave: 'sine' });
-        for (let r = 0; r < 2; r++) seq(['C5', 'D#5', 'G5', 'A#5', 'D6', 'G6'], 0.045, { at: 0.4 + r * 0.28, dur: 0.07, vol: 0.08, duty: 0.125, pan: r ? 0.4 : -0.4, wet: 0.4 });
-        for (const n of ['C5', 'G5', 'D#6']) { tone({ at: 1.0, f: n, dur: 1.3, hold: 0.5, vol: 0.06, duty: 0.25, wet: 0.5 }); tone({ at: 1.0, f: hz(n) * 1.007, dur: 1.3, hold: 0.5, vol: 0.05, duty: 0.125, wet: 0.5 }); }
+        noise({ f: 1500, to: 4000, dur: 0.5, vol: 0.12, q: 0.6 }); tone({ f: 200, to: 1760, slide: 0.45, dur: 0.5, vol: 0.05, wave: 'sine' });
+        [0, 0.08, 0.16, 0.32, 0.4, 0.56, 0.64, 0.72].forEach((d) => tone({ at: 0.55 + d, f: 1046, dur: 0.06, vol: 0.06, wave: 'sine', wet: 0.3 }));
+        for (const n of ['A4', 'E5', 'C#6']) tone({ at: 1.4, f: n, dur: 1.3, hold: 0.5, attack: 0.2, vol: 0.06, wave: 'sine', vib: { rate: 5, depth: 0.015 }, wet: 0.5 });
+      },
+    },
+    'Eclipse': {                                          // a black hole: deep groans, things falling in, time slowing down
+      card_deal: (o) => {                                 // the card is pulled in: the swish slows and sinks, then a sub thump
+        noise({ f: 1400, to: 120, dur: 0.26, vol: 0.18, q: 1.2, pan: o.pan });
+        tone({ at: 0.12, f: 70, to: 32, dur: 0.3, vol: 0.4, wave: 'sine', pan: o.pan }); tone({ at: 0.12, f: 70, to: 32, dur: 0.3, vol: 0.12, wave: 'triangle', pan: o.pan });
+      },
+      card_flip: (o) => {                                 // gravitational lensing: two close tones beating as they sink
+        tone({ f: 110, to: 52, slide: 0.45, dur: 0.5, vol: 0.2, wave: 'triangle', pan: o.pan, wet: 0.3 });
+        tone({ f: 113, to: 50, slide: 0.45, dur: 0.5, vol: 0.2, wave: 'triangle', pan: o.pan, wet: 0.3 });
+      },
+      shuffle: () => {                                    // the riffle slows down as it falls, like time dilating
+        let t = 0, gap = 0.02;
+        for (let i = 0; i < 20; i++) { noise({ at: t, f: 1600 * Math.pow(0.9, i), dur: 0.03 + i * 0.004, vol: 0.12, q: 3, pan: i % 2 ? -0.3 : 0.3 }); t += gap; gap *= 1.12; }
+        tone({ at: t, f: 60, to: 28, dur: 0.9, vol: 0.45, wave: 'sine' }); tone({ at: t, f: 60, to: 28, dur: 0.9, vol: 0.14, wave: 'triangle' }); noise({ at: t, f: 300, to: 60, dur: 0.9, vol: 0.2, filter: 'lowpass' });
+      },
+      win: () => {                                        // escaping the pull: a rise out of the depths into the bright accretion disk
+        tone({ f: 30, to: 120, slide: 0.7, dur: 0.8, vol: 0.4, wave: 'sine' });
+        noise({ f: 100, to: 1200, dur: 0.7, vol: 0.15, q: 2, attack: 0.5 }); tone({ f: 30, to: 120, slide: 0.7, dur: 0.8, vol: 0.12, wave: 'triangle' });
+        for (let i = 0; i < 10; i++) tone({ at: 0.6 + i * 0.05, f: hz('E4') * Math.pow(1.06, i), dur: 0.16, vol: 0.07, wave: 'triangle', pan: i % 2 ? 0.6 : -0.6, wet: 0.4 });
+      },
+      lose: () => {                                       // swallowed: everything stretches down into nothing
+        tone({ f: 'E3', to: 25, slide: 1.3, dur: 1.4, vol: 0.18, wave: 'triangle', wet: 0.3 });
+        tone({ f: 'B2', to: 30, slide: 1.3, dur: 1.4, vol: 0.12, wave: 'triangle', wet: 0.3 });
+        noise({ f: 1200, to: 50, dur: 1.4, vol: 0.2, filter: 'lowpass' });
+        tone({ at: 1.0, f: 45, to: 25, dur: 0.8, vol: 0.4, wave: 'sine' });
+      },
+      blackjack: () => {                                  // crossing the event horizon
+        tone({ f: 38, to: 30, dur: 2.2, hold: 1.2, attack: 0.4, vol: 0.4, wave: 'sine' });                    // the groan
+        tone({ f: 57, to: 45, dur: 2.2, hold: 1.2, attack: 0.4, vol: 0.2, wave: 'triangle', vib: { rate: 0.8, depth: 0.05 } }); tone({ f: 76, to: 60, dur: 2.2, hold: 1.2, attack: 0.4, vol: 0.1, wave: 'triangle', vib: { rate: 0.6, depth: 0.06 } });
+        let t = 0.2, gap = 0.12;                          // the accretion disk spins faster and faster
+        for (let i = 0; i < 22; i++) { tone({ at: t, f: hz('B3') * (1 + (i % 4) * 0.25), dur: 0.1, vol: 0.08, wave: 'triangle', pan: Math.sin(i * 1.3) * 0.8, wet: 0.4 }); t += gap; gap *= 0.9; }
+        noise({ at: 1.3, f: 2000, to: 80, dur: 0.5, vol: 0.22, filter: 'lowpass' });
+        tone({ at: 1.75, f: 90, to: 25, dur: 1.2, vol: 0.5, wave: 'sine' }); tone({ at: 1.75, f: 90, to: 25, dur: 1.2, vol: 0.15, wave: 'triangle' });                                 // the boom
+        for (const n of ['E2', 'B2', 'G3']) tone({ at: 1.8, f: n, to: hz(n) * 0.94, slide: 1.6, dur: 1.8, hold: 0.5, attack: 0.1, vol: 0.12, wave: 'triangle', wet: 0.6 });   // time slowing down
       },
     },
   };

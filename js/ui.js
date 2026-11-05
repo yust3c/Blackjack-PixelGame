@@ -297,8 +297,8 @@
     if (window.Scenarios) Scenarios.applyForMode(type, diffId);
     // The scene's dealer comments on the game in speech bubbles (js/dealertalk.js).
     if (window.DealerTalk) DealerTalk.start(game, window.Scenarios ? Scenarios.forMode(type, diffId) : null);
-    // Table sounds follow the game (js/gamesounds.js).
-    if (window.GameSounds) GameSounds.start(game);
+    // Table sounds follow the game, and the scene's music plays (js/gamesounds.js, js/music.js).
+    if (window.GameSounds) GameSounds.start(game, window.Scenarios ? Scenarios.forMode(type, diffId) : null);
   }
 
   // ======================================================================

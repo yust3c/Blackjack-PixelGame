@@ -27,7 +27,7 @@ Each difficulty has its own casino and dealer. **Achievements** unlock **cosmeti
 
 ## Sound
 
-The game has chiptune sound effects, and each dealer talks in their own voice. Secret card backs and sets come with their own sounds. Open **Settings** in the main menu to change the volume or turn the set sounds off. Press `M` anywhere to mute. Sound starts after your first click, because browsers block it until then.
+The game has chiptune sound effects and music. Secret card backs and sets come with their own sounds. Open **Settings** in the main menu to change the volume or turn the set sounds off. Press `M` anywhere to mute. Sound starts after your first click, because browsers block it until then.
 
 ## Your save
 

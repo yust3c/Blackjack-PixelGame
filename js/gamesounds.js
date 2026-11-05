@@ -1,6 +1,6 @@
 /* Game sounds: plays js/audio.js effects for what happens at the table, and owns the Settings screen.
    Like js/dealertalk.js it watches the running game through its onUpdate/onRoundEnd callbacks, so the
-   engine knows nothing about sound. ui.js calls GameSounds.start(game) in startMode, GameSounds.stop()
+   engine knows nothing about sound. ui.js calls GameSounds.start(game, sceneId) in startMode, GameSounds.stop()
    and GameSounds.closeSettings() in showMenu, and GameSounds.openSettings() from the menu button.
    Settings are saved under SaveData.KEYS.settings (see js/save.js). */
 (function (root) {
@@ -131,8 +131,13 @@
   }
   const later = (fn, ms) => { const g = st && st.game; setTimeout(() => { if (st && st.game === g) fn(); }, ms); };
 
-  function start(game) {
+  // Music: the menu tune on every menu screen and in Practice, each scene's own tune at its table (js/music.js).
+  const music = (id) => { if (root.GameMusic) root.GameMusic.play(id); };
+  music('menu');
+
+  function start(game, sceneId) {
     stop();
+    music(sceneId || 'menu');
     if (!game || !BJ) return;
     st = { game, prev: null };
     const onUpdate = game.onUpdate, onRoundEnd = game.onRoundEnd;
@@ -140,12 +145,12 @@
     game.onRoundEnd = (g) => { onRoundEnd(g); try { if (st && st.game === g) roundEnd(g); } catch (e) { console.error(e); } };
     st.prev = snap(game);
   }
-  function stop() { st = null; }
+  function stop() { st = null; music('menu'); }
 
   // ---------------------------------------------------------------- Settings screen
   let section = null, badge = null;
   const ROWS = [
-    ['master', 'Master volume'], ['music', 'Music', 'Music is coming in a later update.'], ['sfx', 'Sound effects'],
+    ['master', 'Master volume'], ['music', 'Music'], ['sfx', 'Sound effects'],
   ];
   function openSettings() {
     if (!section) {
