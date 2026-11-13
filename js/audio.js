@@ -369,6 +369,32 @@
         chord(['A2', 'E3'], 1.15, 1.4, { vol: 0.12, wave: 'triangle', wet: 0.4 });
       },
     },
+    'Sunrise': {                                          // morning: birdsong, a warm rising chord, a distant church bell
+      card_deal: (o) => { swish(o.pan, 0.11); tone({ at: 0.05, f: jitter(2600, 0.06), to: 3400, slide: 0.05, dur: 0.06, vol: 0.04, wave: 'sine', pan: o.pan }); },
+      card_flip: (o) => { tone({ f: 3000, to: 3900, slide: 0.06, dur: 0.07, vol: 0.04, wave: 'sine', pan: o.pan }); tone({ at: 0.09, f: 3600, to: 4200, slide: 0.05, dur: 0.06, vol: 0.035, wave: 'sine', pan: o.pan }); },   // a chirp
+      shuffle: () => riffle(0, (t) => { for (let i = 0; i < 3; i++) tone({ at: t + 0.15 + i * 0.13, f: 3200 + i * 300, to: 4000 + i * 200, slide: 0.05, dur: 0.07, vol: 0.03, wave: 'sine' }); }),
+      win: () => { seq(['D5', 'F#5', 'A5', 'D6'], 0.1, { dur: 0.35, vol: 0.07, wave: 'triangle', wet: 0.4 }); chord(['D4', 'A4', 'F#5'], 0.4, 1.0, { vol: 0.05, wave: 'sine', attack: 0.3, wet: 0.5 }); },
+      lose: () => { seq(['A4', 'F#4', 'D4'], 0.22, { dur: 0.4, vol: 0.06, wave: 'triangle', wet: 0.4 }); tone({ at: 0.7, f: 2600, to: 2200, slide: 0.1, dur: 0.12, vol: 0.025, wave: 'sine' }); },
+      blackjack: () => {
+        chord(['D3', 'A3', 'D4'], 0, 2.2, { vol: 0.07, wave: 'sine', attack: 0.9, wet: 0.5 });                      // the sky brightens
+        seq(['D5', 'E5', 'F#5', 'A5', 'B5', 'D6', 'F#6'], 0.12, { at: 0.6, dur: 0.3, vol: 0.06, wave: 'triangle', wet: 0.5 });
+        bell(1.5, hz('D6'), 0.05, { dur: 1.6 }); bell(1.5, hz('A6'), 0.025, { dur: 1.4 });                             // the bell
+        [1.9, 2.05, 2.3].forEach((d, i) => tone({ at: d, f: 3200 + i * 250, to: 4100, slide: 0.05, dur: 0.07, vol: 0.035, wave: 'sine', pan: i % 2 ? 0.5 : -0.5 }));
+      },
+    },
+    'Eyewitness': {                                       // a camera shutter, a held breath, a music-box sting for every secret seen
+      card_deal: (o) => { swish(o.pan, 0.11); noise({ at: 0.05, f: 5200, dur: 0.01, vol: 0.16, q: 5, pan: o.pan }); noise({ at: 0.09, f: 3800, dur: 0.015, vol: 0.12, q: 5, pan: o.pan }); },
+      card_flip: (o) => { bell(0, hz('E6'), 0.04, { dur: 0.3, pan: o.pan }); tone({ f: 'B5', dur: 0.25, vol: 0.03, wave: 'sine', pan: o.pan, wet: 0.5 }); },
+      shuffle: () => riffle(0, (t) => { noise({ at: t, f: 900, to: 2400, dur: 0.5, vol: 0.06, q: 2, attack: 0.3 }); noise({ at: t + 0.5, f: 2400, to: 700, dur: 0.5, vol: 0.05, q: 2 }); }),   // a breath in and out
+      win: () => { seq(['E5', 'G5', 'B5', 'E6'], 0.12, { dur: 0.3, vol: 0.06, wave: 'sine', wet: 0.5 }); bell(0.5, hz('B6'), 0.04, { dur: 0.6 }); },
+      lose: () => { seq(['E5', 'C5', 'A4'], 0.2, { dur: 0.4, vol: 0.06, wave: 'sine', wet: 0.5 }); noise({ at: 0.6, f: 1500, to: 500, dur: 0.6, vol: 0.05, q: 2 }); },
+      blackjack: () => {
+        noise({ f: 5200, dur: 0.01, vol: 0.18, q: 5 }); noise({ at: 0.05, f: 3800, dur: 0.015, vol: 0.14, q: 5 });   // shutter
+        seq(['E5', 'G5', 'B5', 'E6', 'D6', 'B5', 'G6'], 0.14, { at: 0.3, dur: 0.3, vol: 0.06, wave: 'sine', wet: 0.6 });
+        chord(['E4', 'B4', 'G5'], 1.3, 1.4, { vol: 0.05, wave: 'sine', attack: 0.3, wet: 0.6 });
+        bell(1.3, hz('E7'), 0.03, { dur: 1.0 });
+      },
+    },
     'Eclipse': {                                          // a black hole: deep groans, things falling in, time slowing down
       card_deal: (o) => {                                 // the card is pulled in: the swish slows and sinks, then a sub thump
         noise({ f: 1400, to: 120, dur: 0.26, vol: 0.18, q: 1.2, pan: o.pan });
@@ -410,7 +436,7 @@
   function setPack(setName, full) { pack = setName && PACKS[setName] ? { set: setName, full: !!full } : null; }
   // Picks the pack from what's equipped: { back, face, felt, chips } -> each a cosmetic { set, rarity } or null.
   function packFromEquipped(eq) {
-    const special = (c) => c && c.set && PACKS[c.set] && (c.rarity === 'secret' || c.rarity === 'insanity');
+    const special = (c) => c && c.set && PACKS[c.set];   // only the secret sets and Sunrise have a pack
     const cardItem = special(eq.back) ? eq.back : special(eq.face) ? eq.face : null;
     if (!cardItem) return null;
     const full = ['back', 'face', 'felt', 'chips'].every((k) => eq[k] && eq[k].set === cardItem.set);

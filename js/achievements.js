@@ -158,6 +158,22 @@
       hint: 'Secret. Some names are whispered, not spoken.' },
     { id: 'wolf_endless_expert', rarity: 'secret', group: 'Secret', name: 'Silver Moon', desc: 'Complete Endless on Expert using only 2 seats every round.', secret: true,
       hint: 'Secret. Alone at the very top, for as long as it takes.' },
+    // ---------- round 5: scene events and the Daily challenge ----------
+    { id: 'seen_corner', rarity: 'rare', group: 'Scenes', name: 'Barfly', desc: 'See every event at The Corner.', counter: ['fx_corner', 3] },
+    { id: 'seen_deco', rarity: 'rare', group: 'Scenes', name: 'Socialite', desc: 'See every event at the Grand Hotel.', counter: ['fx_deco', 2] },
+    { id: 'seen_neon', rarity: 'rare', group: 'Scenes', name: 'Night Crawler', desc: 'See every event at Neon.', counter: ['fx_neon', 3] },
+    { id: 'seen_vip', rarity: 'rare', group: 'Scenes', name: 'Insider', desc: 'See every event in the VIP Lounge.', counter: ['fx_vip', 2] },
+    { id: 'seen_orbit', rarity: 'epic', group: 'Scenes', name: 'Stargazer', desc: 'See every event on Orbit.', counter: ['fx_orbit', 2] },
+    { id: 'seen_liner', rarity: 'epic', group: 'Scenes', name: 'Deckhand', desc: 'See every event on the Star Liner.', counter: ['fx_liner', 2] },
+    { id: 'seen_mars', rarity: 'epic', group: 'Scenes', name: 'Dust Devil', desc: 'See every event on Mars.', counter: ['fx_mars', 3] },
+    { id: 'seen_horizon', rarity: 'epic', group: 'Scenes', name: 'Light Bender', desc: 'See every event at the Event Horizon.', counter: ['fx_horizon', 2] },
+    { id: 'daily_3', rarity: 'common', group: 'Daily', name: 'Early Riser', desc: 'Play the Daily challenge 3 days in a row.', counter: ['dailyBest', 3] },
+    { id: 'daily_7', rarity: 'rare', group: 'Daily', name: 'Daily Regular', desc: 'Play the Daily challenge 7 days in a row.', counter: ['dailyBest', 7] },
+    { id: 'daily_14', rarity: 'epic', group: 'Daily', name: 'Devoted', desc: 'Play the Daily challenge 14 days in a row.', counter: ['dailyBest', 14] },
+    { id: 'daily_30', rarity: 'legendary', group: 'Daily', name: 'Clockwork', desc: 'Play the Daily challenge 30 days in a row.', counter: ['dailyBest', 30] },
+    { id: 'daily_100', rarity: 'legendary', group: 'Daily', name: 'Sunrise', desc: 'Play the Daily challenge 100 days in a row.', counter: ['dailyBest', 100] },
+    { id: 'eyewitness', rarity: 'secret', group: 'Secret', name: 'Eyewitness', desc: 'See the secret event of every scene.', secret: true,
+      hint: 'Secret. Look up from the cards once in a while. Some things happen only once in a blue moon.' },
     { id: 'darkest_run', rarity: 'insanity', group: 'Secret', name: 'The Darkest Run', desc: 'Complete Endless on Expert using only 2 seats, without ever splitting, doubling or surrendering.', secret: true,
       hint: 'Secret. The darkest run there is.' },
   ];
@@ -173,7 +189,8 @@
     unlocked: {},
     stats: { hands: 0, rounds: 0, blackjacks: 0, handsWon: 0, chipsWon: 0, doublesWon: 0, dealerBusts: 0,
       doubles: 0, surrenders: 0, minWins: 0, shuffles: 0, daysPlayed: 0, disciplined: 0, proCount: 0,
-      hands_easy: 0, hands_medium: 0, hands_hard: 0, hands_expert: 0, noBustStreak: 0, bookStreak: 0, bustStreak: 0, highStreak: 0, dealerBJStreak: 0 },
+      hands_easy: 0, hands_medium: 0, hands_hard: 0, hands_expert: 0, noBustStreak: 0, bookStreak: 0, bustStreak: 0, highStreak: 0, dealerBJStreak: 0,
+      fx_corner: 0, fx_deco: 0, fx_neon: 0, fx_vip: 0, fx_orbit: 0, fx_liner: 0, fx_mars: 0, fx_horizon: 0, dailyBest: 0, dailies: 0 },
     days: {},   // 'YYYY-MM-DD' -> true, for Seven Days
     losses: {}, // difficulty -> Challenges lost, for Phoenix
   });
@@ -430,7 +447,10 @@
 
   /** Endless objectives can be one list, or one list per difficulty. */
   function objectivesFor(difficulty) {
-    const o = root.Modes && root.Modes.ENDLESS_OBJECTIVES;
+    const M = root.Modes;
+    const d = M && M.DIFFICULTIES && M.DIFFICULTIES.find((x) => x.id === difficulty);
+    if (d && M.endlessObjectives) return M.endlessObjectives(d);   // the real ladder for that difficulty
+    const o = M && M.ENDLESS_OBJECTIVES;
     if (Array.isArray(o)) return o;
     if (o && o[difficulty]) return o[difficulty];
     return ENDLESS_FALLBACK;
@@ -528,6 +548,32 @@
     root.addEventListener && root.addEventListener('load', checkSecretLines);
   }
 
+  // Scene events (js/sceneevents.js): every sighting is reported; seeing all of a scene's events, or every
+  // scene's secret one, unlocks. Sightings count in Challenge and Endless only (Practice has no scene).
+  function sceneSeen(d) {
+    if (!d || !d.scene) return;
+    save.stats['fx_' + d.scene] = Math.max(save.stats['fx_' + d.scene] || 0, d.seen || 0);
+    if (d.total && d.seen >= d.total) unlock('seen_' + d.scene);
+    if (d.totalSecrets && d.secretsSeen >= d.totalSecrets) unlock('eyewitness');
+    persist();
+  }
+  function syncSceneEvents() {
+    const S = root.SceneEvents;
+    if (!S) return;
+    Object.keys(S.EVENTS).forEach((scene) => sceneSeen(Object.assign({ scene }, S.progress(scene))));
+  }
+  // Daily challenge (ui.js): called when a Daily run ends, with the current streak of days in a row.
+  function dailyDone(streak) {
+    save.stats.dailies = (save.stats.dailies || 0) + 1;
+    save.stats.dailyBest = Math.max(save.stats.dailyBest || 0, streak || 0);
+    for (const a of LIST) if (a.counter && a.counter[0] === 'dailyBest' && save.stats.dailyBest >= a.counter[1]) unlock(a.id);
+    persist();
+  }
+  if (root.document) {
+    root.document.addEventListener('sceneevents:seen', (e) => sceneSeen(e.detail));
+    root.addEventListener && root.addEventListener('load', syncSceneEvents);
+  }
+
   // Name achievements: the player's name is compared by hash only, so the names never appear in the code.
   const NAME_KEYS = { l4241obop9: 'house_name', '24os373tvu0': 'whisper_name' };
   function nameKey(str, seed = 0x5eed) {
@@ -554,8 +600,7 @@
     get: (id) => byId[id] || null,
     isUnlocked: (id) => !!save.unlocked[id],
     stats: () => Object.assign({}, save.stats),
-    stats: () => Object.assign({}, save.stats),
-    startSession, resumeSession, sessionState, roundEnd, challengeWon, endlessProgress, syncFromModes,
+    startSession, resumeSession, sessionState, roundEnd, challengeWon, endlessProgress, syncFromModes, dailyDone,
     unlock, // exposed for testing and the preview page
     showToast: (id) => byId[id] && toast(byId[id], root.Cosmetics ? root.Cosmetics.rewardFor(id) : null),
     reset: () => { save = blank(); persist(); },
@@ -1391,6 +1436,106 @@
       p.disc(8, 8, 4.5, 4.5, BLACK, true);
     }, post(p) { p.ring(8, 8, 4.5, 5.1, '#ffffff'); p.set(6, 4, C.dark[0]); } },
   };
+
+  // ---------- round 5: scene events, Daily streaks ----------
+  // An eye that looks around and blinks; iris colour per scene.
+  const eye = (iris, lid) => ({ frames: 8, dur: 2, draw(p, f) {
+    const look = [0, 0, 1, 1, 0, -1, -1, 0][f];
+    if (f === 6) { p.rect(2, 8, 12, 1, lid); p.rect(4, 9, 8, 1, lid); return; }
+    p.poly([[1, 8], [5, 4], [11, 4], [15, 8], [11, 12], [5, 12]], C.white);
+    p.disc(8 + look, 8, 3, 3, iris);
+    p.disc(8 + look, 8, 1.4, 1.4, BLACK, true);
+    p.set(7 + look, 7, '#ffffff');
+    p.line(5, 4, 11, 4, lid); p.line(1, 8, 5, 4, lid); p.line(11, 4, 15, 8, lid);
+  } });
+  // Streak badges: one flame that grows and changes metal with the streak.
+  const FIRE = [C.red[1], C.orange[1], C.yellow[1], C.yellow[0]];
+  const BLUEFIRE = ['#3a7ac0', '#6ab0ff', '#c8e8ff', '#ffffff'];
+  const WHITEFIRE = [C.orange[1], C.yellow[1], '#fff6c0', '#ffffff'];
+  const ICEFIRE = ['#3ad8ff', '#9af4ff', '#e8ffff', '#ffffff'];
+  const LEGENDFIRE = ['#a01a8a', '#ff4ad0', '#ffd75e', '#ffffff'];
+  const LEGENDFIRE2 = ['#7a1ac0', '#c06aff', '#ffb040', '#fff6c0'];
+  // A flame standing on (cx, base), h tall and about 2w wide, leaning by `sway`; colours outside to core.
+  function flameAt(p, cx, base, h, w, sway, col) {
+    const shape = (k) => [[cx - w * k, base], [cx - w * k - 0.4, base - h * 0.35 * k], [cx - w * 0.35 * k + sway * 0.4, base - h * 0.7 * k], [cx + sway, base - h * k],
+      [cx + w * 0.45 * k + sway * 0.5, base - h * 0.55 * k], [cx + w * k + 0.4, base - h * 0.3 * k], [cx + w * k, base]];
+    p.poly(shape(1), col[0]); p.poly(shape(0.78), col[1]); p.poly(shape(0.52), col[2]);
+    if (h > 5) p.rect(Math.round(cx - 0.5), Math.round(base - 2), 1, 2, col[3]);
+  }
+  // A round medal of `metal` with a flame in it; a light glint runs round the rim.
+  const streakMedal = (metal, fire, extra, r = 6.5, cy = 9) => ({ frames: 8, dur: 1.4, draw(p, f) {
+    p.disc(8, cy, r, r, metal);
+    p.disc(8, cy, r - 1.9, r - 1.9, ['#2a1a10', '#2a1a10', '#2a1a10'], true);
+    flameAt(p, 8, cy + r - 2.2, r + 1.2, r * 0.46, [0, 1, 1, 0, -1, -1, 0, 0][f], fire);
+    if (extra) extra(p, f);
+  }, post(p, f) {
+    const a = (f / 8) * Math.PI * 2 - Math.PI / 2;
+    p.set(8 + Math.round(Math.cos(a) * (r - 0.5)), cy + Math.round(Math.sin(a) * (r - 0.5)), '#ffffff');
+    if (f === 1) p.sparkle(14, 3, '#ffffff');
+  } });
+  Object.assign(ICONS, {
+    seen_corner: eye(C.brown, C.brown[2]), seen_deco: eye(C.blue, '#6a4a08'), seen_neon: eye(['#ffd0f0', '#ff7ad8', '#8a1a6a'], '#3a0a3a'),
+    seen_vip: eye(C.purple, '#6a4a08'), seen_orbit: eye(C.cyan, C.dark[1]), seen_liner: eye(['#ffe0f8', '#c070ff', '#4a1a7a'], '#6a4a08'),
+    seen_mars: eye(C.orange, C.red[2]), seen_horizon: eye(['#fff6b0', '#ff9a3a', '#000000'], C.dark[2]),
+    eyewitness: { frames: 8, dur: 1.6, draw(p, f) {
+      const look = [0, 2, 2, 0, -2, -2, 0, 0][f];
+      p.poly([[0, 8], [4, 3], [12, 3], [16, 8], [12, 13], [4, 13]], '#f4ecff');
+      if (f === 7) { p.rect(1, 8, 14, 1, '#c084ff'); return; }
+      p.disc(8 + look, 8, 4, 4, ['#e0c8ff', '#a06aff', '#4a2a8a']);
+      p.disc(8 + look, 8, 1.8, 1.8, BLACK, true);
+      p.set(7 + look, 6, '#ffffff');
+    }, post(p, f) { [[1, 1], [14, 1], [15, 14], [0, 14]].forEach(([x, y], i) => { if ((i + f) % 4 === 0) p.sparkle(x, y, C.yellow[1]); }); } },
+    // Daily streak tiers (also the streak badge on the Daily card in the menu)
+    streak_ember: { frames: 6, dur: 1.2, draw(p, f) {
+      p.disc(8, 13, 6.5, 3, C.dark);                                           // a little heap of coal
+      [[5, 13], [8, 12], [10, 14], [7, 14]].forEach(([x, y], i) => p.set(x, y, (i + f) % 3 === 0 ? C.yellow[1] : C.red[1]));
+      flameAt(p, 8, 12, 4 + (f % 3 === 1 ? 1 : 0), 1.6, [0, 1, 0, -1, 0, 1][f], FIRE);
+    }, post(p, f) { const y = 9 - f * 1.5; if (y > 0) p.set(f % 2 ? 9 : 7, y, C.orange[1]); } },
+    streak_flame: { frames: 6, dur: 0.9, draw(p, f) {
+      p.disc(8, 14, 5, 1.6, C.dark);
+      flameAt(p, 8, 14, 12, 4.2, [0, 1, 1, 0, -1, -1][f], FIRE);
+    }, post(p, f) { [[3, 6], [13, 4], [11, 1]].forEach(([x, y], i) => { const yy = y - ((f + i * 2) % 6); if ((f + i) % 2 === 0 && yy >= 0) p.set(x, yy, C.yellow[1]); }); } },
+    streak_bronze: streakMedal(METAL.bronze, FIRE, null),
+    streak_silver: streakMedal(METAL.silver, BLUEFIRE, (p) => {                // laurel branches on both sides
+      [[2, 13], [1, 11], [1, 9], [1, 7]].forEach(([x, y], i) => { p.set(x, y, C.green[1]); p.set(x + 1, y + 1, C.green[2]); p.set(15 - x, y, C.green[1]); p.set(14 - x, y + 1, C.green[2]); if (i === 3) { p.set(x + 1, y - 1, C.green[0]); p.set(14 - x, y - 1, C.green[0]); } });
+    }, 5.4, 9.5),
+    streak_gold: streakMedal(METAL.gold, WHITEFIRE, (p, f) => {                // a crown on top
+      p.poly([[3.5, 5], [3.5, 0.5], [5.8, 2.6], [8, 0], [10.2, 2.6], [12.5, 0.5], [12.5, 5]], (x) => (x < 7 ? METAL.gold[0] : x > 10 ? METAL.gold[2] : METAL.gold[1]));
+      p.set(8, 3, f % 4 < 2 ? C.red[1] : C.red[0]); p.set(5, 4, C.blue[1]); p.set(11, 4, C.blue[1]);
+    }, 5.2, 10.5),
+    streak_diamond: { frames: 8, dur: 1.4, draw(p, f) {
+      const GEM = ['#6ab0ff', '#2a5ac0', '#14287a'];
+      p.poly([[0.5, 5.5], [4, 1.5], [12, 1.5], [15.5, 5.5], [8, 15.5]], (x, y) => (y < 5 ? (x < 6 ? GEM[0] : x < 10 ? GEM[1] : GEM[0]) : x < 8 ? GEM[1] : GEM[2]));
+      p.line(4, 2, 12, 2, '#bfe8ff'); p.line(1, 5, 15, 5, '#9ad0ff');
+      flameAt(p, 8, 13, 9, 3, [0, 1, 0, -1, 0, 1, 0, -1][f], ICEFIRE);
+    }, post(p, f) {
+      const RAIN = ['#ff6ad0', '#ffe66a', '#6aff9a', '#6ad0ff', '#b06aff', '#ff9a3a', '#ffffff', '#ff6ad0'];
+      p.set(1 + f * 2, 5, RAIN[f]);
+      if (f === 2) p.sparkle(13, 1, '#ffffff', true); if (f === 6) p.sparkle(2, 2, '#ffffff');
+    } },
+    streak_legend: { frames: 8, dur: 1.2, draw(p, f) {
+      const HUES = [LEGENDFIRE, LEGENDFIRE2];
+      p.poly([[2, 5], [14, 5], [14, 10], [8, 15.5], [2, 10]], (x, y) => (x < 8 ? (y < 9 ? '#6a3ab0' : '#4a2a8a') : '#3a1a6a'));   // a shield
+      p.line(2, 5, 14, 5, METAL.gold[1]); p.line(2, 5, 2, 10, METAL.gold[1]); p.line(14, 5, 14, 10, METAL.gold[2]);
+      p.line(2, 10, 8, 15, METAL.gold[1]); p.line(14, 10, 8, 15, METAL.gold[2]);
+      flameAt(p, 8, 13, 13, 4, [0, 1, 1, 0, -1, -1, 0, 1][f], HUES[f % 2]);
+    }, post(p, f) {
+      for (let i = 0; i < 3; i++) {                                             // sparks circling the shield
+        const a = (f / 8 + i / 3) * Math.PI * 2;
+        p.set(8 + Math.round(Math.cos(a) * 7.4), 8 + Math.round(Math.sin(a) * 7.4), i === 0 ? '#ffffff' : METAL.gold[0]);
+      }
+    } },
+    // the streak achievements wear the badge of the tier they reach
+    daily_100: { frames: 8, dur: 2.4, draw(p, f) {
+      const rise = [4, 3, 2, 1, 0, 0, 0, 0][f];
+      p.rect(0, 0, 16, 16, f < 4 ? '#3a1a4a' : '#ff9a5a');
+      p.disc(8, 10 + rise, 5, 5, [C.yellow[0], C.yellow[1], C.orange[1]]);
+      if (f >= 4) for (let i = 0; i < 8; i++) { const a = (i / 8) * Math.PI * 2 + f * 0.2; p.set(8 + Math.round(Math.cos(a) * 7), 10 + Math.round(Math.sin(a) * 7), C.yellow[0]); }
+      p.rect(0, 12, 16, 4, '#5a2a1a'); p.rect(0, 12, 16, 1, '#ffd75e');
+    } },
+  });
+
+  Object.assign(ICONS, { daily_3: ICONS.streak_flame, daily_7: ICONS.streak_bronze, daily_14: ICONS.streak_silver, daily_30: ICONS.streak_gold });
 
   // ======================================================================
   // Rendering

@@ -30,6 +30,7 @@
     hideOverlay();
     if (window.Scenarios) Scenarios.clear(); // the menu never shows a scene
     if (window.DealerTalk) DealerTalk.stop();
+    if (window.SceneEvents) window.SceneEvents.stop();
     if (window.GameSounds) { GameSounds.stop(); GameSounds.closeSettings(); }
     $('game').hidden = true;
     $('lore').hidden = true;
@@ -305,6 +306,8 @@
     if (window.Scenarios) Scenarios.applyForMode(type, diffId);
     // The scene's dealer comments on the game in speech bubbles (js/dealertalk.js).
     if (window.DealerTalk) DealerTalk.start(game, window.Scenarios ? Scenarios.forMode(type, diffId) : null);
+    // Now and then something happens in the room (js/sceneevents.js).
+    if (window.SceneEvents) window.SceneEvents.start(game, window.Scenarios ? Scenarios.forMode(type, diffId) : null);
     // Table sounds follow the game, and the scene's music plays (js/gamesounds.js, js/music.js).
     if (window.GameSounds) GameSounds.start(game, window.Scenarios ? Scenarios.forMode(type, diffId) : null);
   }
@@ -315,6 +318,7 @@
   function roundEnd(g) {
     if (g !== game) return; // a game abandoned mid-hand finishing in the background
     if (window.Achievements) window.Achievements.roundEnd(g);
+    if (window.SceneEvents && window.SceneEvents.roundEnd) window.SceneEvents.roundEnd(g);
     storeRun(g, false);
 
     if (mode.type === 'practice') {

@@ -174,6 +174,26 @@
       vip: 'Mr. Valdez does not see you. Mr. Valdez never sees anything.',
       horizon: 'Even out here they whisper your name. Deal quietly.',
     },
+    'Sunrise': {
+      corner: 'A hundred mornings in a row, kid? Coffee\'s on me today.',
+      orbit: 'Sunrise logged. Day count: 100+. Unit is... proud.',
+      deco: 'Every single morning, darling? Now that is devotion.',
+      liner: 'Sun on the horizon and you at my table. Good morning, regular.',
+      neon: 'Sun\'s coming up and you\'re still here. Every day, huh? Respect, pal.',
+      mars: 'Two sunrises a day on Mars and you never missed one.',
+      vip: 'One hundred days. Punctual as a sunrise. Sit, sir.',
+      horizon: 'Out here the sun never rises. You brought one anyway.',
+    },
+    'Eyewitness': {
+      corner: 'You saw the ghost too, huh? Thought I was going crazy.',
+      orbit: 'Witness on record. Unit requests you keep the footage private.',
+      deco: 'Darling, you have seen far too much. I adore that.',
+      liner: 'An eyewitness aboard. Captain\'s log: say nothing of the whale.',
+      neon: 'You saw the UFO? Me too, pal. Nobody believes us.',
+      mars: 'My eye saw you seeing things. Two of us now.',
+      vip: 'You have seen what happens in this room. And you stayed. Good.',
+      horizon: 'You looked into the mirror and it looked back. Sit down.',
+    },
     'Unknown Signal': {
       corner: 'You heard them all, didn\'t you, kid? Every secret.',
       orbit: 'Unknown signal detected. That... is my frequency.',
@@ -361,6 +381,55 @@
       lowChips: ['Your light grows faint.', 'Little remains. Bet with care.'],
     },
   };
+
+  // Scene events (js/sceneevents.js): the dealer reacts to what just happened in the room. Ids are "fx_<event id>".
+  const FX = {
+    corner: {
+      fx_flicker: ['That\'s the wiring. Older than me.', 'Lights do that. Pay it no mind, kid.'],
+      fx_cat: ['That\'s Mostaza. She owns the place, really.', 'Don\'t feed her. She\'ll never leave.'],
+      fx_jackpot: ['Ha! Somebody finally fed that machine enough.', 'Thirty years here and I never hit it once.'],
+      fx_thief: ['...Was that a mouse with one of my chips? Count your stack, kid.'],
+    },
+    deco: {
+      fx_chandelier: ['The chandeliers are dancing again. Ignore them, darling.', 'Old building. It breathes.'],
+      fx_fireworks: ['Fireworks. Somebody in the city just won big.', 'Ooh, pretty. Now, your bet, darling.'],
+      fx_burglar: ['...Did someone just wink at me from the ceiling? How rude.'],
+    },
+    neon: {
+      fx_glitch: ['That sign\'s been dying since \'09.', 'Somebody kick that sign.'],
+      fx_siren: ['Relax. Not for us. Probably.', 'Keep playing. Act natural.'],
+      fx_lightning: ['Good night to stay inside and play.', 'Storm\'s rolling in. Stay a while.'],
+      fx_ufo: ['...You didn\'t see that. I didn\'t see that. Deal?'],
+    },
+    vip: {
+      fx_smoke: ['Cuban. A gift from an old friend.', 'Smoke and mirrors. Mostly smoke.'],
+      fx_cheer: ['Some table is having a night. Make this one yours.', 'Somebody got lucky. Your turn.'],
+      fx_double: ['...I don\'t have a brother. Deal the cards.'],
+    },
+    orbit: {
+      fx_meteors: ['METEORS. MAKE A WISH. I CANNOT.', 'SHOOTING STARS DETECTED. ODDS UNCHANGED.'],
+      fx_bump: ['MINOR IMPACT. CHIPS RE-STACKED. PROBABLY.', 'ASTEROID. NOT MY FAULT.'],
+      fx_astronaut: ['...THAT IS NOT ON THE CREW MANIFEST.'],
+    },
+    liner: {
+      fx_flare: ['Shields up, darlings. Enjoy the light show.', 'The sun is showing off again.'],
+      fx_bump: ['Just a pebble, darlings. Hold your chips.', 'A little turbulence. Nothing a good hand can\'t fix.'],
+      fx_galleon: ['...The Mary Celeste. Still looking for a harbour, poor dears.'],
+    },
+    mars: {
+      fx_meteors: ['Meteor season on Mars. Bad for the windshield.', 'Look at that. Free fireworks.'],
+      fx_dust: ['Dust storm. Nobody leaves till it passes. Deal?', 'Red sky, red cards. Keep playing.'],
+      fx_flare: ['Sun\'s angry today. Me too.', 'Solar flare. Bad for the circuits.'],
+      fx_glitch: ['Even the signs glitch out here. Like me.', 'Red dust in the wires again.'],
+      fx_martian: ['Hey, that\'s Gus. He owes me money.'],
+    },
+    horizon: {
+      fx_warp: ['Light bends near the hole. So do odds.', 'Do not trust what you see. Trust the count.'],
+      fx_meteors: ['They all fall in, eventually. Like chips.', 'Everything ends up in the hole.'],
+      fx_eye: ['...It looked at you. It has never looked at anyone before.'],
+    },
+  };
+  Object.keys(FX).forEach((scene) => { if (P[scene]) Object.assign(P[scene], FX[scene]); });
 
   root.DealerPhrases = Object.assign(P, { EVENTS, SECRETS, SET_GREETINGS });
 })(window);

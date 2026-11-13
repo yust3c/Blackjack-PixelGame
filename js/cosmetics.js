@@ -1227,6 +1227,100 @@ html .cos-sw-faces.cos-sw-faces[data-face="${id}"] .card::after { ${after} }\n`;
     { id: 'title_off_the_record', type: 'title', name: "Eavesdropper", rarity: 'secret', by: 'off_the_record', animated: true },
     { id: 'title_darkest_run', type: 'title', name: "Eclipse", rarity: 'insanity', by: 'darkest_run', animated: true },
   );
+  // ======================================================================
+  // Round 5: scene events (Eyewitness) and the Daily challenge (Sunrise)
+  // ======================================================================
+  // ----- Eyewitness: secret kit for seeing every scene's secret event. An eye that watches the room. -----
+  const EYE = [ // 18 x 9
+    '.....XXXXXXXX.....', '...XXwwwwwwwwXX...', '.XXwwwwwwwwwwwwXX.', 'Xwwwwwwwwwwwwwwwwx', 'Xwwwwwwwwwwwwwwwwx',
+    'Xwwwwwwwwwwwwwwwwx', '.XXwwwwwwwwwwwwXX.', '...XXwwwwwwwwXX...', '.....XXXXXXXX.....',
+  ];
+  BACKS.back_eye = artBack(8, 2.4, '#c084ff', (u, v, f) => {
+    const d = Math.hypot(u - 10.5, v - 16.5);
+    const ring = Math.floor(d - f * 0.5) % 4 === 0;
+    return ring ? '#2a1446' : (u + v) % 2 ? '#140a24' : '#180c2a';
+  }, (set, f) => {
+    const look = [0, 0, 2, 2, 0, -2, -2, 0][f];
+    const shut = f === 5;
+    EYE.forEach((r, y) => [...r].forEach((ch, x) => {
+      const yy = 12 + y;
+      if (ch === 'X' || ch === 'x') set(2 + x, yy, '#c084ff');
+      else if (ch === 'w') set(2 + x, yy, shut ? (y === 4 ? '#c084ff' : '#140a24') : '#f4ecff');
+    }));
+    if (shut) return;
+    for (let y = -3; y <= 3; y++) for (let x = -3; x <= 3; x++) {
+      const dd = Math.hypot(x, y);
+      if (dd <= 3.2) set(11 + x + look, 16 + y, dd < 1.6 ? '#05020a' : dd < 2.4 ? '#a06aff' : '#5a2a8a');
+    }
+    set(10 + look, 15, '#ffffff');
+    [[3, 4], [18, 6], [4, 28], [17, 29]].forEach(([x, y], i) => { if ((i + f) % 4 === 0) set(x, y, '#ffd75e'); });
+  });
+  FELTS.felt_eye = { '--felt': '#1c1030', '--felt-dot': '#190e2b', '--felt-dark': '#0c0618', '--felt-line': '#c084ff',
+    '--rail': '#2a1a3a', '--rail-light': '#3a2650', '--rail-dark': '#120a1c' };
+  function eyeTile() {
+    const rows = ['..XXXX..', '.X....X.', 'X..XX..X', '.X....X.', '..XXXX..']; let rects = '';
+    rows.forEach((row, y) => [...row].forEach((c, x) => { if (c === 'X') rects += `<rect x="${x + 4}" y="${y + 5}" width="1" height="1" fill="#3a2458"/><rect x="${x + 20}" y="${y + 21}" width="1" height="1" fill="#3a2458"/>`; }));
+    return svgUrl(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="64" height="64" shape-rendering="crispEdges">${rects}</svg>`);
+  }
+  FELT_FX.felt_eye = () => [[eyeTile(), 'radial-gradient(ellipse at 50% 30%, rgba(192, 132, 255, 0.18), transparent 60%)'], ['64px 64px', '100% 100%'], ['64px 64px', '0 0'], '24s', 48];
+  CHIP_SETS.chips_eye = { stripe: 'spin', spin: ['#ffd75e', '#c084ff', '#5a2a8a'], colors: (m) => [mix(m, '#3a1a5a', 0.6), '#0a0414', '#e0c8ff'] };
+  FACE_FX.face_eye = { vars: { '--card': '#f4ecff', '--card-ink': '#2a1440', '--card-red': '#b0206a' },
+    shadow: 'inset 0 0 0 2px #2a1440, inset 0 0 0 4px #c084ff, inset -4px -4px 0 4px #e0d0f8',
+    after: 'radial-gradient(circle at 50% 50%, rgba(160, 106, 255, 0.35) 0 8%, transparent 9%) 0 0 / 100% 100%, linear-gradient(90deg, transparent 0 45%, rgba(192, 132, 255, 0.4) 50%, transparent 55%) 0 0 / 300% 100%',
+    opacity: 0.5, anim: 'cos-holo 3s steps(30) infinite' };
+
+  // ----- Sunrise: legendary set for 100 Daily challenges in a row. The sun comes up over the table. -----
+  BACKS.back_sunrise = artBack(10, 3, '#ffb040', (u, v, f) => {
+    const t = f / 9;                                  // night to morning
+    const sky = v < 10 ? mix('#2a1446', '#ff9a5a', t * 0.6) : v < 18 ? mix('#5a2a5a', '#ffc070', t) : mix('#a04a4a', '#ffe0a0', t);
+    if (v >= 24) return v === 24 ? '#ffd75e' : (u + v) % 3 ? '#3a1a10' : '#4a2414';
+    return sky;
+  }, (set, f) => {
+    const cy = 30 - f * 1.4;
+    for (let y = -6; y <= 6; y++) for (let x = -6; x <= 6; x++) {
+      const d = Math.hypot(x, y);
+      if (d <= 5.8 && cy + y < 24) set(11 + x, cy + y, d < 3 ? '#fff6c0' : d < 4.6 ? '#ffd75e' : '#ff9a3a');
+    }
+    if (f >= 5) for (let i = 0; i < 12; i++) {
+      const a = (i / 12) * Math.PI * 2 + f * 0.15; const r = 8 + (i % 2);
+      const x = 11 + Math.round(Math.cos(a) * r); const y = Math.round(cy + Math.sin(a) * r);
+      if (y < 24) set(x, y, '#fff6c0');
+    }
+    if (f < 4) [[3, 3], [17, 5], [8, 2], [19, 11]].forEach(([x, y], i) => { if ((i + f) % 2 === 0) set(x, y, '#ffffff'); });
+  });
+  FELTS.felt_sunrise = { '--felt': '#7a3a24', '--felt-dot': '#713521', '--felt-dark': '#4a1e12', '--felt-line': '#ffd75e',
+    '--rail': '#5a2a1a', '--rail-light': '#7a3a24', '--rail-dark': '#2a1208' };
+  FELT_FX.felt_sunrise = () => [['radial-gradient(ellipse at 50% 115%, rgba(255, 215, 94, 0.45), rgba(255, 154, 58, 0.18) 45%, transparent 70%)', 'linear-gradient(180deg, rgba(42, 20, 70, 0.35), transparent 60%)'], ['100% 200%', '100% 100%'], ['0 -100%', '0 0'], '12s', 24];
+  CHIP_SETS.chips_sunrise = { stripe: 'spin', spin: ['#fff6c0', '#ffb040', '#ff6a1a'], colors: (m) => [mix(m, '#ff8a2a', 0.55), '#3a1206', '#ffe9a0'] };
+  FACE_FX.face_sunrise = { vars: { '--card': '#fff4e0', '--card-ink': '#3a1a10', '--card-red': '#d84a1a' },
+    shadow: 'inset 0 0 0 2px #5a2a1a, inset 0 0 0 4px #ffb040, inset -4px -4px 0 4px #f8e0c0',
+    after: 'radial-gradient(ellipse at 50% 120%, rgba(255, 176, 64, 0.55), transparent 55%) 0 0 / 100% 300%', opacity: 0.6, anim: 'cos-sunrise 4s steps(20) infinite alternate' };
+
+  CATALOG.push(
+    { id: 'back_eye',  type: 'back',  name: 'Eyewitness', rarity: 'secret', by: 'eyewitness', animated: true, set: 'Eyewitness' },
+    { id: 'felt_eye',  type: 'felt',  name: 'Eyewitness', rarity: 'secret', by: 'eyewitness', animated: true, set: 'Eyewitness' },
+    { id: 'chips_eye', type: 'chips', name: 'Eyewitness', rarity: 'secret', by: 'eyewitness', animated: true, set: 'Eyewitness' },
+    { id: 'face_eye',  type: 'face',  name: 'Eyewitness', rarity: 'secret', by: 'eyewitness', animated: true, set: 'Eyewitness' },
+    { id: 'title_eyewitness', type: 'title', name: 'Eyewitness', rarity: 'secret', by: 'eyewitness', animated: true },
+    { id: 'back_sunrise',  type: 'back',  name: 'Sunrise', rarity: 'legendary', by: 'daily_100', animated: true, set: 'Sunrise' },
+    { id: 'felt_sunrise',  type: 'felt',  name: 'Sunrise', rarity: 'legendary', by: 'daily_100', animated: true, set: 'Sunrise' },
+    { id: 'chips_sunrise', type: 'chips', name: 'Sunrise', rarity: 'legendary', by: 'daily_100', animated: true, set: 'Sunrise' },
+    { id: 'face_sunrise',  type: 'face',  name: 'Sunrise', rarity: 'legendary', by: 'daily_100', animated: true, set: 'Sunrise' },
+    { id: 'title_sunrise', type: 'title', name: 'Sunrise', rarity: 'legendary', by: 'daily_100', animated: true },
+    { id: 'title_seen_corner', type: 'title', name: 'Barfly', rarity: 'rare', by: 'seen_corner' },
+    { id: 'title_seen_deco', type: 'title', name: 'Socialite', rarity: 'rare', by: 'seen_deco' },
+    { id: 'title_seen_neon', type: 'title', name: 'Night Crawler', rarity: 'rare', by: 'seen_neon' },
+    { id: 'title_seen_vip', type: 'title', name: 'Insider', rarity: 'rare', by: 'seen_vip' },
+    { id: 'title_seen_orbit', type: 'title', name: 'Stargazer', rarity: 'epic', by: 'seen_orbit' },
+    { id: 'title_seen_liner', type: 'title', name: 'Deckhand', rarity: 'epic', by: 'seen_liner' },
+    { id: 'title_seen_mars', type: 'title', name: 'Dust Devil', rarity: 'epic', by: 'seen_mars' },
+    { id: 'title_seen_horizon', type: 'title', name: 'Light Bender', rarity: 'epic', by: 'seen_horizon' },
+    { id: 'title_daily_3', type: 'title', name: 'Early Riser', rarity: 'common', by: 'daily_3' },
+    { id: 'title_daily_7', type: 'title', name: 'Daily Regular', rarity: 'rare', by: 'daily_7' },
+    { id: 'title_daily_14', type: 'title', name: 'Devoted', rarity: 'epic', by: 'daily_14' },
+    { id: 'title_daily_30', type: 'title', name: 'Clockwork', rarity: 'legendary', by: 'daily_30', animated: true },
+  );
+
   const RANK = { default: 0, common: 1, rare: 2, epic: 3, legendary: 4, secret: 5, insanity: 6 };
   const TYPE_ORDER = { back: 0, felt: 1, chips: 2, face: 3, title: 4 };
   CATALOG.sort((a, b) => TYPE_ORDER[a.type] - TYPE_ORDER[b.type] || RANK[a.rarity] - RANK[b.rarity]);

@@ -118,7 +118,8 @@
     let set = null;
     for (const t of ['back', 'felt', 'chips', 'face']) {
       const it = C.get(eq[t]);
-      if (!it || !it.set || (it.rarity !== 'secret' && it.rarity !== 'insanity')) return null;
+      const G = phrases().SET_GREETINGS || {};   // secret sets, and the few others that have greetings (Sunrise)
+      if (!it || !it.set || (it.rarity !== 'secret' && it.rarity !== 'insanity' && !G[it.set])) return null;
       if (set && it.set !== set) return null;
       set = it.set;
     }

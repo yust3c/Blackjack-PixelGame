@@ -982,8 +982,9 @@
   function room3dDeco(p) {
     p.rect(0, 0, W, H, '#0a1020');
     decoBack(p, '#14213d', '#c9a24a', false);
-    [64, 128].forEach((x) => chandelier(p, x, '#c9a24a', '#bfe4ff', '#ffe9a0'));
     trimBackWall(p, '#0a1020');
+    // the chandeliers hang below the ceiling, each in its own group so a scene event can swing it (js/sceneevents.js)
+    [64, 128].forEach((x) => { p.out.push(`<g transform="translate(0 6)"><g class="sc-chandelier" style="transform-origin:${x + 0.5}px 0px">`); chandelier(p, x, '#c9a24a', '#bfe4ff', '#ffe9a0'); p.out.push('</g></g>'); });
     [BW.x0, BW.x1 - 6].forEach((x) => { p.rect(x, BW.top, 6, BW.bottom - BW.top, '#e8e2d0'); p.rect(x + 2, BW.top + 3, 1, 30, '#c8c2ae'); p.rect(x + 4, BW.top + 3, 1, 30, '#c8c2ae'); p.rect(x - 1, BW.top, 8, 2, '#c9a24a'); p.rect(x - 1, BW.bottom - 3, 8, 3, '#c9a24a'); });
     sideWalls3d(p, { upper: ['#14213d', '#162544'], rail: '#c9a24a', lower: '#0f1a32', seam: '#c9a24a', ceilingEdge: '#c9a24a' });
     floor3d(p, (xw, zw) => {
@@ -1043,13 +1044,13 @@
     p.disc(132, 12, 3, '#fbf6e6'); p.disc(133, 11, 3, '#150a2a');
     skyline(p, 9, 14, BW.bottom, '#1a1030', '#0c0618', ['#ffd75e', '#7ff0ff', '#ff7ad8']);
     for (let x = BW.x0; x <= BW.x1; x += 24) p.rect(x, BW.top, 1, 36, '#05030a');
-    p.rect(118, 8, 23, 9, '#05030a'); p.g('sc-flicker2', () => p.text('LUCKY', 120, 10, '#ff7ad8', '#ff3ac8'));
+    p.out.push('<g class="sc-sign">'); p.rect(118, 8, 23, 9, '#05030a'); p.g('sc-flicker2', () => p.text('LUCKY', 120, 10, '#ff7ad8', '#ff3ac8')); p.out.push('</g>');
     trimBackWall(p, '#08040f');
     sideWalls3d(p, { upper: ['#140a1e', '#170c22'], rail: '#ff7ad8', lower: '#0c0614', seam: '#05030a', railAt: 28 });
     // neon signs on the side walls
-    p.rect(6, 14, 22, 9, '#05030a'); p.g('sc-flicker', () => p.text('BAR', 8, 16, '#7ff0ff', '#3fe0e0'));
-    p.rect(W - 20, 12, 12, 9, '#05030a'); p.g('sc-blink', () => p.text('21', W - 18, 14, '#ffd75e', '#ff9a3a'));
-    ['A', 'C', 'E'].forEach((c, i) => p.g(`sc-chase sc-d${i}`, () => p.text(c, 36, 12 + i * 6, '#ff7ad8', '#ff3ac8')));
+    p.out.push('<g class="sc-sign">'); p.rect(6, 14, 22, 9, '#05030a'); p.g('sc-flicker', () => p.text('BAR', 8, 16, '#7ff0ff', '#3fe0e0')); p.out.push('</g>');
+    p.out.push('<g class="sc-sign">'); p.rect(W - 20, 12, 12, 9, '#05030a'); p.g('sc-blink', () => p.text('21', W - 18, 14, '#ffd75e', '#ff9a3a')); p.out.push('</g>');
+    p.out.push('<g class="sc-sign">'); ['A', 'C', 'E'].forEach((c, i) => p.g(`sc-chase sc-d${i}`, () => p.text(c, 36, 12 + i * 6, '#ff7ad8', '#ff3ac8'))); p.out.push('</g>');
     floor3d(p, (xw, zw) => {
       const gx = ((xw % 24) + 24) % 24;
       if (gx < 0.6) return Math.floor(xw / 24) % 2 ? ['#7ff0ff', 0.5] : ['#ff7ad8', 0.5];
@@ -1073,8 +1074,8 @@
     for (let x = BW.x0; x <= BW.x1; x += 24) p.rect(x, BW.top, 1, 36, '#05030a');
     trimBackWall(p, '#0a0606');
     sideWalls3d(p, { upper: ['#1a1a22', '#1e1e28'], rail: '#7ff0ff', lower: '#101016', seam: '#05030a', railAt: 28 });
-    p.rect(6, 14, 22, 9, '#05030a'); p.g('sc-flicker', () => p.text('BAR', 8, 16, '#7ff0ff', '#3fe0e0'));
-    p.rect(W - 20, 12, 12, 9, '#05030a'); p.g('sc-flicker2', () => p.text('21', W - 18, 14, '#ff7ad8', '#ff3ac8'));
+    p.out.push('<g class="sc-sign">'); p.rect(6, 14, 22, 9, '#05030a'); p.g('sc-flicker', () => p.text('BAR', 8, 16, '#7ff0ff', '#3fe0e0')); p.out.push('</g>');
+    p.out.push('<g class="sc-sign">'); p.rect(W - 20, 12, 12, 9, '#05030a'); p.g('sc-flicker2', () => p.text('21', W - 18, 14, '#ff7ad8', '#ff3ac8')); p.out.push('</g>');
     floor3d(p, (xw, zw) => {
       const gx = ((xw % 16) + 16) % 16;
       if (gx < 0.6) return ['#7ff0ff', 0.35];

@@ -25,6 +25,8 @@ No install and no internet needed. With a connection it also loads the two pixel
 
 Each difficulty has its own casino and dealer. **Achievements** unlock **cosmetics** (card backs, felts, chip sets and card faces, some animated), and the **Lore** section tells the story of every dealer and room. Progress is saved in your browser.
 
+Casinos are not always quiet: keep an eye on the room, things happen there now and then. Some of them are very rare.
+
 ## Sound
 
 The game has chiptune sound effects and music. Secret card backs and sets come with their own sounds. Open **Settings** in the main menu to change the volume or turn the set sounds off. Settings also has the dealer's speed, quick bot turns and a switch to reduce motion. Press `M` anywhere to mute. Sound starts after your first click, because browsers block it until then.

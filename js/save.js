@@ -7,7 +7,7 @@
   // shape of a save. Steps upgrade old data in place and never throw it away.
   const CURRENT = 4;
   const META_KEY = 'blackjack-meta';
-  const KEYS = { progress: 'blackjack-save-v1', achievements: 'blackjack-achievements-v1', cosmetics: 'blackjack-cosmetics-v1', settings: 'blackjack-settings-v1', dealertalk: 'blackjack-dealertalk-v1', prefs: 'blackjack-prefs-v1' };
+  const KEYS = { progress: 'blackjack-save-v1', achievements: 'blackjack-achievements-v1', cosmetics: 'blackjack-cosmetics-v1', settings: 'blackjack-settings-v1', dealertalk: 'blackjack-dealertalk-v1', prefs: 'blackjack-prefs-v1', sceneevents: 'blackjack-sceneevents-v1' };
   // Parts that belong to this computer, not to the player: an imported save without them keeps the current ones.
   const DEVICE_PARTS = ['settings', 'prefs'];
   const MIGRATIONS = {

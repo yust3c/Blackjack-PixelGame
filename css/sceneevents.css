@@ -1,0 +1,55 @@
+/* Scene events (js/sceneevents.js). Two layers sized to the scene picture: the back one sits in the room (under the
+   table and the cards), the front one over everything but never takes clicks. Units inside are the scene's pixels. */
+.scene-fx { position: fixed; pointer-events: none; }
+.scene-fx svg { display: block; width: 100%; height: 100%; overflow: visible; image-rendering: pixelated; }
+.scene-fx-front { z-index: 35; }
+
+.scene-fx .fx-move { animation: fx-move var(--t) linear both; }
+@keyframes fx-move { from { transform: translate(0, 0); } to { transform: translate(var(--dx, 0px), var(--dy, 0px)); } }
+.scene-fx .fx-frameA { animation: fx-frame var(--f) steps(1) infinite; }
+.scene-fx .fx-frameB { animation: fx-frame var(--f) steps(1) infinite calc(var(--f) / -2); }
+@keyframes fx-frame { 0% { opacity: 1; } 50% { opacity: 0; } }
+.scene-fx .fx-show { opacity: 0; animation: fx-show calc(var(--to) - var(--from)) steps(1) var(--from); }
+@keyframes fx-show { 0%, 100% { opacity: 1; } }
+.scene-fx .fx-fade { opacity: 0; animation: fx-fade var(--t) linear both; }
+@keyframes fx-fade { 0% { opacity: 0; } 15%, 85% { opacity: var(--o); } 100% { opacity: 0; } }
+.scene-fx .fx-blink { animation: fx-frame var(--f) steps(1) infinite; }
+.scene-fx .fx-bob { animation: fx-bob 1.6s steps(4) infinite alternate; }
+@keyframes fx-bob { from { transform: translateY(0); } to { transform: translateY(-2px); } }
+.scene-fx .fx-rise { animation: fx-rise var(--t) linear both; }
+@keyframes fx-rise { 0% { opacity: 0; transform: translate(0, 0); } 15% { opacity: 1; } 100% { opacity: 0; transform: translate(4px, -22px); } }
+.scene-fx .fx-smoke { opacity: 0; animation: fx-smoke 2.6s linear both; transform-box: fill-box; transform-origin: 50% 50%; }
+@keyframes fx-smoke { 0% { opacity: 0; transform: translate(0, 0) scale(1); } 20% { opacity: 0.55; } 100% { opacity: 0; transform: translate(-8px, -20px) scale(2.4); } }
+.scene-fx .fx-dim { opacity: 0; animation: fx-dim 2.6s steps(1) both; }
+@keyframes fx-dim { 0% { opacity: 0.55; } 8% { opacity: 0.1; } 14% { opacity: 0.6; } 22% { opacity: 0.05; } 30% { opacity: 0.7; } 70% { opacity: 0.7; } 76% { opacity: 0.2; } 82% { opacity: 0.5; } 90%, 100% { opacity: 0; } }
+.scene-fx .fx-flash { opacity: 0; animation: fx-flash 2.4s steps(1) both; }
+@keyframes fx-flash { 0% { opacity: 0.75; } 6% { opacity: 0; } 12% { opacity: 0.9; } 18% { opacity: 0.2; } 26%, 100% { opacity: 0; } }
+.scene-fx .fx-bolt { opacity: 0; animation: fx-bolt 2.4s steps(1) both; }
+@keyframes fx-bolt { 0% { opacity: 1; } 6% { opacity: 0; } 12% { opacity: 1; } 26%, 100% { opacity: 0; } }
+.scene-fx .fx-siren { opacity: 0; animation: fx-siren 0.7s steps(1) 5 both; }
+.scene-fx .fx-siren2 { animation-delay: 0.35s; }
+@keyframes fx-siren { 0% { opacity: 1; } 50%, 100% { opacity: 0; } }
+.scene-fx .fx-shrink { animation: fx-shrink 0.9s ease-in both; transform-box: fill-box; transform-origin: 50% 50%; }
+@keyframes fx-shrink { from { transform: scale(1); opacity: 1; } to { transform: scale(0.2); opacity: 0; } }
+.scene-fx .fx-stretch { animation: fx-stretch 4.8s ease-in both; transform-box: fill-box; transform-origin: 0 50%; }
+@keyframes fx-stretch { 0% { transform: scale(1, 1); opacity: 1; } 70% { transform: scale(3, 0.5); opacity: 1; } 100% { transform: scale(6, 0.1); opacity: 0; } }
+.scene-fx .fx-peek { animation: fx-peek 6.5s steps(6) both; }
+@keyframes fx-peek { 0% { transform: translateY(8px); } 20%, 80% { transform: translateY(0); } 100% { transform: translateY(8px); } }
+
+/* Events that move the room itself */
+body.fx-chandelier #scene-backdrop .sc-chandelier { animation: fx-swing 1.05s ease-in-out 4 alternate both; }
+@keyframes fx-swing { from { transform: rotate(-6deg); } to { transform: rotate(6deg); } }
+body.fx-glitch #scene-backdrop .sc-sign { animation: fx-glitch 0.18s steps(1) infinite; }
+@keyframes fx-glitch { 0% { transform: translate(0, 0); opacity: 1; } 25% { transform: translate(1px, 0); opacity: 0.2; } 50% { transform: translate(-1px, 1px); opacity: 1; } 75% { transform: translate(0, -1px); opacity: 0.5; } }
+body.fx-shake #scene-backdrop .scene-art svg, body.fx-shake #game { animation: fx-shake 0.7s steps(1) 2; }
+@keyframes fx-shake { 0% { translate: 0 0; } 15% { translate: 6px 2px; } 30% { translate: -5px -2px; } 45% { translate: 4px 1px; } 60% { translate: -3px 0; } 75% { translate: 2px -1px; } 90% { translate: 0 0; } }
+body.fx-shake .chip-rack .px-chip, body.fx-shake .stack-chip, body.fx-shake .chip-stacks { animation: fx-rattle 0.12s steps(1) 10; }
+@keyframes fx-rattle { 50% { transform: translateY(-2px); } }
+/* light bending round the black hole: the room wobbles and its colours shift */
+body.fx-warp #scene-backdrop .scene-art svg { animation: fx-lens 3.2s ease-in-out both; transform-origin: 50% 18%; }
+@keyframes fx-lens {
+  0%, 100% { transform: none; filter: none; }
+  20% { transform: scale(1.04, 0.97) skewX(1.5deg); filter: hue-rotate(30deg) saturate(1.5); }
+  45% { transform: scale(0.97, 1.03) skewX(-1.5deg); filter: hue-rotate(-25deg) saturate(1.3); }
+  70% { transform: scale(1.02, 0.99) skewX(0.6deg); filter: hue-rotate(10deg); }
+}
