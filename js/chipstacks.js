@@ -103,12 +103,38 @@
     return cols.slice(0, MAX_COLUMNS);
   }
 
+  // Chips whose edge and colour are both close to the felt get a one-pixel rim in the felt's line colour
+  // (css/style.css .cs-col.rim), so dark chips stay visible on dark felts. Other chips are left as they are.
+  const hex = (h) => {
+    let x = String(h || '').trim().replace('#', '');
+    if (x.length === 3) x = x.split('').map((c) => c + c).join('');
+    const n = parseInt(x, 16);
+    return Number.isNaN(n) ? null : [n >> 16, (n >> 8) & 255, n & 255];
+  };
+  function colourDistance(a, b) {   // "redmean" RGB distance, close to how different two colours look
+    const p = hex(a); const q = hex(b);
+    if (!p || !q) return Infinity;
+    const rm = (p[0] + q[0]) / 2;
+    return Math.sqrt((2 + rm / 256) * (p[0] - q[0]) ** 2 + 4 * (p[1] - q[1]) ** 2 + (2 + (255 - rm) / 256) * (p[2] - q[2]) ** 2);
+  }
+  const NEAR = 90;
+  function feltColour() {
+    const C = root.Cosmetics; const v = C && C.feltVars ? C.feltVars() : null;
+    if (v && v['--felt']) return v['--felt'];
+    return root.getComputedStyle(root.document.documentElement).getPropertyValue('--felt').trim() || '#1f7a45';
+  }
+  function blendsIn(value, felt) {
+    const pal = palette(value);
+    return colourDistance(pal.o.fill, felt) < NEAR && colourDistance(pal.m.fill, felt) < NEAR;
+  }
+
   function html(chips) {
     const cols = fit(chips);
     if (!cols.length) return '';
+    const felt = feltColour();
     const parts = cols.map(([v, n], i) => {
       const c = column(v, n);
-      return `<span class="cs-col" style="--i:${i};--h:${c.h}">${c.svg}</span>`;
+      return `<span class="cs-col${blendsIn(v, felt) ? ' rim' : ''}" style="--i:${i};--h:${c.h}">${c.svg}</span>`;
     });
     return `<span class="chip-stacks" style="--cols:${cols.length}">${parts.join('')}</span>`;
   }
