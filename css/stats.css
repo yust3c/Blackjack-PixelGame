@@ -1,0 +1,44 @@
+/* Daily card and result (js/ui.js) and stats screens (js/statsview.js). */
+.dl-card { min-width: 0; }
+.dl-head { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+.dl-date { font-size: 18px; color: var(--muted); }
+.dl-place { color: var(--gold); font-weight: normal; }
+.dl-streak { display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; align-items: center; background: rgba(11, 15, 10, 0.35); padding: 8px 10px; min-height: 48px; }
+.dl-streak .ic { grid-row: span 2; }
+.dl-streak b { font-family: var(--font-pixel); font-size: 9px; font-weight: normal; color: var(--gold); }
+.dl-streak span { font-size: 17px; color: var(--muted); }
+.dl-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.dl-facts div { background: rgba(11, 15, 10, 0.35); padding: 6px 8px; }
+.dl-facts b { display: block; font-family: var(--font-pixel); font-size: 9px; font-weight: normal; color: var(--ink); font-variant-numeric: tabular-nums; }
+.dl-facts span { font-size: 15px; color: var(--muted); }
+.dl-done { font-family: var(--font-pixel); font-size: 8px; color: var(--win); }
+.dl-result { display: flex; align-items: center; gap: 10px; justify-content: center; font-size: 20px; }
+.dl-result b { color: var(--gold); font-weight: normal; }
+
+/* Profile > Stats */
+.stv { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr)); align-items: start; }
+.stv-k { font-family: var(--font-pixel); font-size: 9px; color: var(--muted); margin: 0 0 8px; }
+.stv-k span { font-family: var(--font-text); font-size: 17px; color: #b8a890; margin-left: 6px; }
+.stv-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 6px; }
+.stv-tiles div, .stv-mini div { background: #0b0f0a; padding: 8px 10px; }
+.stv-tiles b, .stv-mini b { display: block; font-family: var(--font-pixel); font-size: 11px; font-weight: normal; color: var(--gold); margin-bottom: 4px; font-variant-numeric: tabular-nums; }
+.stv-tiles b.up, .stv-mini b.up { color: var(--win); }
+.stv-tiles b.down, .stv-mini b.down { color: var(--lose); }
+.stv-tiles span { font-size: 16px; color: #b8a890; }
+.stv-box { background: #0b0f0a; padding: 8px; margin-top: 8px; }
+.stv-graph { display: block; width: 100%; height: auto; }
+.stv-graph text { fill: #8a7a60; font-family: var(--font-text); font-size: 14px; }
+.stv-empty { margin: 0; font-size: 18px; color: #b8a890; }
+
+/* In-game session panel */
+.stv-pop { position: fixed; top: 84px; right: 16px; z-index: 60; width: min(calc(100vw - 32px), 360px); background: #120c08;
+  box-shadow: inset 0 0 0 2px var(--gold), 6px 6px 0 #0008; padding: 12px; display: grid; gap: 8px; }
+.stv-pop[hidden] { display: none; }
+.stv-pop h3 { margin: 0; font-family: var(--font-pixel); font-size: 10px; color: var(--gold); display: flex; justify-content: space-between; align-items: center; }
+.stv-x { font-family: var(--font-pixel); font-size: 8px; background: #2a1a10; color: var(--ink); border: 0; padding: 5px 7px; cursor: pointer; }
+.stv-mini { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; }
+.stv-mini div { padding: 6px; }
+.stv-mini b { font-size: 9px; color: var(--ink); }
+.stv-mini span { font-size: 14px; color: #b8a890; }
+#stats-btn.on { background: var(--gold); color: var(--btn-ink); }
+.mode-col { display: grid; gap: 20px; align-content: start; min-width: 0; }

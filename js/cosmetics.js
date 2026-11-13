@@ -1495,6 +1495,7 @@ html .cos-sw-faces.cos-sw-faces[data-face="${id}"] .card::after { ${after} }\n`;
   function lockerBody() {
     const A = root.Achievements;
     if (lockerTab === 'profile') return profileBody();
+    if (lockerTab === 'stats') return root.StatsView ? root.StatsView.profileHtml() : '';
     if (lockerTab === 'achievements') {
       if (!A) return '<p class="cos-empty">Achievements are not loaded.</p>';
       return `<ul class="cos-ach-list">${A.list().map((a) => {
@@ -1542,8 +1543,8 @@ html .cos-sw-faces.cos-sw-faces[data-face="${id}"] .card::after { ${after} }\n`;
     if (lockerOnly === 'achievements') {
       title = 'Achievements'; tabs = []; lockerTab = 'achievements';
     } else if (lockerOnly === 'profile') {
-      title = 'Profile'; tabs = [{ id: 'profile', name: 'Profile' }, { id: 'title', name: 'Titles' }];
-      if (!['profile', 'title'].includes(lockerTab)) lockerTab = 'profile';
+      title = 'Profile'; tabs = [{ id: 'profile', name: 'Profile' }].concat(root.StatsView ? [{ id: 'stats', name: 'Stats' }] : [], [{ id: 'title', name: 'Titles' }]);
+      if (!['profile', 'stats', 'title'].includes(lockerTab)) lockerTab = 'profile';
       count = state.name;
     } else if (lockerOnly === 'cosmetics') {
       title = 'Cosmetics'; tabs = TYPES.slice();

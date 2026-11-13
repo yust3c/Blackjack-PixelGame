@@ -23,9 +23,12 @@
       if (!isObj(data.settings)) data.settings = { master: 0.8, music: 0.6, sfx: 0.8, muted: false, setSounds: true };
       return data;
     },
-    // 3 -> 4: table settings (dealer speed, bot turns, reduce motion) get their own part.
+    // 3 -> 4: table settings (dealer speed, bot turns, reduce motion) get their own part, and the
+    // progress save gets a place for Daily challenge results and the Daily streak.
     4: (data) => {
       if (!isObj(data.prefs)) data.prefs = { speed: 'normal', botTurns: 'normal', reduceMotion: false };
+      if (isObj(data.progress) && !isObj(data.progress.daily)) data.progress.daily = {};
+      if (isObj(data.progress) && !isObj(data.progress.streak)) data.progress.streak = { last: '', count: 0, best: 0 };
       return data;
     },
   };

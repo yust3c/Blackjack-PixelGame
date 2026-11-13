@@ -22,10 +22,13 @@ No install and no internet needed. With a connection it also loads the two pixel
   | Expert | 200 | 5000 | 25-500 | none (play two seats) |
 
 - **Endless**: one per difficulty, unlocked by beating that difficulty in Challenge, and set in a space version of its casino. Chase 8 objectives based on the difficulty's goal, then keep going for a high score. Lose when you run out of chips.
+- **Daily**: a new deal every day, the same shoe for everyone, dealt in a different casino each day. You get 25 hands and 1000 chips; what you finish with is your score. Replay as often as you like, your best of the day counts. Play every day to grow your streak.
 
 Each difficulty has its own casino and dealer. **Achievements** unlock **cosmetics** (card backs, felts, chip sets and card faces, some animated), and the **Lore** section tells the story of every dealer and room. Progress is saved in your browser.
 
 Casinos are not always quiet: keep an eye on the room, things happen there now and then. Some of them are very rare.
+
+**Stats**: press `T` (or the **Stats** button) at the table to see how this session is going, with a graph of your chips. **Profile → Stats** shows your lifetime numbers and your last session.
 
 ## Sound
 
@@ -53,7 +56,7 @@ Click a seat to sit or to add a bot, click chips to bet, then press **Deal** (or
 
 Betting shortcuts: `1`-`7` add a chip (5 to 500) to the highlighted seat, `←` `→` switch between your seats, `U` undoes the last change, `C` clears the seat (`Shift+C` clears all your seats), `R` repeats last hand's bets and `Shift+R` doubles them. You can also scroll over one of your seats to add or remove chips, drag a chip from the rack onto any seat, or drag a bet to another of your seats (or off the table to take it back).
 
-On your turn: `H` hit, `S` stand, `D` double, `P` split, `R` surrender. When the dealer shows an ace, each of your seats is asked about insurance in turn: `I` take it, `N` decline. `M` mutes or unmutes the sound.
+On your turn: `H` hit, `S` stand, `D` double, `P` split, `R` surrender. When the dealer shows an ace, each of your seats is asked about insurance in turn: `I` take it, `N` decline. `T` shows this session's stats. `M` mutes or unmutes the sound.
 
 ## Made with
 

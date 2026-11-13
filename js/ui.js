@@ -25,11 +25,18 @@
   // Menu
   // ======================================================================
   function showMenu() {
-    game = null;
-    mode = null;
     hideOverlay();
     if (window.Scenarios) Scenarios.clear(); // the menu never shows a scene
     if (window.DealerTalk) DealerTalk.stop();
+    if (window.SessionStats) {
+      // keep the numbers of the table you just left for Profile > Stats
+      const st = mode && SessionStats.state();
+      if (st && st.hands) { save.lastSession = { label: mode.label, at: Date.now(), stats: st }; M.store(save); }
+      SessionStats.stop();
+    }
+    if (window.StatsView) window.StatsView.close();
+    game = null;
+    mode = null;
     if (window.SceneEvents) window.SceneEvents.stop();
     if (window.GameSounds) { GameSounds.stop(); GameSounds.closeSettings(); }
     $('game').hidden = true;
@@ -144,11 +151,14 @@
         <p class="tagline">6 decks · Blackjack pays 3 to 2 · Dealer stands on all 17s</p>
       </div>
       <div class="modes">
+        <div class="mode-col">
         <article class="mode-card">
           <h2>Practice</h2>
           <p>Learn to play well. Hints show the basic strategy move, and a coach tracks the Hi-Lo count for you.</p>
           <button class="btn btn-primary" data-start="practice">Play practice</button>
         </article>
+        ${dailyCard()}
+        </div>
         <article class="mode-card">
           <h2>Challenge</h2>
           <p>You against the dealer. Reach the goal before you run out of chips.</p>
@@ -171,6 +181,34 @@
         <button class="link-btn" data-import-save>Import save</button>` : ''}
         <button class="link-btn" data-reset-progress>${resetArmed ? 'Click again to erase all progress' : 'Reset progress'}</button>
       </div>`;
+  }
+
+  // The Daily card: today's casino, the streak with its tier icon, and today's best.
+  const SCENE_OF = { easy: ['The Corner', 'Old Tito'], medium: ['Grand Hotel', 'Madame Odette'], hard: ['Neon', 'Vinnie'], expert: ['VIP Lounge', 'Mr. Valdez'] };
+  function dailyPlace(day) {
+    const id = M.dailyDifficulty(day);
+    const S = window.Scenarios; const D = window.ScenarioDealers;
+    const sceneId = S ? S.forMode('challenge', id) : null;
+    const scene = sceneId && S.SCENES[sceneId]; const dealer = sceneId && D && D.DEALERS[sceneId];
+    return `${scene ? scene.name : SCENE_OF[id][0]} · ${dealer ? dealer.name : SCENE_OF[id][1]}`;
+  }
+  function dailyCard() {
+    const day = M.localDay();
+    const rec = (save.daily || {})[day] || { best: 0, tries: 0, done: false };
+    const streak = M.currentStreak(save, day);
+    const tier = M.streakTier(streak);
+    const I = window.AchievementIcons;
+    const date = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    const tierLine = tier ? `${tier.name} · ${tier.next ? `${tier.next.days} more day${tier.next.days === 1 ? '' : 's'} to ${tier.next.name}` : 'Top tier'}` : 'Play today to start one';
+    return `<article class="mode-card dl-card">
+      <div class="dl-head"><h2>Daily</h2><span class="dl-date">${date}</span></div>
+      <p>Today's deal at <b class="dl-place">${dailyPlace(day)}</b>. The same shoe for everyone. ${M.DAILY.hands} hands, start with ${fmt(M.DAILY.start)}.</p>
+      <div class="dl-streak"><span class="ic">${tier && I ? I.html('streak_' + tier.id, 48) : ''}</span>
+        <b>${streak ? `${streak} day streak` : 'No streak yet'}</b><span>${tierLine}</span></div>
+      <div class="dl-facts"><div><b>${rec.best ? fmt(rec.best) : '-'}</b><span>Best today</span></div><div><b>${rec.tries}</b><span>Tries</span></div><div><b>${(save.streak && save.streak.best) || 0}</b><span>Best streak</span></div></div>
+      ${rec.done ? '<span class="dl-done">✓ Done for today. Streak safe.</span>' : ''}
+      <button class="btn btn-primary" data-start="daily">${rec.done ? 'Play again' : 'Play today\'s deal'}</button>
+    </article>`;
   }
 
   function collectionCount() {
@@ -205,6 +243,7 @@
       botNameIndex: g._botNameIndex, handNumber: g.handNumber, endlessIndex,
       shoe: midHand ? null : { cards: g.shoe.cards, roundsDealt: g.shoe.roundsDealt, runningCount: g.runningCount },
       achievements: window.Achievements && window.Achievements.sessionState ? window.Achievements.sessionState() : null,
+      stats: window.SessionStats ? window.SessionStats.state() : null,
     };
   }
   function storeRun(g, midHand) {
@@ -257,6 +296,12 @@
       rules = { startingBankroll: d.start, minBet: d.minBet, maxBet: d.maxBet, maxBots: d.maxBots };
       label = `Challenge · ${d.name}`;
       coach = null;
+    } else if (type === 'daily') {
+      // diffId is the casino of the day (see Modes.dailyDifficulty); the table itself is always the Daily one.
+      const D = M.DAILY;
+      rules = { startingBankroll: D.start, minBet: D.minBet, maxBet: D.maxBet, maxBots: D.maxBots };
+      label = 'Daily';
+      coach = null;
     } else {
       const d = M.DIFFICULTIES.find((x) => x.id === diffId);
       rules = { startingBankroll: d.start, minBet: d.minBet, maxBet: d.maxBet, maxBots: d.maxBots };
@@ -268,13 +313,20 @@
       M.store(save);
     }
     mode = { type, difficulty: diffId, label };
+    if (type === 'daily') {
+      mode.day = M.localDay();
+      M.dailyRecord(save, mode.day).tries++;
+      M.store(save);
+    }
     seenCards.clear();
     selectedSeat = null;
     undoStack = [];
     seatChips = {};
     const P = window.Prefs;
     game = new BJ.Game({ rules, onUpdate: render, onRoundEnd: roundEnd,
-      delay: P ? P.delay() : undefined, botPace: P ? P.botPace() : undefined });
+      delay: P ? P.delay() : undefined, botPace: P ? P.botPace() : undefined,
+      // the Daily shoe is shuffled from the day's seed, so every player (and every retry) gets the same cards
+      shoeRng: type === 'daily' ? M.seededRng(M.daySeed(mode.day)) : undefined });
     activeChip = CHIPS.find((v) => v >= game.rules.minBet) || CHIPS[0];
 
     if (run) {
@@ -286,7 +338,8 @@
     } else {
       if (resumable(type)) clearRun(type, diffId);
       // The table starts empty: the player picks their seats and any bots.
-      game.say(game.rules.maxBots > 0
+      if (type === 'daily') game.say(`Today's deal: ${M.DAILY.hands} hands. Pick your seats.`);
+      else game.say(game.rules.maxBots > 0
         ? 'Pick a seat. Two bets are needed: play two seats or add a bot.'
         : 'Pick two seats. No bots here, you play both hands.');
     }
@@ -303,13 +356,16 @@
       if (run && run.achievements && window.Achievements.resumeSession) window.Achievements.resumeSession(run.achievements, opts);
       else window.Achievements.startSession(opts);
     }
-    if (window.Scenarios) Scenarios.applyForMode(type, diffId);
+    const sceneType = type === 'daily' ? 'challenge' : type;   // the Daily is dealt in the day's casino
+    if (window.Scenarios) Scenarios.applyForMode(sceneType, diffId);
     // The scene's dealer comments on the game in speech bubbles (js/dealertalk.js).
-    if (window.DealerTalk) DealerTalk.start(game, window.Scenarios ? Scenarios.forMode(type, diffId) : null);
+    if (window.DealerTalk) DealerTalk.start(game, window.Scenarios ? Scenarios.forMode(sceneType, diffId) : null);
+    // Hands, results and the bankroll history of this sitting (js/sessionstats.js); Continue keeps them.
+    if (window.SessionStats) SessionStats.start(game, run && run.stats);
     // Now and then something happens in the room (js/sceneevents.js).
-    if (window.SceneEvents) window.SceneEvents.start(game, window.Scenarios ? Scenarios.forMode(type, diffId) : null);
+    if (window.SceneEvents) window.SceneEvents.start(game, window.Scenarios ? Scenarios.forMode(sceneType, diffId) : null);
     // Table sounds follow the game, and the scene's music plays (js/gamesounds.js, js/music.js).
-    if (window.GameSounds) GameSounds.start(game, window.Scenarios ? Scenarios.forMode(type, diffId) : null);
+    if (window.GameSounds) GameSounds.start(game, window.Scenarios ? Scenarios.forMode(sceneType, diffId) : null);
   }
 
   // ======================================================================
@@ -330,6 +386,8 @@
       }
       return;
     }
+
+    if (mode.type === 'daily') { dailyRoundEnd(g); return; }
 
     if (mode.type === 'challenge') {
       const d = M.DIFFICULTIES.find((x) => x.id === mode.difficulty);
@@ -387,6 +445,34 @@
         { label: 'Menu', run: showMenu },
       ]);
     }
+  }
+
+  // The Daily ends after its hands (or when the chips run out): the result is the bankroll.
+  function dailyRoundEnd(g) {
+    const played = g.handNumber;
+    if (played < M.DAILY.hands && !g.broke) {
+      if (played === M.DAILY.hands - 1) g.say('Last hand of the day. Make it count.');
+      render();
+      return;
+    }
+    const day = mode.day;
+    const before = M.dailyRecord(save, day).best;
+    const firstToday = !M.dailyRecord(save, day).done;
+    const streak = M.finishDaily(save, day, g.bankroll);
+    M.store(save);
+    if (window.Achievements && window.Achievements.dailyDone) window.Achievements.dailyDone(streak);
+    if (window.GameAudio) setTimeout(() => window.GameAudio.play('goal'), 900);
+    const tier = M.streakTier(streak);
+    const I = window.AchievementIcons;
+    const best = Math.max(before, g.bankroll);
+    const net = g.bankroll - M.DAILY.start;
+    showOverlay(g.broke ? 'Out of chips' : 'Daily done!', `
+      <p>${g.broke ? `Busted after ${played} hands.` : `${played} hands played.`} You finished with <b>${fmt(g.bankroll)}</b> chips (${net >= 0 ? '+' : ''}${fmt(net)}).</p>
+      <p>${g.bankroll > before && before ? 'New best today!' : `Best today: ${fmt(best)}`}</p>
+      <div class="dl-result">${tier && I ? I.html('streak_' + tier.id, 48) : ''}<span>${firstToday ? 'Streak' : 'Streak safe'}: <b>${streak} day${streak === 1 ? '' : 's'}</b>${tier ? ` · ${tier.name}` : ''}</span></div>`, [
+      { label: 'Menu', primary: true, run: showMenu },
+      { label: 'Play again', run: () => startMode('daily', M.dailyDifficulty(M.localDay())) },
+    ]);
   }
 
   // ======================================================================
@@ -521,6 +607,7 @@
     $('seats').innerHTML = game.seats.map(renderSeat).join('');
     renderControls();
     renderCoach();
+    if (window.StatsView) { window.StatsView.refresh(); $('stats-btn').classList.toggle('on', window.StatsView.isOpen()); }
   }
 
   function renderGoal() {
@@ -538,6 +625,16 @@
       label = done ? 'Best' : `Objective ${endlessIndex + 1}/${objectives.length}`;
       goal = done ? null : objectives[endlessIndex];
       start = endlessIndex > 0 ? objectives[endlessIndex - 1] : 0;
+    }
+    if (mode.type === 'daily') {
+      label = 'Hand';
+      $('goal-stat').hidden = false;
+      $('progress').hidden = false;
+      $('goal-label').textContent = label;
+      const n = Math.min(M.DAILY.hands, game.handNumber + (game.phase === 'betting' ? 1 : 0));
+      $('goal').textContent = `${Math.max(1, n)}/${M.DAILY.hands}`;
+      $('progress-fill').style.width = `${Math.round((game.handNumber / M.DAILY.hands) * 20) * 5}%`;
+      return;
     }
     const show = mode.type !== 'practice';
     $('goal-stat').hidden = !show;
@@ -730,7 +827,11 @@
     const d = t.dataset;
 
     if (d.overlay !== undefined) { const b = overlayButtons[+d.overlay]; if (b) b.run(); return; }
-    if (d.start !== undefined) { if (resumable(d.start)) chooseRun(d.start, d.diff); else startMode(d.start, d.diff); return; }
+    if (d.start !== undefined) {
+      if (resumable(d.start)) chooseRun(d.start, d.diff);
+      else startMode(d.start, d.start === 'daily' ? M.dailyDifficulty(M.localDay()) : d.diff);
+      return;
+    }
     if (d.locker !== undefined) { openSection(d.locker); return; }
     if (d.lore !== undefined) { showLore(); return; }
     if (d.settings !== undefined) { window.GameSounds.openSettings(); return; }
@@ -772,6 +873,7 @@
     if (!game || $('game').hidden || !$('overlay').hidden) return;
     if (e.ctrlKey || e.metaKey || e.altKey || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
     const key = e.key.toLowerCase();
+    if (key === 't' && window.StatsView) { window.StatsView.toggle(); render(); return; }
     if (game.phase === 'playing') {
       const map = { h: 'hit', s: 'stand', d: 'double', p: 'split', r: 'surrender' };
       if (map[key]) doAct(map[key]);
@@ -945,12 +1047,14 @@
     g.deal().catch((err) => { console.error(err); g.say('Something went wrong. Go back to the menu and start again.'); render(); });
   }
 
+  $('stats-btn').addEventListener('click', () => { if (window.StatsView) { window.StatsView.toggle(); render(); } });
   $('to-menu').addEventListener('click', () => {
     if (!game) return;
     if (game.phase === 'betting' && mode.type === 'practice') { showMenu(); return; }
-    if (mode.type !== 'practice' && game.phase === 'betting') { storeRun(game, false); showMenu(); return; }
+    if (resumable(mode.type) && game.phase === 'betting') { storeRun(game, false); showMenu(); return; }
     const lose = mode.type === 'practice' ? '<p>Your practice chips are not saved.</p>'
-      : '<p>Your run is saved, but this hand is unfinished: its bets are lost.</p>';
+      : mode.type === 'daily' ? '<p>This Daily try ends here and does not count. You can play it again from the menu.</p>'
+        : '<p>Your run is saved, but this hand is unfinished: its bets are lost.</p>';
     showOverlay('Leave the table?', lose, [
       { label: 'Leave', primary: true, run: showMenu },
       { label: 'Stay', run: hideOverlay },
