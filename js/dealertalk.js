@@ -24,7 +24,7 @@
   let shown = { at: 0, prio: -1, visible: false };
   let typeT = null; let hideT = null; let idleT = null; let greetT = null; let secretT = null;
 
-  const reduceMotion = () => root.matchMedia && root.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const reduceMotion = () => (root.Prefs ? root.Prefs.reduceMotion() : root.matchMedia && root.matchMedia('(prefers-reduced-motion: reduce)').matches);
   const phrases = () => root.DealerPhrases;
   // ---------------------------------------------------------------- secrets
   // Rare timed lines (DealerPhrases.SECRETS), not tied to events: between hands, once a minute, each secret of this

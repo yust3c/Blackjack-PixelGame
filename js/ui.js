@@ -18,6 +18,8 @@
   let coach = null;         // practice mode: hint settings and stats
   let endlessIndex = 0;     // next endless objective
   let resetArmed = false;
+  let activeChip = 5;       // the chip that number keys, the scroll wheel and Rebet-free clicks use
+  let undoStack = [];       // bets before each betting change, for Undo (cleared when cards are dealt)
 
   // ======================================================================
   // Menu
@@ -267,10 +269,16 @@
     mode = { type, difficulty: diffId, label };
     seenCards.clear();
     selectedSeat = null;
-    game = new BJ.Game({ rules, onUpdate: render, onRoundEnd: roundEnd });
+    undoStack = [];
+    seatChips = {};
+    const P = window.Prefs;
+    game = new BJ.Game({ rules, onUpdate: render, onRoundEnd: roundEnd,
+      delay: P ? P.delay() : undefined, botPace: P ? P.botPace() : undefined });
+    activeChip = CHIPS.find((v) => v >= game.rules.minBet) || CHIPS[0];
 
     if (run) {
       restoreRun(game, run);
+      game.lastBets = game.seats.map((s) => (s.type === 'player' ? s.bet : 0));
       const first = game.playerSeats()[0];
       selectedSeat = first ? first.index : null;
       game.say(`Welcome back. ${fmt(game.bankroll)} chips, hand ${game.handNumber + 1}.${run.shoe ? '' : ' The last hand was left unfinished, so its bets are lost.'}`);
@@ -415,8 +423,33 @@
     return soft && total < 21 ? `${total - 10}/${total}` : String(total);
   }
 
-  function chipStack(amount) {
+  // The chips on each seat, in the order they were placed, so the stack shows the chips you actually bet.
+  // Any other change (undo, rebet, clear) falls back to the fewest chips for the amount.
+  let seatChips = {};
+  const sum = (a) => a.reduce((t, v) => t + v, 0);
+  function chipsOn(i) {
+    const seat = game.seats[i];
+    const list = seatChips[i];
+    if (!seat || !seat.bet) return [];
+    return list && sum(list) === seat.bet ? list : PX.breakdown(seat.bet);
+  }
+  // Adds one chip to a seat (sitting down first on an open seat when `sit`), keeping the chip list.
+  function addChipTo(i, v, sit) {
+    return betChange(() => {
+      if (sit && !game.seats[i].type && !game.sitPlayer(i)) return false;
+      const prev = chipsOn(i);
+      if (!game.addChip(i, v)) return false;
+      seatChips[i] = prev.concat([v]);
+      return true;
+    });
+  }
+  function chipStack(seat) {
+    const amount = seat.bet;
     if (!amount) return '<div class="bet-spot empty">BET</div>';
+    if (window.ChipStacks) {
+      return `<div class="bet-spot"><div class="stack stack-cols">${window.ChipStacks.html(chipsOn(seat.index))}</div>
+        <span class="bet-amount">${fmt(amount)}</span></div>`;
+    }
     const chips = PX.breakdown(amount).slice(0, 8).reverse();
     const stack = chips.map((v, n) => `<span class="stack-chip" style="bottom:${n * 4}px">${PX.chip(v)}</span>`).join('');
     return `<div class="bet-spot"><div class="stack" style="height:${42 + (chips.length - 1) * 4}px">${stack}</div>
@@ -454,7 +487,7 @@
           ${tags ? `<div class="hand-tags">${tags}</div>` : ''}
         </div>`;
       }).join('');
-      const spot = seat.type === 'player' && betting ? chipStack(seat.bet) : '';
+      const spot = seat.type === 'player' && betting ? chipStack(seat) : '';
       body = `${hands ? `<div class="hands">${hands}</div>` : ''}${spot}`;
     }
 
@@ -541,16 +574,22 @@
       }
       const seat = game.seats[selectedSeat];
       const remaining = game.bankroll - game.totalPlayerBets();
-      const chips = CHIPS.map((v) => {
+      const chips = CHIPS.map((v, n) => {
         const disabled = v > remaining || seat.bet + v > game.rules.maxBet;
-        return `<button class="chip-btn" data-chip="${v}" ${disabled ? 'disabled' : ''} aria-label="Add ${v}">${PX.chip(v)}<span>${v}</span></button>`;
+        return `<button class="chip-btn${v === activeChip ? ' active-chip' : ''}" data-chip="${v}" ${disabled ? 'disabled' : ''} aria-label="Add ${v}" title="Add ${v} (key ${n + 1}). Drag it onto a seat, or scroll over a seat.">${PX.chip(v)}<span>${v}</span></button>`;
       }).join('');
+      const withBets = players.filter((s) => s.bet > 0).length;
+      const can = rebetCheck();
       c.innerHTML = `
         <div class="betting-for">Betting on seat ${seat.index + 1}: <strong>${fmt(seat.bet)}</strong>
           ${players.length > 1 ? '<span class="hint">(click one of your seats to switch)</span>' : ''}</div>
         <div class="chip-rack">${chips}</div>
-        <div class="row">
-          <button class="btn btn-ghost" data-clear>Clear bet</button>
+        <div class="row bet-actions">
+          <button class="btn btn-ghost btn-small" data-undo ${undoStack.length ? '' : 'disabled'} title="Undo the last change to your bets">Undo <kbd>U</kbd></button>
+          <button class="btn btn-ghost btn-small" data-clear ${seat.bet ? '' : 'disabled'} title="Clear this seat's bet">Clear <kbd>C</kbd></button>
+          ${players.length > 1 ? `<button class="btn btn-ghost btn-small" data-clear-all ${withBets ? '' : 'disabled'} title="Clear the bets on all your seats (Shift+C)">Clear all</button>` : ''}
+          <button class="btn btn-ghost btn-small" data-rebet="1" ${can.one ? '' : 'disabled'} title="Bet the same as last hand">Rebet <kbd>R</kbd></button>
+          <button class="btn btn-ghost btn-small" data-rebet="2" ${can.two ? '' : 'disabled'} title="Bet double what you bet last hand (Shift+R)">Rebet ×2</button>
           <button class="btn btn-primary" data-deal ${problem ? 'disabled' : ''}>Deal <kbd>Enter</kbd></button>
         </div>
         ${problem ? `<p class="hint">${problem}</p>` : ''}`;
@@ -711,8 +750,11 @@
     if (d.sit !== undefined) { game.sitPlayer(+d.sit); selectedSeat = +d.sit; render(); return; }
     if (d.bot !== undefined) { game.addBot(+d.bot); return; }
     if (d.leave !== undefined) { game.leaveSeat(+d.leave); return; }
-    if (d.chip !== undefined) { if (selectedSeat !== null) game.addChip(selectedSeat, +d.chip); return; }
-    if (d.clear !== undefined) { if (selectedSeat !== null) game.clearBet(selectedSeat); return; }
+    if (d.chip !== undefined) { pickChip(+d.chip); return; }
+    if (d.clear !== undefined) { clearSeat(); return; }
+    if (d.clearAll !== undefined) { betChange(() => game.clearAllBets()); return; }
+    if (d.undo !== undefined) { undoBet(); return; }
+    if (d.rebet !== undefined) { betChange(() => game.rebet(+d.rebet)); return; }
     if (d.deal !== undefined) { startDeal(); return; }
     if (d.ins !== undefined) { doInsurance(+d.ins, d.take === '1'); return; }
     if (d.act !== undefined) { doAct(d.act); return; }
@@ -723,21 +765,177 @@
   });
 
   document.addEventListener('keydown', (e) => {
-    if (!game || !$('overlay').hidden) return;
+    if (!game || $('game').hidden || !$('overlay').hidden) return;
+    if (e.ctrlKey || e.metaKey || e.altKey || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
     const key = e.key.toLowerCase();
     if (game.phase === 'playing') {
       const map = { h: 'hit', s: 'stand', d: 'double', p: 'split', r: 'surrender' };
       if (map[key]) doAct(map[key]);
     } else if (game.phase === 'insurance' && game.active && (key === 'i' || key === 'n')) {
       doInsurance(game.active.seat, key === 'i');
-    } else if (game.phase === 'betting' && key === 'enter' && !e.target.closest('button')) {
-      startDeal();
+    } else if (game.phase === 'betting') {
+      if (key === 'enter') {
+        // Enter deals, even right after clicking a chip (which keeps focus on that chip).
+        const btn = e.target.closest('button');
+        if (btn && (btn.dataset.deal !== undefined || !btn.closest('#controls, #seats'))) return;   // its own click handles it
+        e.preventDefault();
+        startDeal();
+        return;
+      }
+      const n = /^Digit([1-7])$/.exec(e.code);   // e.code, so Shift and keyboard layouts don't matter
+      if (n) { pickChip(CHIPS[+n[1] - 1]); e.preventDefault(); return; }
+      if (key === 'u' || key === 'backspace') { undoBet(); e.preventDefault(); return; }
+      if (key === 'c') { if (e.shiftKey) betChange(() => game.clearAllBets()); else clearSeat(); return; }
+      if (key === 'r') { betChange(() => game.rebet(e.shiftKey ? 2 : 1)); return; }
+      if (key === 'arrowleft' || key === 'arrowright') { switchSeat(key === 'arrowleft' ? 1 : -1); e.preventDefault(); }
     }
   });
+
+  // ---------- betting: chips, undo, rebet, scroll and drag ----------
+  const betsNow = () => game.seats.map((s) => (s.type === 'player' ? s.bet : 0));
+  const sameBets = (a, b) => a.length === b.length && a.every((v, i) => v === b[i]);
+  // Every betting change goes through here so Undo can put the bets back.
+  function betChange(fn) {
+    if (!game || game.phase !== 'betting') return false;
+    const before = betsNow();
+    const ok = fn();
+    if (ok && !sameBets(before, betsNow())) {
+      undoStack.push(before);
+      if (undoStack.length > 60) undoStack.shift();
+      render();
+    }
+    return ok;
+  }
+  function undoBet() {
+    if (!game || game.phase !== 'betting') return;
+    while (undoStack.length) {
+      const prev = undoStack.pop();
+      if (game.restoreBets(prev)) { render(); return; }
+    }
+    render();
+  }
+  function pickChip(v) {
+    if (!game || game.phase !== 'betting' || !v) return;
+    activeChip = v;
+    if (selectedSeat !== null) addChipTo(selectedSeat, v);
+    else render();
+  }
+  function clearSeat() { if (selectedSeat !== null) betChange(() => game.clearBet(selectedSeat)); }
+  // Arrow keys move between your seats in the order they sit on screen (seat 1 is on the right).
+  function switchSeat(dir) {
+    const mine = game.playerSeats().map((s) => s.index);
+    if (mine.length < 2) return;
+    const at = Math.max(0, mine.indexOf(selectedSeat));
+    selectedSeat = mine[(at + dir + mine.length) % mine.length];
+    render();
+  }
+  function rebetCheck() {
+    const last = game.lastBets;
+    const out = { one: false, two: false };
+    if (!last) return out;
+    const now = betsNow();
+    for (const mult of [1, 2]) {
+      const want = game.seats.map((s, i) => (s.type === 'player' ? Math.min((last[i] || 0) * mult, game.rules.maxBet) : 0));
+      const total = want.reduce((a, b) => a + b, 0);
+      out[mult === 1 ? 'one' : 'two'] = total > 0 && total <= game.bankroll && !sameBets(want, now);
+    }
+    return out;
+  }
+
+  // Scroll over one of your seats: up adds the active chip, down takes it off.
+  let wheelAt = 0;
+  document.addEventListener('wheel', (e) => {
+    if (!game || game.phase !== 'betting' || !$('overlay').hidden) return;
+    const el = e.target.closest && e.target.closest('.seat[data-seat]');
+    if (!el) return;
+    const i = +el.dataset.seat;
+    const seat = game.seats[i];
+    if (!seat || seat.type !== 'player') return;
+    e.preventDefault();
+    const now = Date.now();
+    if (now - wheelAt < 90 || !e.deltaY) return;   // trackpads send a stream of small events
+    wheelAt = now;
+    if (selectedSeat !== i) selectedSeat = i;
+    if (e.deltaY < 0) addChipTo(i, activeChip);
+    else {
+      const prev = chipsOn(i);
+      const at = prev.lastIndexOf(activeChip);
+      betChange(() => {
+        if (!game.setBet(i, Math.max(0, seat.bet - activeChip))) return false;
+        if (at >= 0) seatChips[i] = prev.slice(0, at).concat(prev.slice(at + 1));
+        return true;
+      });
+    }
+    render();
+  }, { passive: false });
+
+  // Drag a chip from the rack onto a seat (an open seat sits you there), or drag a seat's bet
+  // onto another of your seats to move it, or off the table to take it back.
+  let drag = null;
+  let swallowClick = false;
+  document.addEventListener('pointerdown', (e) => {
+    if (!game || game.phase !== 'betting' || e.button !== 0) return;
+    const chipBtn = e.target.closest('.chip-btn:not([disabled])');
+    const stack = !chipBtn && e.target.closest('.seat.player .bet-spot:not(.empty)');
+    if (!chipBtn && !stack) return;
+    const from = stack ? +stack.closest('.seat').dataset.seat : null;
+    const value = chipBtn ? +chipBtn.dataset.chip : null;
+    drag = { x: e.clientX, y: e.clientY, from, value, ghost: null, over: null, id: e.pointerId };
+  });
+  document.addEventListener('pointermove', (e) => {
+    if (!drag || e.pointerId !== drag.id) return;
+    if (!drag.ghost) {
+      if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 8) return;
+      drag.ghost = document.createElement('div');
+      drag.ghost.className = 'drag-chip';
+      const amount = drag.value || game.seats[drag.from].bet;
+      drag.ghost.innerHTML = PX.chip(drag.value || PX.breakdown(amount)[0]) + (drag.value ? '' : `<span>${fmt(amount)}</span>`);
+      document.body.appendChild(drag.ghost);
+      document.body.classList.add('chip-dragging');
+    }
+    drag.ghost.style.left = `${e.clientX}px`;
+    drag.ghost.style.top = `${e.clientY}px`;
+    const hit = document.elementFromPoint(e.clientX, e.clientY);
+    const seatEl = hit && hit.closest('.seat[data-seat]');
+    const over = seatEl ? +seatEl.dataset.seat : null;
+    const ok = over !== null && over !== drag.from && (game.seats[over].type === 'player' || (!game.seats[over].type && drag.value));
+    document.querySelectorAll('.seat.drop-target').forEach((n) => n.classList.remove('drop-target'));
+    if (ok) seatEl.classList.add('drop-target');
+    drag.over = ok ? over : null;
+    drag.offTable = !seatEl && !(hit && hit.closest('.table'));
+  });
+  function endDrag(e, cancel) {
+    if (!drag || (e && e.pointerId !== drag.id)) return;
+    const d = drag;
+    drag = null;
+    document.body.classList.remove('chip-dragging');
+    document.querySelectorAll('.seat.drop-target').forEach((n) => n.classList.remove('drop-target'));
+    if (!d.ghost) return;   // a plain click: the click handler does the rest
+    d.ghost.remove();
+    swallowClick = true;
+    setTimeout(() => { swallowClick = false; }, 0);
+    if (cancel || !game || game.phase !== 'betting') return;
+    if (d.value && d.over !== null) {
+      const i = d.over;
+      activeChip = d.value;
+      addChipTo(i, d.value, true);
+      selectedSeat = i;
+      render();
+    } else if (d.from !== null && d.over !== null) {
+      const moved = chipsOn(d.from); const there = chipsOn(d.over);
+      if (betChange(() => { if (!game.moveBet(d.from, d.over)) return false; seatChips[d.over] = there.concat(moved); seatChips[d.from] = []; return true; })) { selectedSeat = d.over; render(); }
+    } else if (d.from !== null && d.offTable) {
+      betChange(() => game.clearBet(d.from));
+    }
+  }
+  document.addEventListener('pointerup', (e) => endDrag(e, false));
+  document.addEventListener('pointercancel', (e) => endDrag(e, true));
+  window.addEventListener('click', (e) => { if (swallowClick) { e.stopImmediatePropagation(); e.preventDefault(); } }, true);
 
   function startDeal() {
     if (game.dealProblem()) { render(); return; }
     if (coach) coach.feedback = null;
+    undoStack = [];
     const g = game;
     storeRun(g, true); // quitting mid-hand loses this hand's bets
     g.deal().catch((err) => { console.error(err); g.say('Something went wrong. Go back to the menu and start again.'); render(); });
@@ -763,6 +961,8 @@
   document.addEventListener('cosmetics:close', () => { if (!game) renderMenu(); });
   document.addEventListener('achievement:unlocked', () => { if (!game) renderMenu(); });
   if (window.Cosmetics) window.Cosmetics.apply();
+  // Settings > Table changes apply to a game in progress too.
+  if (window.Prefs) window.Prefs.onChange(() => { if (game) { game.delay = window.Prefs.delay(); game.botPace = window.Prefs.botPace(); } });
 
   window.__blackjack = () => game; // handy for debugging in the browser console
   showMenu();

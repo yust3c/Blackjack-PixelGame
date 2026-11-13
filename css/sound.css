@@ -38,3 +38,7 @@
 }
 .snd-muted[hidden] { display: none; }
 .snd-muted svg { width: 22px; height: 18px; }
+
+/* Table settings (js/prefs.js): one-of-several choices sit side by side */
+.snd-seg { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.snd-seg .snd-switch { min-width: 0; }

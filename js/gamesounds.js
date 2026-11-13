@@ -157,7 +157,16 @@
       section = doc.getElementById('settings') || doc.body.appendChild(Object.assign(doc.createElement('section'), { id: 'settings', className: 'menu lore' }));
       section.setAttribute('aria-label', 'Settings');
       section.addEventListener('input', (e) => { const s = e.target.closest('input[type=range]'); if (s) { A.setSetting(s.dataset.key, s.value / 100); clearTimeout(section._t); if (s.dataset.key !== 'music') section._t = setTimeout(() => A.play('chip_place'), 60); } });
-      section.addEventListener('click', (e) => { const b = e.target.closest('.snd-switch'); if (b) { A.setSetting(b.dataset.key, !A.settings[b.dataset.key]); A.play('ui_toggle'); } });
+      section.addEventListener('click', (e) => {
+        const b = e.target.closest('.snd-switch');
+        if (!b) return;
+        const P = root.Prefs;
+        if (b.dataset.pref && P) {   // table settings (js/prefs.js)
+          P.set(b.dataset.pref, b.dataset.val !== undefined ? b.dataset.val : !P.get(b.dataset.pref));
+          renderSettings();
+        } else A.setSetting(b.dataset.key, !A.settings[b.dataset.key]);
+        A.play('ui_toggle');
+      });
     }
     ['menu', 'game', 'lore'].forEach((id) => { const el = doc.getElementById(id); if (el) el.hidden = true; });
     section.hidden = false;
@@ -178,7 +187,16 @@
             <button class="snd-switch danger" data-key="muted" aria-pressed="false"></button></div>
           <div class="snd-row snd-toggle"><span class="snd-label">Secret set sounds<span class="snd-note">Secret card backs, faces and full sets change the sounds.</span></span>
             <button class="snd-switch" data-key="setSounds" aria-pressed="true"></button></div>
-        </div>`;
+        </div>
+        ${root.Prefs ? `<div class="snd-panel snd-panel-table">
+          <h2>Table</h2>
+          <div class="snd-row snd-toggle"><span class="snd-label">Dealer speed<span class="snd-note">How fast cards are dealt and turned.</span></span>
+            <span class="snd-seg" role="group" aria-label="Dealer speed">${['slow', 'normal', 'fast'].map((v) => `<button class="snd-switch" data-pref="speed" data-val="${v}" aria-pressed="false">${v[0].toUpperCase() + v.slice(1)}</button>`).join('')}</span></div>
+          <div class="snd-row snd-toggle"><span class="snd-label">Bot turns<span class="snd-note">Quick plays the bots' hands without the pauses.</span></span>
+            <span class="snd-seg" role="group" aria-label="Bot turns">${['normal', 'quick'].map((v) => `<button class="snd-switch" data-pref="botTurns" data-val="${v}" aria-pressed="false">${v[0].toUpperCase() + v.slice(1)}</button>`).join('')}</span></div>
+          <div class="snd-row snd-toggle"><span class="snd-label">Reduce motion<span class="snd-note">Stops animations. Your system setting also counts.</span></span>
+            <button class="snd-switch" data-pref="reduceMotion" aria-pressed="false"></button></div>
+        </div>` : ''}`;
     }
     section.querySelectorAll('input[type=range]').forEach((r) => {
       const v = Math.round(s[r.dataset.key] * 100);
@@ -187,7 +205,15 @@
       r.nextElementSibling.textContent = v + '%';
       r.closest('.snd-row').classList.toggle('dim', s.muted);
     });
-    section.querySelectorAll('.snd-switch').forEach((b) => { const on = !!s[b.dataset.key]; b.setAttribute('aria-pressed', on); b.textContent = on ? 'On' : 'Off'; });
+    section.querySelectorAll('.snd-switch').forEach((b) => {
+      if (b.dataset.pref) {
+        const v = root.Prefs.get(b.dataset.pref);
+        if (b.dataset.val !== undefined) { b.setAttribute('aria-pressed', v === b.dataset.val); return; }
+        b.setAttribute('aria-pressed', !!v); b.textContent = v ? 'On' : 'Off';
+        return;
+      }
+      const on = !!s[b.dataset.key]; b.setAttribute('aria-pressed', on); b.textContent = on ? 'On' : 'Off';
+    });
   }
 
   // A small speaker in the corner shows when sound is muted (M toggles it).

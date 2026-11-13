@@ -108,7 +108,11 @@
       this.onRoundEnd = options.onRoundEnd || (() => {});
       this.runningCount = 0;   // Hi-Lo count of every card shown since the last shuffle
       this.bankroll = this.rules.startingBankroll;
-      this.shoe = new Shoe(this.rules.decks, this.rng);
+      // options.shoeRng: a seeded generator gives the same card order every time (the Daily challenge).
+      this.shoe = new Shoe(this.rules.decks, options.shoeRng || this.rng);
+      this.botPace = options.botPace === undefined ? 1 : options.botPace; // < 1 plays bot turns faster
+      this._botTurn = false;
+      this.lastBets = null;   // the player's bets on the last hand dealt, per seat (Rebet)
       this.seats = Array.from({ length: this.rules.seats }, (_, i) => emptySeat(i));
       this.dealer = { cards: [], holeHidden: true };
       this.phase = 'betting'; // betting | dealing | insurance | playing | dealer
@@ -131,7 +135,10 @@
       this.log.push(msg);
       if (this.log.length > 50) this.log.shift();
     }
-    async pause(mult = 1) { if (this.delay > 0) await sleep(this.delay * mult); }
+    async pause(mult = 1) {
+      const m = this._botTurn ? mult * this.botPace : mult;
+      if (this.delay > 0 && m > 0) await sleep(this.delay * m);
+    }
     waitFor(kind) {
       const p = new Promise((resolve) => { this._waiter = { kind, resolve }; });
       this.update(); // re-render now that the game is waiting for input
@@ -206,6 +213,54 @@
       this.update();
       return true;
     }
+    clearAllBets() {
+      if (this.phase !== 'betting') return false;
+      this.playerSeats().forEach((s) => { s.bet = 0; });
+      this.update();
+      return true;
+    }
+    /** Sets one seat's bet outright (within the table limit and the bankroll). */
+    setBet(i, amount) {
+      const seat = this.seats[i];
+      if (this.phase !== 'betting' || !seat || seat.type !== 'player') return false;
+      amount = Math.max(0, amount);
+      if (amount > this.rules.maxBet) { this.say(`Table maximum is ${this.rules.maxBet} per hand.`); this.update(); return false; }
+      if (this.totalPlayerBets() - seat.bet + amount > this.bankroll) { this.say('Not enough chips for that bet.'); this.update(); return false; }
+      seat.bet = amount;
+      this.update();
+      return true;
+    }
+    /** Moves a seat's whole bet onto another of the player's seats (adding to what is there). */
+    moveBet(from, to) {
+      const a = this.seats[from]; const b = this.seats[to];
+      if (this.phase !== 'betting' || !a || !b || from === to || a.type !== 'player' || b.type !== 'player' || !a.bet) return false;
+      if (a.bet + b.bet > this.rules.maxBet) { this.say(`Table maximum is ${this.rules.maxBet} per hand.`); this.update(); return false; }
+      b.bet += a.bet;
+      a.bet = 0;
+      this.update();
+      return true;
+    }
+    /** Puts every seat back to the bets of a list (Undo). Seats the player has left since are skipped. */
+    restoreBets(bets) {
+      if (this.phase !== 'betting' || !Array.isArray(bets)) return false;
+      const total = this.seats.reduce((sum, s, i) => sum + (s.type === 'player' ? bets[i] || 0 : 0), 0);
+      if (total > this.bankroll) return false;
+      this.seats.forEach((s, i) => { if (s.type === 'player') s.bet = Math.min(bets[i] || 0, this.rules.maxBet); });
+      this.update();
+      return true;
+    }
+    /** Repeats the last hand's bets (mult 2 doubles them). Each seat is capped at the table maximum. */
+    rebet(mult = 1) {
+      if (this.phase !== 'betting') return false;
+      const last = this.lastBets;
+      const want = this.seats.map((s, i) => (s.type === 'player' && last ? Math.min((last[i] || 0) * mult, this.rules.maxBet) : 0));
+      const total = want.reduce((a, b) => a + b, 0);
+      if (!total) { this.say(last ? 'Your seats from the last hand are empty now.' : 'No bets to repeat yet.'); this.update(); return false; }
+      if (total > this.bankroll) { this.say('Not enough chips to repeat those bets.'); this.update(); return false; }
+      this.seats.forEach((s, i) => { if (s.type === 'player') s.bet = want[i]; });
+      this.update();
+      return true;
+    }
 
     /** Returns why the dealer cannot deal yet, or null when ready. */
     dealProblem() {
@@ -241,6 +296,7 @@
       }
       this.shoe.roundsDealt++;
       this.dealer = { cards: [], holeHidden: true };
+      this.lastBets = this.seats.map((s) => (s.type === 'player' ? s.bet : 0));
 
       for (const seat of this.seats) {
         seat.hands = [];
@@ -370,6 +426,11 @@
     }
 
     async playHand(seat, h) {
+      // Bot turns can run faster than the rest of the table (botPace, the "Bot turns" setting).
+      this._botTurn = seat.type === 'bot';
+      try { await this._playHand(seat, h); } finally { this._botTurn = false; }
+    }
+    async _playHand(seat, h) {
       const hand = seat.hands[h];
       if (hand.natural) {
         hand.done = true;

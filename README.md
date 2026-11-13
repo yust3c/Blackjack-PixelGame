@@ -27,7 +27,7 @@ Each difficulty has its own casino and dealer. **Achievements** unlock **cosmeti
 
 ## Sound
 
-The game has chiptune sound effects and music. Secret card backs and sets come with their own sounds. Open **Settings** in the main menu to change the volume or turn the set sounds off. Press `M` anywhere to mute. Sound starts after your first click, because browsers block it until then.
+The game has chiptune sound effects and music. Secret card backs and sets come with their own sounds. Open **Settings** in the main menu to change the volume or turn the set sounds off. Settings also has the dealer's speed, quick bot turns and a switch to reduce motion. Press `M` anywhere to mute. Sound starts after your first click, because browsers block it until then.
 
 ## Your save
 
@@ -47,7 +47,11 @@ Progress lives in the browser you play in, and it carries over when you download
 
 ## Controls
 
-Click a seat to sit or to add a bot, click chips to bet, then press **Deal** (or `Enter`). On your turn: `H` hit, `S` stand, `D` double, `P` split, `R` surrender. When the dealer shows an ace, each of your seats is asked about insurance in turn: `I` take it, `N` decline. `M` mutes or unmutes the sound.
+Click a seat to sit or to add a bot, click chips to bet, then press **Deal** (or `Enter`).
+
+Betting shortcuts: `1`-`7` add a chip (5 to 500) to the highlighted seat, `←` `→` switch between your seats, `U` undoes the last change, `C` clears the seat (`Shift+C` clears all your seats), `R` repeats last hand's bets and `Shift+R` doubles them. You can also scroll over one of your seats to add or remove chips, drag a chip from the rack onto any seat, or drag a bet to another of your seats (or off the table to take it back).
+
+On your turn: `H` hit, `S` stand, `D` double, `P` split, `R` surrender. When the dealer shows an ace, each of your seats is asked about insurance in turn: `I` take it, `N` decline. `M` mutes or unmutes the sound.
 
 ## Made with
 

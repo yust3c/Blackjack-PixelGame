@@ -1190,7 +1190,7 @@
 
   let applied = { id: null, vars: [] };
   let introTimer = null;
-  const reduceMotion = () => root.matchMedia && root.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const reduceMotion = () => (root.Prefs ? root.Prefs.reduceMotion() : root.matchMedia && root.matchMedia('(prefers-reduced-motion: reduce)').matches);
   // The stage needs a landscape window big enough for the table; otherwise the game stacks as usual over the room.
   const stageFits = () => root.innerWidth >= 860 && root.innerHeight >= 480 && root.innerWidth / root.innerHeight >= 1.2;
 

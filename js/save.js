@@ -5,9 +5,11 @@
 
   // Bump CURRENT and add a step to MIGRATIONS whenever a new game version changes the
   // shape of a save. Steps upgrade old data in place and never throw it away.
-  const CURRENT = 3;
+  const CURRENT = 4;
   const META_KEY = 'blackjack-meta';
-  const KEYS = { progress: 'blackjack-save-v1', achievements: 'blackjack-achievements-v1', cosmetics: 'blackjack-cosmetics-v1', settings: 'blackjack-settings-v1', dealertalk: 'blackjack-dealertalk-v1' };
+  const KEYS = { progress: 'blackjack-save-v1', achievements: 'blackjack-achievements-v1', cosmetics: 'blackjack-cosmetics-v1', settings: 'blackjack-settings-v1', dealertalk: 'blackjack-dealertalk-v1', prefs: 'blackjack-prefs-v1' };
+  // Parts that belong to this computer, not to the player: an imported save without them keeps the current ones.
+  const DEVICE_PARTS = ['settings', 'prefs'];
   const MIGRATIONS = {
     // 0 -> 1: saves from before versioning already have the v1 shape, so nothing to change.
     1: (data) => data,
@@ -19,6 +21,11 @@
     // 2 -> 3: sound was added; settings get their own save part with the default volumes.
     3: (data) => {
       if (!isObj(data.settings)) data.settings = { master: 0.8, music: 0.6, sfx: 0.8, muted: false, setSounds: true };
+      return data;
+    },
+    // 3 -> 4: table settings (dealer speed, bot turns, reduce motion) get their own part.
+    4: (data) => {
+      if (!isObj(data.prefs)) data.prefs = { speed: 'normal', botTurns: 'normal', reduceMotion: false };
       return data;
     },
   };
@@ -129,9 +136,12 @@
       // Keep the current save as a backup, then clear and write the imported one.
       const before = JSON.stringify(readAll());
       storage.setItem('blackjack-backup-before-import', before);
-      // Sound settings belong to this computer: an older save without them keeps the current ones.
-      for (const [part, key] of Object.entries(KEYS)) if (part !== 'settings' || d.settings !== undefined) storage.removeItem(key);
-      writeAll(upgrade(d, file.version));
+      // Sound and table settings belong to this computer: a save without them keeps the current ones.
+      const keep = DEVICE_PARTS.filter((part) => d[part] === undefined);
+      for (const [part, key] of Object.entries(KEYS)) if (!keep.includes(part)) storage.removeItem(key);
+      const upgraded = upgrade(d, file.version);
+      keep.forEach((part) => { delete upgraded[part]; });   // upgrades would fill in defaults over this computer's own
+      writeAll(upgraded);
     } catch (e) { return { ok: false, error: 'Could not store the save (browser storage is full or blocked).' }; }
     return { ok: true };
   }
