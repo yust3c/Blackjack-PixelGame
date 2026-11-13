@@ -1,0 +1,17 @@
+/* Card FX: animated aces and pixel-sharp sprite sheets (drawn by js/cardfx.js). */
+html[data-cos-back] .card.back, .cos-back-art { image-rendering: pixelated; image-rendering: crisp-edges; }
+
+/* The ace art takes the place of the big pip: 36 x 44 on a 56 x 80 card, scaled with the card. */
+.card .fx-suit { overflow: visible; }
+.card::before {
+  position: absolute; left: 25%; top: 37.5%; width: 64.3%; height: 55%;
+  background-repeat: no-repeat; background-position: 0 0;
+  image-rendering: pixelated; image-rendering: crisp-edges;
+  animation-name: cardfx-ace; animation-iteration-count: infinite;
+  pointer-events: none;
+}
+@keyframes cardfx-ace { from { background-position-x: 0; } to { background-position-x: 100%; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .card::before { animation: none !important; }
+}

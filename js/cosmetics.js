@@ -1072,7 +1072,7 @@ html .cos-sw-faces.cos-sw-faces[data-face="${id}"] .card::after { ${after} }\n`;
     { id: 'back_heartbreak', type: 'back', name: 'Heartbreak',  rarity: 'secret',    by: 'worst_beat',   animated: true, set: 'Heartbreak' },
     { id: 'felt_heartbreak', type: 'felt', name: 'Heartbreak',  rarity: 'secret',    by: 'worst_beat',   animated: true, set: 'Heartbreak' },
     { id: 'chips_heartbreak', type: 'chips', name: 'Heartbreak', rarity: 'secret',   by: 'worst_beat',   animated: true, set: 'Heartbreak' },
-    { id: 'face_heartbreak', type: 'face', name: 'Heartbreak',  rarity: 'secret',    by: 'worst_beat',   set: 'Heartbreak' },
+    { id: 'face_heartbreak', type: 'face', name: 'Heartbreak',  rarity: 'secret',    by: 'worst_beat',   animated: true, set: 'Heartbreak' },
     { id: 'back_mint',      type: 'back', name: 'Mint',          rarity: 'common',    by: 'full_table' },
     { id: 'back_candystripe', type: 'back', name: 'Candy Cane',  rarity: 'rare',      by: 'dealer_streak' },
     { id: 'back_circuit',   type: 'back', name: 'Circuit',       rarity: 'rare',      by: 'last_standing' },
@@ -1123,9 +1123,9 @@ html .cos-sw-faces.cos-sw-faces[data-face="${id}"] .card::after { ${after} }\n`;
     { id: 'face_noir',      type: 'face', name: 'Noir',          rarity: 'epic',      by: 'comeback' },
     { id: 'face_holo',      type: 'face', name: 'Holo Foil',     rarity: 'legendary', by: 'flawless',     animated: true },
     { id: 'face_newsprint', type: 'face', name: 'Newsprint',     rarity: 'common',    by: 'overinsured' },
-    { id: 'face_void',      type: 'face', name: 'Event Horizon', rarity: 'legendary', by: 'endless_expert', set: 'Event Horizon' },
+    { id: 'face_void',      type: 'face', name: 'Event Horizon', rarity: 'legendary', by: 'endless_expert', animated: true, set: 'Event Horizon' },
     { id: 'face_platinum',  type: 'face', name: 'Platinum',      rarity: 'secret',    by: 'completionist', animated: true, set: 'Platinum' },
-    { id: 'face_kinghearts', type: 'face', name: 'King of Hearts', rarity: 'secret',  by: 'suited_royalty', set: 'King of Hearts' },
+    { id: 'face_kinghearts', type: 'face', name: 'King of Hearts', rarity: 'secret',  by: 'suited_royalty', animated: true, set: 'King of Hearts' },
     { id: 'face_heaven',    type: 'face', name: 'Seventh Heaven', rarity: 'secret',   by: 'seventh_heaven', animated: true, set: 'Seventh Heaven' },
     { id: 'face_retro',     type: 'face', name: 'Handheld',      rarity: 'common',    by: 'pocket_money' },
     { id: 'face_royal',     type: 'face', name: 'Royal Purple',  rarity: 'rare',      by: 'soft_touch' },
@@ -1144,14 +1144,14 @@ html .cos-sw-faces.cos-sw-faces[data-face="${id}"] .card::after { ${after} }\n`;
     { id: 'chips_abacus',    type: 'chips', name: 'Abacus',      rarity: 'epic',      by: 'pro_counter' },
     { id: 'chips_lucky7',    type: 'chips', name: 'Lucky Seven', rarity: 'legendary', by: 'seven_up', animated: true },
     { id: 'face_charlie',    type: 'face',  name: 'Charlie',     rarity: 'epic',      by: 'seven_charlie' },
-    { id: 'back_deadwood',   type: 'back',  name: 'Deadwood',    rarity: 'secret', by: 'dead_mans_hand', set: 'Deadwood' },
+    { id: 'back_deadwood',   type: 'back',  name: 'Deadwood',    rarity: 'secret', by: 'dead_mans_hand', animated: true, set: 'Deadwood' },
     { id: 'felt_deadwood',   type: 'felt',  name: 'Deadwood',    rarity: 'secret', by: 'dead_mans_hand', set: 'Deadwood' },
     { id: 'chips_deadwood',  type: 'chips', name: 'Deadwood',    rarity: 'secret', by: 'dead_mans_hand', set: 'Deadwood' },
-    { id: 'face_deadwood',   type: 'face',  name: 'Deadwood',    rarity: 'secret', by: 'dead_mans_hand', set: 'Deadwood' },
+    { id: 'face_deadwood',   type: 'face',  name: 'Deadwood',    rarity: 'secret', by: 'dead_mans_hand', animated: true, set: 'Deadwood' },
     { id: 'back_bloodmoon',  type: 'back',  name: 'Blood Moon',  rarity: 'secret', by: 'wolf_endless', animated: true, set: 'Blood Moon' },
     { id: 'felt_bloodmoon',  type: 'felt',  name: 'Blood Moon',  rarity: 'secret', by: 'wolf_endless', set: 'Blood Moon' },
     { id: 'chips_bloodmoon', type: 'chips', name: 'Blood Moon',  rarity: 'secret', by: 'wolf_endless', animated: true, set: 'Blood Moon' },
-    { id: 'face_bloodmoon',  type: 'face',  name: 'Blood Moon',  rarity: 'secret', by: 'wolf_endless', set: 'Blood Moon' },
+    { id: 'face_bloodmoon',  type: 'face',  name: 'Blood Moon',  rarity: 'secret', by: 'wolf_endless', animated: true, set: 'Blood Moon' },
     { id: 'back_silverwolf',  type: 'back',  name: 'Silver Wolf', rarity: 'secret', by: 'wolf_endless_expert', animated: true, set: 'Silver Wolf' },
     { id: 'felt_silverwolf',  type: 'felt',  name: 'Silver Wolf', rarity: 'secret', by: 'wolf_endless_expert', animated: true, set: 'Silver Wolf' },
     { id: 'chips_silverwolf', type: 'chips', name: 'Silver Wolf', rarity: 'secret', by: 'wolf_endless_expert', animated: true, set: 'Silver Wolf' },
@@ -1217,7 +1217,7 @@ html .cos-sw-faces.cos-sw-faces[data-face="${id}"] .card::after { ${after} }\n`;
     { id: 'back_house',   type: 'back',  name: 'The House', rarity: 'secret', by: 'house_name', animated: true, set: 'The House' },
     { id: 'felt_house',   type: 'felt',  name: 'The House', rarity: 'secret', by: 'house_name', animated: true, set: 'The House' },
     { id: 'chips_house',  type: 'chips', name: 'The House', rarity: 'secret', by: 'house_name', animated: true, set: 'The House' },
-    { id: 'face_house',   type: 'face',  name: 'The House', rarity: 'secret', by: 'house_name', set: 'The House' },
+    { id: 'face_house',   type: 'face',  name: 'The House', rarity: 'secret', by: 'house_name', animated: true, set: 'The House' },
     { id: 'title_house_name', type: 'title', name: "The Creator", rarity: 'secret', by: 'house_name', animated: true },
     { id: 'back_hitman',  type: 'back',  name: 'Hitman', rarity: 'secret', by: 'whisper_name', animated: true, set: 'Hitman' },
     { id: 'felt_hitman',  type: 'felt',  name: 'Hitman', rarity: 'secret', by: 'whisper_name', animated: true, set: 'Hitman' },
@@ -1258,6 +1258,8 @@ html .cos-sw-faces.cos-sw-faces[data-face="${id}"] .card::after { ${after} }\n`;
   // ======================================================================
   const backCache = {};
   function backArt(id) {
+    const fx = root.CardFX && root.CardFX.back(id); // animated backs drawn by js/cardfx.js win
+    if (fx) return backCache[id] || (backCache[id] = fx);
     if (!BACKS[id]) return null;
     return backCache[id] || (backCache[id] = BACKS[id]());
   }
@@ -1317,7 +1319,7 @@ html .cos-sw-faces.cos-sw-faces[data-face="${id}"] .card::after { ${after} }\n`;
   // ======================================================================
   // Previews
   // ======================================================================
-  const SAMPLE_FACE = (s) => (root.PixelSprites ? root.PixelSprites.suit(s) : s);
+  const SAMPLE_FACE = (s, face) => (root.PixelSprites ? root.PixelSprites.suit(s, face) : s);
   function swatch(item) {
     switch (item.type) {
       case 'back': {
@@ -1338,9 +1340,9 @@ html .cos-sw-faces.cos-sw-faces[data-face="${id}"] .card::after { ${after} }\n`;
       }
       case 'face':
         return `<div class="cos-sw-faces" data-face="${item.id}" aria-hidden="true">
-          <div class="card red" aria-label="A♥"><span class="corner"><span class="rank">A</span>${SAMPLE_FACE('♥')}</span><span class="pip">${SAMPLE_FACE('♥')}</span></div>
-          <div class="card" aria-label="K♣"><span class="corner"><span class="rank">K</span>${SAMPLE_FACE('♣')}</span><span class="pip">${SAMPLE_FACE('♣')}</span></div>
-          <div class="card red" aria-label="7♦"><span class="corner"><span class="rank">7</span>${SAMPLE_FACE('♦')}</span><span class="pip">${SAMPLE_FACE('♦')}</span></div></div>`;
+          <div class="card red" aria-label="A♥"><span class="corner"><span class="rank">A</span>${SAMPLE_FACE('♥', item.id)}</span><span class="pip">${SAMPLE_FACE('♥', item.id)}</span></div>
+          <div class="card" aria-label="K♣"><span class="corner"><span class="rank">K</span>${SAMPLE_FACE('♣', item.id)}</span><span class="pip">${SAMPLE_FACE('♣', item.id)}</span></div>
+          <div class="card red" aria-label="7♦"><span class="corner"><span class="rank">7</span>${SAMPLE_FACE('♦', item.id)}</span><span class="pip">${SAMPLE_FACE('♦', item.id)}</span></div></div>`;
       case 'title':
         return `<div class="cos-sw-title">${titleHtml(item)}</div>`;
       default: return '';
