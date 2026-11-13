@@ -356,7 +356,9 @@ html .cos-sw-faces.cos-sw-faces[data-face="face_heartbreak"] .card::after {
 
 /* ---------- Insanity rarity: a colour that never sits still ---------- */
 @property --holo { syntax: '<color>'; inherits: true; initial-value: #5af2ff; }
-:root { animation: cos-holo-hue 2.4s steps(24) infinite; }
+/* Only the things painted in the insanity colour animate it (they set --rar: var(--holo) inline). Animating it on
+   :root made the browser restyle the whole page ten times a second, which made the table stutter. */
+[style*="--holo"] { animation: cos-holo-hue 2.4s steps(24) infinite; }
 @keyframes cos-holo-hue {
   0%   { --holo: #ff4fd8; }
   17%  { --holo: #ffe14f; }
