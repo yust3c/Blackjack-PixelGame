@@ -480,17 +480,12 @@ body[data-view="3d"] .seats > .seat.drop-target .seat-head { background: var(--g
 body[data-view="3d"] .seats > .seat.drop-target .bet-spot { box-shadow: inset 0 0 0 2px var(--gold), 0 0 0 2px var(--gold); }
 body[data-view="3d"] .controls .bet-actions .btn-small { min-height: 30px; padding: 8px 8px 11px; font-size: 7px; }
 
-/* ---------- chip stacks (js/chipstacks.js): side-view columns, one per chip value ---------- */
+/* ---------- chip stacks (js/chipstacks.js): side-view piles, biggest chips at the bottom ---------- */
 .stack.stack-cols { width: auto; height: auto; display: flex; justify-content: center; }
 .chip-stacks { --u: 3px; display: flex; align-items: flex-end; filter: drop-shadow(0 2px 0 rgba(11, 15, 10, 0.55)); }
 .chip-stacks .cs-col { display: block; line-height: 0; }
-.chip-stacks .cs-col + .cs-col { margin-left: calc(var(--u) * -3); }
-.chip-stacks .px-stack { display: block; width: calc(14 * var(--u)); height: calc(var(--h) * var(--u)); }
+/* each column is drawn with a free pixel all round (room for the felt rim), so neighbours overlap by 5 */
+.chip-stacks .cs-col + .cs-col { margin-left: calc(var(--u) * -5); }
+.chip-stacks .px-stack { display: block; width: calc(16 * var(--u)); height: calc(var(--h) * var(--u)); }
 body[data-view="3d"] .chip-stacks { --u: 2px; }
-/* a chip that would vanish into the felt gets a one-pixel rim in the felt's line colour (js/chipstacks.js) */
-.chip-stacks .cs-col.rim .px-stack {
-  --rim: color-mix(in srgb, var(--felt-line) 75%, transparent);
-  filter: drop-shadow(var(--u) 0 0 var(--rim)) drop-shadow(calc(var(--u) * -1) 0 0 var(--rim))
-    drop-shadow(0 var(--u) 0 var(--rim)) drop-shadow(0 calc(var(--u) * -1) 0 var(--rim));
-}
 body[data-view="3d"] .bet-spot .stack.stack-cols { width: auto; bottom: 12px; }
