@@ -34,3 +34,16 @@ body[data-stage] .tfx-shoe { left: 991px; right: auto; top: -30px; }
 body[data-stage] .tfx-discard { left: 83px; top: -26px; }
 body[data-view="3d"] .tfx-shoe { left: 831px; top: -46px; }
 body[data-view="3d"] .tfx-discard { left: 115px; top: -42px; }
+
+/* Chips: piles in front of each hand, and the copies that move (see "chips" in js/tablefx.js). */
+.hand-chips { display: flex; align-items: flex-end; justify-content: center; gap: 4px; min-height: 20px; }
+.hand-chips .chip-stacks { --u: 2.5px; }
+body[data-view="3d"] .hand-chips .chip-stacks { --u: 1.5px; }
+.pile.tfx-wait, .stack.tfx-wait { visibility: hidden; }
+.tfx-fly .tfx-pile-fly { position: absolute; left: 0; top: 0; margin: 0; transform-origin: 50% 50%; }
+.tfx-fly .tfx-chip { position: absolute; left: 0; top: 0; width: 30px; height: 30px; transform-origin: 50% 50%; filter: drop-shadow(0 2px 0 rgba(11, 15, 10, 0.55)); }
+.tfx-fly .tfx-chip .px-chip { display: block; width: 100%; height: 100%; }
+/* The dealer's chip rack in the scenes, where lost bets go and pays come from (stage px, like the trays). */
+.tfx-rack { display: none; }
+body[data-stage] .tfx-rack { display: block; position: absolute; left: 424px; top: -24px; width: 256px; height: 16px; pointer-events: none; }
+body[data-view="3d"] .tfx-rack { left: 360px; top: -32px; }

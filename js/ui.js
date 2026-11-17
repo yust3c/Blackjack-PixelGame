@@ -536,17 +536,54 @@
       return true;
     });
   }
-  function chipStack(seat) {
+  // While the dealer settles a hand (js/tablefx.js), the standing bet waits off the spot until the chips go home.
+  // A chip clicked (or keyed) in the rack hops onto the seat's spot.
+  function chipFromRack(i, v) {
+    if (window.TableFX) window.TableFX.chipIn(i, v);
+    if (!addChipTo(i, v) && window.TableFX) window.TableFX.chipIn(null);
+  }
+  function chipStack(seat, hold) {
     const amount = seat.bet;
     if (!amount) return '<div class="bet-spot empty">BET</div>';
     if (window.ChipStacks) {
-      return `<div class="bet-spot"><div class="stack stack-cols">${window.ChipStacks.html(chipsOn(seat.index))}</div>
+      const pile = hold ? ' style="visibility:hidden"' : ` data-pile="s${seat.index}spot" data-from="pile:s${seat.index}h0b|owner" data-dest="owner"`;
+      return `<div class="bet-spot"><div class="stack stack-cols"${pile}>${window.ChipStacks.html(chipsOn(seat.index))}</div>
         <span class="bet-amount">${fmt(amount)}</span></div>`;
     }
     const chips = PX.breakdown(amount).slice(0, 8).reverse();
     const stack = chips.map((v, n) => `<span class="stack-chip" style="bottom:${n * 4}px">${PX.chip(v)}</span>`).join('');
     return `<div class="bet-spot"><div class="stack" style="height:${42 + (chips.length - 1) * 4}px">${stack}</div>
       <span class="bet-amount">${fmt(amount)}</span></div>`;
+  }
+
+  // Chips for an amount that may not be a whole chip (a 3:2 pay on 5 is 7.5): the nearest amount in 5s.
+  const chipsFor = (amount) => PX.breakdown(Math.max(5, Math.round(amount / 5) * 5));
+  /** The chips in front of a hand: its bet, the double beside it, and once the dealer pays, the payout.
+      `step` is how far the settling has gone (see settleStep): 1 lost bets taken, 2 wins paid, 3 chips home.
+      A bust hand's chips leave with its cards; the dealer takes them. */
+  function handChips(seat, hand, h, step) {
+    if (!window.ChipStacks || !hand.bet) return '';
+    const betting = game.phase === 'betting';
+    const r = hand.result;
+    const lost = r === 'lose' || r === 'bust' || r === 'surrender';
+    if (r === 'bust' && (betting || bustTaken(hand))) return '';
+    if (betting && r && ((lost && step >= 1) || step >= 3)) return '';
+    const key = `s${seat.index}h${h}`;
+    const stake = hand.doubled ? hand.bet / 2 : hand.bet;
+    const pile = (k, chips, from) => `<div class="pile" data-pile="${key}${k}" data-from="${from}" data-dest="${lost ? 'dealer' : 'owner'}">${window.ChipStacks.html(chips)}</div>`;
+    const placed = seat.type === 'player' && h === 0 && seat.bet === stake ? chipsOn(seat.index) : chipsFor(stake);
+    let out = pile('b', placed, h === 0 && seat.type === 'player' ? `pile:s${seat.index}spot|owner` : 'owner');
+    if (hand.doubled) out += pile('d', chipsFor(stake), 'owner');
+    if (betting && step >= 2 && (r === 'win' || r === 'blackjack')) out += pile('p', chipsFor(r === 'win' ? hand.bet : hand.bet * 1.5), 'dealer');
+    return `<div class="hand-chips">${out}</div>`;
+  }
+  // How far the end of the round has gone: the hands that finished first, then the moves of the chips.
+  let settle = 3;
+  function settleStep() {
+    if (game.phase !== 'betting' || !window.TableFX) return 3;
+    let token = null;
+    game.seats.forEach((s) => s.hands.forEach((h) => { if (!token && h.result) token = h; }));
+    return token ? window.TableFX.settleStep(token) : 3;
   }
 
   function renderSeat(seat) {
@@ -575,12 +612,13 @@
         const tags = [hand.doubled ? 'Doubled' : '', hand.insurance ? `Ins. ${fmt(hand.insurance)}` : ''].filter(Boolean).join(' · ');
         return `<div class="hand${activeHand}${hand.result && betting ? ' finished' : ''}">
           <div class="cards">${bustTaken(hand) ? '' : hand.cards.map((c) => cardHtml(c, false)).join('')}</div>
+          ${handChips(seat, hand, h, settle)}
           <div class="hand-info"><span class="total"${hand.fromSplit && BJ.isBlackjack(hand.cards) ? ' title="21 after a split counts as 21, not blackjack"' : ''}>${totalLabel(hand.cards, hand)}</span>
             <span class="hand-bet">${fmt(hand.bet)}</span>${result}</div>
           ${tags ? `<div class="hand-tags">${tags}</div>` : ''}
         </div>`;
       }).join('');
-      const spot = seat.type === 'player' && betting ? chipStack(seat) : '';
+      const spot = seat.type === 'player' && betting ? chipStack(seat, settle < 3) : '';
       body = `${hands ? `<div class="hands">${hands}</div>` : ''}${spot}`;
     }
 
@@ -599,7 +637,9 @@
   function render() {
     if (!game) return;
     if (window.TableFX) window.TableFX.before();
-    $('bankroll').textContent = fmt(game.bankroll);
+    settle = settleStep();
+    if (window.TableFX) window.TableFX.money($('bankroll'), game.bankroll, fmt);
+    else $('bankroll').textContent = fmt(game.bankroll);
     const left = game.rules.roundsPerShoe - game.shoe.roundsDealt;
     $('shoe').textContent = `${game.shoe.remaining} cards · ${left > 0 ? `${left} hand${left === 1 ? '' : 's'} to shuffle` : 'shuffle next hand'}`;
     renderGoal();
@@ -911,6 +951,7 @@
   // Every betting change goes through here so Undo can put the bets back.
   function betChange(fn) {
     if (!game || game.phase !== 'betting') return false;
+    if (window.TableFX) window.TableFX.finishSettle();
     const before = betsNow();
     const ok = fn();
     if (ok && !sameBets(before, betsNow())) {
@@ -931,7 +972,7 @@
   function pickChip(v) {
     if (!game || game.phase !== 'betting' || !v) return;
     activeChip = v;
-    if (selectedSeat !== null) addChipTo(selectedSeat, v);
+    if (selectedSeat !== null) chipFromRack(selectedSeat, v);
     else render();
   }
   function clearSeat() { if (selectedSeat !== null) betChange(() => game.clearBet(selectedSeat)); }
@@ -970,7 +1011,7 @@
     if (now - wheelAt < 90 || !e.deltaY) return;   // trackpads send a stream of small events
     wheelAt = now;
     if (selectedSeat !== i) selectedSeat = i;
-    if (e.deltaY < 0) addChipTo(i, activeChip);
+    if (e.deltaY < 0) chipFromRack(i, activeChip);
     else {
       const prev = chipsOn(i);
       const at = prev.lastIndexOf(activeChip);
@@ -1032,11 +1073,13 @@
     if (d.value && d.over !== null) {
       const i = d.over;
       activeChip = d.value;
+      if (window.TableFX) window.TableFX.still();
       addChipTo(i, d.value, true);
       selectedSeat = i;
       render();
     } else if (d.from !== null && d.over !== null) {
       const moved = chipsOn(d.from); const there = chipsOn(d.over);
+      if (window.TableFX) window.TableFX.still();
       if (betChange(() => { if (!game.moveBet(d.from, d.over)) return false; seatChips[d.over] = there.concat(moved); seatChips[d.from] = []; return true; })) { selectedSeat = d.over; render(); }
     } else if (d.from !== null && d.offTable) {
       betChange(() => game.clearBet(d.from));
