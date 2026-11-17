@@ -60,7 +60,7 @@ On your turn: `H` hit, `S` stand, `D` double, `P` split, `R` surrender. When the
 
 ## Made with
 
-Plain HTML, CSS and JavaScript, no libraries. Every card, chip, dealer and casino is pixel art drawn in code, and every sound is generated in code too.
+Plain HTML, CSS and JavaScript. Every card, chip, dealer and casino is pixel art drawn in code, and every sound is generated in code too. Card moves are animated with [GSAP](https://gsap.com), included in the `vendor` folder under [its own license](https://gsap.com/standard-license).
 
 ## License
 
