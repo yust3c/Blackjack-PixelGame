@@ -681,7 +681,7 @@
       $('goal-label').textContent = label;
       const n = Math.min(M.DAILY.hands, game.handNumber + (game.phase === 'betting' ? 1 : 0));
       $('goal').textContent = `${Math.max(1, n)}/${M.DAILY.hands}`;
-      $('progress-fill').style.width = `${Math.round((game.handNumber / M.DAILY.hands) * 20) * 5}%`;
+      setProgress(game.handNumber / M.DAILY.hands, 'daily');
       return;
     }
     const show = mode.type !== 'practice';
@@ -692,9 +692,14 @@
     $('goal').textContent = goal === null ? fmt(M.endlessRecord(save, mode.difficulty).best) : fmt(goal);
     if (goal !== null) {
       const pct = Math.max(0, Math.min(1, (game.bankroll - start) / (goal - start)));
-      // Snap to 5% steps so the bar moves in chunky pixel increments.
-      $('progress-fill').style.width = `${Math.round(pct * 20) * 5}%`;
+      setProgress(pct, document.body.dataset.scene);
     }
+  }
+
+  // The goal bar: each casino draws its own (js/goalbar.js); without it, the plain bar in 5% steps.
+  function setProgress(pct, barId) {
+    if (window.GoalBar) window.GoalBar.set($('progress'), pct, barId);
+    else $('progress-fill').style.width = `${Math.round(pct * 20) * 5}%`;
   }
 
   function myTurn() {

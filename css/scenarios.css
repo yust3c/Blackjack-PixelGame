@@ -29,6 +29,7 @@ body[data-stage] .topbar {
   background: none; box-shadow: none; clip-path: none; flex-wrap: nowrap;
 }
 body[data-stage] .progress { position: absolute; left: 192px; width: 1152px; top: 62px; height: 10px; margin: 0; padding: 1px; }
+body[data-stage] .progress.has-goalbar { top: 60px; height: 18px; padding: 0; }
 
 /* felt: exactly the painted table's inner shape */
 body[data-stage] .table {
