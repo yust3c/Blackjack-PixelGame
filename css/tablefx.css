@@ -1,0 +1,36 @@
+/* Table FX (js/tablefx.js): the layer the moving cards fly in, and the shoe and discard tray.
+   On the plain table (Practice, narrow windows) the shoe and tray are drawn at the felt's top corners; in the
+   scenes' stage layout they are invisible spots over the shoe and tray painted in the room. */
+#game { position: relative; }
+.tfx-fly { position: absolute; inset: 0; pointer-events: none; z-index: 40; overflow: visible; }
+.tfx-fly .card { position: absolute; left: 0; top: 0; margin: 0; transform-origin: 50% 50%; filter: drop-shadow(3px 3px 0 rgba(11, 15, 10, 0.55)); }
+.tfx-fly .card.back > *, .tfx-fly .card.back::before, .tfx-fly .card.back::after { display: none; }
+.card.tfx-wait { visibility: hidden; }
+
+.tfx-tray {
+  position: absolute; top: 30px; z-index: 0; pointer-events: none;
+  width: calc(var(--card-w) + 12px); height: calc(var(--card-h) + 12px);
+}
+.tfx-tray .card, .tfx-tray .tfx-anchor { position: absolute; left: 6px; top: 6px; }
+.tfx-tray .tfx-anchor:not(.card) { width: var(--card-w); height: var(--card-h); }
+.tfx-shoe { right: 36px; background: var(--rail-dark); box-shadow: inset 0 0 0 2px var(--rail-light); }
+.tfx-shoe::after { content: ""; position: absolute; left: 4px; right: 4px; bottom: 4px; height: 24px; background: var(--rail); box-shadow: inset 0 2px 0 var(--rail-light); }
+.tfx-discard { left: 36px; background: rgba(11, 15, 10, 0.3); box-shadow: inset 0 0 0 2px rgba(233, 210, 122, 0.4); }
+.tfx-pile { position: absolute; inset: 0; }
+
+/* Narrow windows: no room beside the dealer, so the spots stay but are not drawn. */
+@media (max-width: 720px) {
+  .tfx-tray { top: 20px; background: none; box-shadow: none; }
+  .tfx-shoe { right: 16px; } .tfx-discard { left: 16px; }
+  .tfx-tray::after, .tfx-tray .card { visibility: hidden; }
+}
+
+/* Stage layout: spots over the shoe and discard tray painted on the table, small because they are far away.
+   Positions are stage px relative to the felt box (see drawStage / drawTable3d in js/scenarios.js). */
+body[data-stage] .tfx-tray { background: none; box-shadow: none; width: 26px; height: 36px; }
+body[data-stage] .tfx-tray::after, body[data-stage] .tfx-tray .card { visibility: hidden; }
+body[data-stage] .tfx-tray .tfx-anchor { left: 0; top: 0; width: 26px; height: 36px; }
+body[data-stage] .tfx-shoe { left: 991px; right: auto; top: -30px; }
+body[data-stage] .tfx-discard { left: 83px; top: -26px; }
+body[data-view="3d"] .tfx-shoe { left: 831px; top: -46px; }
+body[data-view="3d"] .tfx-discard { left: 115px; top: -42px; }

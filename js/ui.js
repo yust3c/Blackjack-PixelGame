@@ -37,6 +37,7 @@
     if (window.StatsView) window.StatsView.close();
     game = null;
     mode = null;
+    if (window.TableFX) window.TableFX.reset();
     if (window.SceneEvents) window.SceneEvents.stop();
     if (window.GameSounds) { GameSounds.stop(); GameSounds.closeSettings(); }
     $('game').hidden = true;
@@ -319,6 +320,7 @@
       M.store(save);
     }
     seenCards.clear();
+    if (window.TableFX) window.TableFX.reset();
     selectedSeat = null;
     undoStack = [];
     seatChips = {};
@@ -494,12 +496,13 @@
   // ======================================================================
   function cardHtml(card, hidden) {
     const key = card.id + (hidden ? 'h' : '');
-    const fresh = !seenCards.has(key);
+    // With TableFX the card flies in from the shoe instead of the small drop.
+    const fresh = !seenCards.has(key) && !(window.TableFX && window.TableFX.active());
     seenCards.add(key);
-    if (hidden) return `<div class="card back${fresh ? ' fresh' : ''}" aria-label="Face-down card"></div>`;
+    if (hidden) return `<div class="card back${fresh ? ' fresh' : ''}" data-cid="${card.id}" aria-label="Face-down card"></div>`;
     const red = card.suit === '♥' || card.suit === '♦';
     const sprite = PX.suit(card.suit);
-    return `<div class="card${red ? ' red' : ''}${fresh ? ' fresh' : ''}" aria-label="${card.rank}${card.suit}">
+    return `<div class="card${red ? ' red' : ''}${fresh ? ' fresh' : ''}" data-cid="${card.id}" aria-label="${card.rank}${card.suit}">
       <span class="corner"><span class="rank">${card.rank}</span>${sprite}</span><span class="pip">${sprite}</span></div>`;
   }
 
@@ -571,7 +574,7 @@
           : '';
         const tags = [hand.doubled ? 'Doubled' : '', hand.insurance ? `Ins. ${fmt(hand.insurance)}` : ''].filter(Boolean).join(' · ');
         return `<div class="hand${activeHand}${hand.result && betting ? ' finished' : ''}">
-          <div class="cards">${hand.cards.map((c) => cardHtml(c, false)).join('')}</div>
+          <div class="cards">${bustTaken(hand) ? '' : hand.cards.map((c) => cardHtml(c, false)).join('')}</div>
           <div class="hand-info"><span class="total"${hand.fromSplit && BJ.isBlackjack(hand.cards) ? ' title="21 after a split counts as 21, not blackjack"' : ''}>${totalLabel(hand.cards, hand)}</span>
             <span class="hand-bet">${fmt(hand.bet)}</span>${result}</div>
           ${tags ? `<div class="hand-tags">${tags}</div>` : ''}
@@ -590,8 +593,12 @@
     </div>`;
   }
 
+  // A busted hand's cards leave the table after a short look (js/tablefx.js); its total and BUST stay.
+  const bustTaken = (hand) => !!(window.TableFX && window.TableFX.bustTaken(hand));
+
   function render() {
     if (!game) return;
+    if (window.TableFX) window.TableFX.before();
     $('bankroll').textContent = fmt(game.bankroll);
     const left = game.rules.roundsPerShoe - game.shoe.roundsDealt;
     $('shoe').textContent = `${game.shoe.remaining} cards · ${left > 0 ? `${left} hand${left === 1 ? '' : 's'} to shuffle` : 'shuffle next hand'}`;
@@ -608,6 +615,7 @@
     renderControls();
     renderCoach();
     if (window.StatsView) { window.StatsView.refresh(); $('stats-btn').classList.toggle('on', window.StatsView.isOpen()); }
+    if (window.TableFX) window.TableFX.after();
   }
 
   function renderGoal() {
@@ -1069,6 +1077,8 @@
   document.addEventListener('cosmetics:close', () => { if (!game) renderMenu(); });
   document.addEventListener('achievement:unlocked', () => { if (!game) renderMenu(); });
   if (window.Cosmetics) window.Cosmetics.apply();
+  // Cards move on the table (js/tablefx.js); it re-renders when a busted hand is taken away.
+  if (window.TableFX) window.TableFX.init({ game: () => game, render: () => render() });
   // Settings > Table changes apply to a game in progress too.
   if (window.Prefs) window.Prefs.onChange(() => { if (game) { game.delay = window.Prefs.delay(); game.botPace = window.Prefs.botPace(); } });
 
