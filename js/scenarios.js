@@ -979,12 +979,53 @@
     for (let x = BW.x0 + 2; x < BW.x1 - 4; x += 6) { p.rect(x, 35, 3, 3, '#c9a24a', 0.3); p.rect(x + 1, 36, 1, 1, bg); }
   }
 
+  // Grand Hotel: the back wall between the pillars is a tall window onto the city at night, in a gilded frame:
+  // sky, stars, a crescent moon, two rows of towers with lit windows, glass glints and the frame's mullions.
+  function decoWindow(p) {
+    const x0 = 54; const x1 = 138; const y0 = 15; const y1 = 31;
+    const sky = ['#0b1230', '#101a3e', '#17244c', '#22305a'];
+    for (let y = y0; y < y1; y++) p.rect(x0, y, x1 - x0, 1, sky[Math.min(3, Math.floor(((y - y0) / (y1 - y0)) * 4))]);
+    p.stars(57, 18, x0, y0, x1, y0 + 6);
+    p.disc(124.5, 18.5, 2.5, '#fbf6e6'); p.disc(125.5, 17.5, 2.2, sky[0]);
+    const r = rng(61);
+    [['#1c2648', 0.45, 4, 6], ['#0b1024', 0.9, 1, 4]].forEach(([c, lit, min, span]) => {
+      let x = x0;
+      while (x < x1) {
+        const w = 4 + Math.floor(r() * 7); const top = y1 - min - Math.floor(r() * span);
+        p.rect(x, top, Math.min(w, x1 - x), y1 - top, c);
+        if (r() < 0.25) p.rect(x + Math.floor(w / 2), top - 3, 1, 3, c);
+        for (let wy = top + 2; wy < y1 - 1; wy += 2) for (let wx = x + 1; wx < Math.min(x + w, x1) - 1; wx += 2) if (r() < 0.3) p.px(wx, wy, r() < 0.8 ? '#ffd27a' : '#bfe4ff', lit);
+        x += w + (r() < 0.3 ? 1 : 0);
+      }
+    });
+    // glass: a faint diagonal glint in each pane, then the gilded frame (mullions, transom, sill)
+    for (let x = x0; x < x1; x += 14) for (let i = 0; i < 4; i++) { p.px(x + 4 + i, y0 + 5 - i, '#ffffff', 0.14); p.px(x + 6 + i, y0 + 5 - i, '#ffffff', 0.08); }
+    for (let x = x0; x <= x1; x += 14) p.rect(x, y0, 1, y1 - y0, '#c9a24a');
+    p.rect(x0, y0 + 5, x1 - x0, 1, '#c9a24a', 0.85);
+    p.rect(x0, y1 - 1, x1 - x0, 1, '#8a6a2a');
+  }
+
+
+  // The Grand Hotel's chandeliers in crystal (gold chain and candles, pale crystal body, hanging drops), so they stand
+  // out from the gold window grille behind them. 15 x 15, centred on x. Drawn before the scoreboard, which hangs in front.
+  const DECO_CHANDELIER = [".......M.......", "......MMM......", ".......M.......", ".......M.......", ".F.....M.....F.", ".C....MmM....C.", "MMM..MmmmM..MMM", ".MMMMMmmmMMMMM.", "...MMmmmmmMM...", "..d..MmmmM..d..", "..d...MmM...d..", "..W....M....W..", ".....d.d.d.....", ".....W.d.W.....", ".......W......."];
+  function decoChandelier(p, x) {
+    const pal = { M: '#d8f0ff', m: '#2f62b0', C: '#fbf6e6', F: '#ffd75e', d: '#8fd0ff' };
+    const D = 3;   // hangs 3 px lower than the old one, so it shows under the scoreboard
+    p.disc(x + 0.5, 9 + D, 8, '#ffe9a0', 0.06);
+    DECO_CHANDELIER.forEach((row, j) => [...row].forEach((c, i) => { if (pal[c]) p.px(x - 7 + i, j + D, pal[c]); }));
+    for (let j = 0; j <= 4 + D; j++) p.px(x, j, j % 2 ? '#1c2a4a' : '#9ab8d8');   // chain: dark and steel links, so it reads on the gold
+    p.px(x - 6, 3 + D, '#fff6c0'); p.px(x + 6, 3 + D, '#fff6c0');       // candle flame tips
+    p.g('sc-twinkle', () => DECO_CHANDELIER.forEach((row, j) => [...row].forEach((c, i) => { if (c === 'W') p.px(x - 7 + i, j + D, '#ffffff'); })));
+  }
+
   function room3dDeco(p) {
     p.rect(0, 0, W, H, '#0a1020');
     decoBack(p, '#14213d', '#c9a24a', false);
+    decoWindow(p);
     trimBackWall(p, '#0a1020');
     // the chandeliers hang below the ceiling, each in its own group so a scene event can swing it (js/sceneevents.js)
-    [64, 128].forEach((x) => { p.out.push(`<g transform="translate(0 6)"><g class="sc-chandelier" style="transform-origin:${x + 0.5}px 0px">`); chandelier(p, x, '#c9a24a', '#bfe4ff', '#ffe9a0'); p.out.push('</g></g>'); });
+    [64, 128].forEach((x) => { p.out.push(`<g transform="translate(0 6)"><g class="sc-chandelier" style="transform-origin:${x + 0.5}px 0px">`); decoChandelier(p, x); p.out.push('</g></g>'); });
     [BW.x0, BW.x1 - 6].forEach((x) => { p.rect(x, BW.top, 6, BW.bottom - BW.top, '#e8e2d0'); p.rect(x + 2, BW.top + 3, 1, 30, '#c8c2ae'); p.rect(x + 4, BW.top + 3, 1, 30, '#c8c2ae'); p.rect(x - 1, BW.top, 8, 2, '#c9a24a'); p.rect(x - 1, BW.bottom - 3, 8, 3, '#c9a24a'); });
     sideWalls3d(p, { upper: ['#14213d', '#162544'], rail: '#c9a24a', lower: '#0f1a32', seam: '#c9a24a', ceilingEdge: '#c9a24a' });
     floor3d(p, (xw, zw) => {
