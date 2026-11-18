@@ -66,6 +66,7 @@ html[data-cos-face="face_holo"] .card:not(.back)::after {
   animation: cos-holo 2.4s steps(24) infinite;
 }
 @keyframes cos-chase { to { background-position: 6px 0, -6px 100%, 0 6px, 100% -6px; } }
+@keyframes cos-rain { from { background-position: 0 0; } to { background-position: -16px 64px; } }
 @keyframes cos-holo { from { background-position: 100% 0; } to { background-position: -50% 0; } }
 
 html[data-cos-face="face_retro"] { --card: #c4cfa1; --card-ink: #1e2a12; --card-red: #4f6a1f; }

@@ -180,6 +180,8 @@
     { id: 'daily_14', rarity: 'epic', group: 'Daily', name: 'Devoted', desc: 'Play the Daily challenge 14 days in a row.', counter: ['dailyBest', 14] },
     { id: 'daily_30', rarity: 'legendary', group: 'Daily', name: 'Clockwork', desc: 'Play the Daily challenge 30 days in a row.', counter: ['dailyBest', 30] },
     { id: 'daily_100', rarity: 'legendary', group: 'Daily', name: 'Sunrise', desc: 'Play the Daily challenge 100 days in a row.', counter: ['dailyBest', 100] },
+    { id: 'yellow_raincoat', rarity: 'secret', group: 'Secret', name: 'Rainy Night', desc: 'Unlock every chapter of the Lore, then hit three blackjacks in a row at The Corner.', secret: true,
+      hint: 'Secret. Some nights are worth living twice.' },
     { id: 'eyewitness', rarity: 'secret', group: 'Secret', name: 'Eyewitness', desc: 'See the secret event of every scene.', secret: true,
       hint: 'Secret. Look up from the cards once in a while. Some things happen only once in a blue moon.' },
     { id: 'darkest_run', rarity: 'insanity', group: 'Secret', name: 'The Darkest Run', desc: 'Complete Endless on Expert using only 2 seats, without ever splitting, doubling or surrendering.', secret: true,
@@ -1503,6 +1505,13 @@
       p.disc(8, 8, 3.2, 3.2, C.yellow);
       [[7, 13], [8, 13], [6, 14], [9, 14]].forEach(([x, y]) => p.set(x, y, '#c0202a'));
     }, post(p, f) { if (f >= 6) p.sparkle(8, 2, '#ffffff'); } },
+    yellow_raincoat: { frames: 8, dur: 1.2, draw(p, f) {
+      p.rect(0, 0, 16, 16, '#1a2430'); p.rect(0, 13, 16, 3, '#0e141c');
+      [[6, 3, 'YYYY'], [5, 4, 'YYYYYY'], [5, 5, 'YSSSSy'], [5, 6, 'YYYYYy'], [5, 7, 'YYYYYy'], [5, 8, 'YYYYYy'], [5, 9, 'YYYYYy'], [4, 10, 'YYYYYYy']].forEach(([x0, y, r]) => [...r].forEach((c, i) => p.set(x0 + i, y, { Y: '#f0c020', y: '#b88a10', S: '#e8b890' }[c])));
+      [[6, 11], [6, 12], [9, 11], [9, 12]].forEach(([x, y]) => p.set(x, y, '#2a2a33'));
+      for (let i = 0; i < 7; i++) { const x = (i * 5 + 3) % 16, y = (i * 7 + f * 2) % 16; if (x < 4 || x > 11 || y < 3 || y > 12) { p.set(x, y, '#9ab8d8'); p.set(x, y - 1, '#4a6a88'); } }
+      p.set(12, 13, f % 4 < 1 ? '#ffffff' : '#ffd75e'); p.set(13, 13, '#d8a020');
+    } },
     darkest_run: { frames: 8, dur: 1.6, draw(p, f) {
       p.ring(8, 8, 4.5, 7.9, (x, y, d) => {
         const a = Math.atan2(y + 0.5 - 8, x + 0.5 - 8);

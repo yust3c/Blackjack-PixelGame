@@ -466,6 +466,14 @@
       lose: () => { tone({ f: 80, to: 55, dur: 0.8, vol: 0.12, wave: 'sawtooth', vib: { rate: 8, depth: 0.12 }, attack: 0.1 }); noise({ at: 0.7, f: 600, to: 200, dur: 0.3, vol: 0.12, q: 0.8 }); },
       blackjack: () => { tone({ f: 150, to: 70, slide: 0.9, dur: 1.0, vol: 0.14, wave: 'sawtooth', vib: { rate: 14, depth: 0.15 }, attack: 0.08 }); noise({ f: 400, to: 3000, dur: 0.9, vol: 0.12, q: 0.6, attack: 0.1 }); noise({ at: 0.5, f: 3000, to: 800, dur: 0.9, vol: 0.1, q: 0.5 }); coins(0.9, 22); },
     },
+    'Yellow Raincoat': {                                  // rain, puddles, distant thunder and the Corner's old jukebox
+      card_deal: (o) => { swish(o.pan, 0.1); drop(0.03, jitter(1400, 0.15), 0.05, o.pan); },
+      card_flip: (o) => { noise({ at: 0, f: 2400, dur: 0.08, vol: 0.12, q: 1.5, pan: o.pan }); drop(0.02, 900, 0.05, o.pan); },
+      shuffle: () => { noise({ at: 0, f: 5000, dur: 1, vol: 0.08, q: 0.4, attack: 0.25 }); for (let i = 0; i < 9; i++) drop(0.05 + i * 0.09 + Math.random() * 0.04, jitter(1300, 0.3), 0.04, Math.random() * 0.8 - 0.4); },
+      win: () => { [['E5', 0], ['G5', 0.16], ['A5', 0.32], ['C6', 0.48], ['A5', 0.72], ['C6', 0.88]].forEach(([n, t]) => bell(t, n, 0.05, { dur: 0.6 })); tone({ at: 0, f: 'A3', dur: 1.2, vol: 0.05, wave: 'triangle' }); tone({ at: 0.48, f: 'C4', dur: 1, vol: 0.05, wave: 'triangle' }); },
+      lose: () => { noise({ at: 0, f: 110, dur: 2, vol: 0.35, q: 0.7, attack: 0.18 }); noise({ at: 0.35, f: 70, dur: 1.6, vol: 0.25, q: 0.8, attack: 0.1 }); tone({ at: 0.1, f: 'E4', to: 'C4', slide: 0.6, dur: 0.9, vol: 0.05, wave: 'triangle' }); for (let i = 0; i < 5; i++) drop(0.9 + i * 0.13, jitter(1100, 0.3), 0.035); },
+      blackjack: () => { ['C6', 'E6', 'G6'].forEach((n, i) => bell(i * 0.3, n, 0.06, { dur: 0.8 })); ['C4', 'E4', 'G4', 'C5'].forEach((n, i) => tone({ at: 0.95 + i * 0.03, f: n, dur: 1.5, hold: 0.6, vol: 0.045, wave: 'triangle', wet: 0.4 })); bell(1.1, 'G6', 0.04, { dur: 1 }); for (let i = 0; i < 4; i++) bell(1.25 + i * 0.06, jitter(3300, 0.1), 0.025, { dur: 0.25 }); },
+    },
     'Eclipse': {                                          // a black hole: deep groans, things falling in, time slowing down
       card_deal: (o) => {                                 // the card is pulled in: the swish slows and sinks, then a sub thump
         noise({ f: 1400, to: 120, dur: 0.26, vol: 0.18, q: 1.2, pan: o.pan });

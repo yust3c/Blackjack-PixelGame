@@ -1425,6 +1425,106 @@
     },
   });
 
+
+  // ===== YELLOW RAINCOAT (secret: the girl from '98) ================================
+  // Back: the Corner's front door on a rainy night. The door opens, a girl in a yellow raincoat steps out into the
+  // rain and walks away; a gold chip is left glinting on the step. Faces: raindrops by each suit; the ace has rain
+  // falling on the big suit, splashing on its top edge, with a gold chip spinning in the puddle below.
+  const RAIN_GIRL = [ // 5 x 9, two walking frames share the top 7 rows
+    '.YYY.', 'YYYYY', 'YSSSy', 'YYYYy', 'YYYYy', 'YYYYy', 'YYYYy',
+  ];
+  const RAIN_LEGS = [['.B.B.', '.B.B.'], ['B...B', '.B.B.'], ['.B.B.', '.B.B.'], ['..BB.', '.B.B.']];
+  const RAIN_PAL = { Y: '#f0c020', y: '#b88a10', S: '#e8b890', B: '#2a2a33' };
+  const OPEN_TXT = { O: ['XXX', 'X.X', 'X.X', 'X.X', 'XXX'], P: ['XXX', 'X.X', 'XXX', 'X..', 'X..'], E: ['XXX', 'X..', 'XX.', 'X..', 'XXX'], N: ['X..X', 'XX.X', 'X.XX', 'X..X', 'X..X'] };
+  Object.assign(SUIT_FX, {
+    raincoat(s) { // two short raindrops falling past the top corners
+      const g = pad(grid(BASE[s]), 1);
+      putIf(g, [[0, 0], [1, 1], [9, 2], [10, 3]], 'o');
+      return g;
+    },
+  });
+  SETS.push({
+    id: 'raincoat', name: 'Yellow Raincoat', rarity: 'secret', code: 'S3',
+    border: '#f0c020', frames: 96, fps: 12,
+    backNote: 'The Corner on a rainy night. Rain streaks down, the OPEN sign flickers and its red light smears in the puddles. The door swings open, a girl in a yellow raincoat steps out into the rain and walks away down the street. Where she stood, a gold chip is left glinting on the wet step.',
+    face: { card: '#f4f0e4', ink: '#1a2430', red: '#b8282a', edge: '#1a2430', shade: '#e2dccc', ring: '#f0c020', accent: '#5a8ab0' },
+    faceNote: '<b>Suits:</b> two raindrops falling past the top corners. <b>Ace:</b> rain falls on the big suit and splashes on its top edge, while a gold chip spins in a puddle below.',
+    back(g, f, F) {
+      const STREET = 27;
+      // wall: dark brick with mortar lines
+      g.each((u, v) => {
+        if (v >= STREET) return null;
+        const row = Math.floor(v / 3), brick = (u + (row % 2) * 2) % 5 === 0 || v % 3 === 0;
+        return brick ? '#1e161c' : mix('#3a2630', '#2a1c24', v / STREET);
+      });
+      // OPEN sign, flickering more than it should
+      const flick = (f % 37 === 5) || (f % 37 === 6) || (f % 53 === 20) || (f > 40 && f < 43);
+      const neon = flick ? '#5a1a20' : '#ff3a4a';
+      for (let v = 1; v <= 7; v++) for (let u = 1; u <= 19; u++) g.set(u, v, v === 1 || v === 7 || u === 1 || u === 19 ? '#4a3a40' : '#140c10');
+      ['O', 'P', 'E', 'N'].forEach((ch, i) => g.bits(OPEN_TXT[ch], 3 + i * 4, 2, { X: neon }));
+      if (!flick) for (let u = 2; u <= 18; u++) g.set(u, 8, '#5a2a30');
+      // door with warm light inside; it opens at the start of the loop
+      const open = f < 22 ? Math.min(4, Math.floor(f / 3)) : f < 28 ? 4 - Math.floor((f - 22) / 1.5) : 0;
+      for (let v = 11; v < STREET; v++) for (let u = 13; u <= 19; u++) {
+        const frame = u === 13 || u === 19 || v === 11;
+        g.set(u, v, frame ? '#5a3a20' : u - 14 < open ? (v > 20 ? '#ffd890' : '#ffc860') : (u === 18 && v === 19) ? '#d8a020' : '#4a2a18');
+      }
+      // lamp post with a cone of light
+      for (let v = 10; v < STREET; v++) g.set(3, v, '#1a1a20');
+      g.set(2, 10, '#1a1a20'); g.set(4, 10, '#1a1a20'); g.set(3, 9, '#fff0b0');
+      g.each((u, v) => (v > 10 && v < STREET && u !== 3 && Math.abs(u - 3) < (v - 10) * 0.3 && (u + v) % 2 === 0 ? '#4a3a34' : null));
+      // street: wet asphalt with the sign's red light and the door's glow smeared in it
+      g.each((u, v) => {
+        if (v < STREET) return null;
+        const wob = Math.sin(v * 1.7 + f * 0.6) > 0.3 ? 1 : 0;
+        if (!flick && v > STREET && (v - STREET) % 2 === 1 && u >= 5 + wob && u <= 15 + wob && (u + v) % 4 !== 0) return '#4a1a26';
+        if (open && u >= 14 && u <= 18 && v < STREET + 4) return '#8a6a30';
+        return v === STREET ? '#3a4450' : mix('#1a2430', '#0e141c', (v - STREET) / 7);
+      });
+      // the girl: steps out of the door and walks away to the left
+      if (f >= 10 && f < 74) {
+        const t = f - 10, x = Math.round(14 - t * 0.33), y = STREET - 9 + (t < 6 ? 0 : 0);
+        const legs = RAIN_LEGS[Math.floor(t / 3) % 4];
+        g.bits(RAIN_GIRL, x, y, RAIN_PAL); g.bits(legs, x, y + 7, RAIN_PAL);
+        // her reflection in the puddle
+        if (y + 9 < IH) for (let i = 0; i < 5; i++) if ((i + f) % 2) g.set(x + i, STREET + 2, '#8a7020');
+      }
+      // the gold chip she left on the step
+      if (f >= 24) {
+        const glint = (f % 12) < 3;
+        g.set(15, STREET, glint ? '#ffffff' : '#ffd75e'); g.set(16, STREET, '#d8a020'); g.set(15, STREET + 1, '#b8860b'); g.set(16, STREET + 1, '#8a6a10');
+        if (glint && f > 74) { g.set(15, STREET - 1, '#fff6c0'); g.set(14, STREET, '#fff6c0'); g.set(17, STREET, '#fff6c0'); }
+      }
+      // rain: diagonal streaks over everything, two pixels long, moving down two pixels a frame
+      const r0 = rand(98);
+      const drops = Array.from({ length: 16 }, () => [r0() * IW, r0() * IH]);
+      drops.forEach(([x0, y0], i) => {
+        const y = (y0 + f * 2) % IH, x = (x0 - f * 0.5 + IW * 8) % IW;
+        g.set(x, y, i % 4 ? '#6a88a8' : '#a8c4e0'); g.set(x + 0.5, y - 1, '#3a5068');
+      });
+      [[5, 0], [10, 31], [18, 63], [8, 47], [20, 15]].forEach(([x, k]) => { const t = (f + k) % 24; if (t < 3) { const r = t; g.set(x - r, STREET + 2, '#7a9ab8'); g.set(x + r, STREET + 2, '#7a9ab8'); if (!t) g.set(x, STREET + 1, '#a8c4e0'); } }); // splashes
+    },
+    borderFx(g, f) { // drops running down both sides of the yellow frame
+      for (let i = 0; i < 3; i++) { const y = (f * 1.5 + i * 13) % (BH - 2) + 1; g.set(1, y, '#fff6c0'); g.set(BW - 2, (y + 20) % (BH - 2) + 1, '#fff6c0'); }
+    },
+    ace(g, f, F, ink) {
+      g.bits(BASE[this.s], 0, 2, { X: ink }, 2);
+      const T = f % 48;
+      // puddle line under the suit, a ripple drifting out from where the chip lands
+      for (let x = 0; x < 18; x++) g.set(x, 21, Math.abs(x - 13 - (T % 8) / 2) < 0.6 || Math.abs(x - 13 + (T % 8) / 2) < 0.6 ? '#9ab8d8' : '#5a8ab0');
+      // rain: streaks falling on the suit; they stop at its top edge and splash
+      const top = (x) => { const row = BASE[this.s].findIndex((r) => r[Math.floor(x / 2)] === 'X'); return row < 0 ? 20 : 2 + row * 2; };
+      [1, 5, 8, 12, 15].forEach((x0, i) => {
+        const y = ((T * 1.5 + i * 7) % 22) - 2, x = x0, stop = top(x);
+        if (y < stop - 1) { g.set(x, y, '#5a8ab0'); g.set(x, y - 1, '#9ab8d8'); }
+        else if (y < stop + 2) { g.set(x - 1, stop - 1, '#9ab8d8'); g.set(x + 1, stop - 1, '#9ab8d8'); }
+      });
+      // the gold chip spinning in the puddle, bottom right
+      const k = Math.floor(T / 4) % 4, w = [3, 2, 1, 2][k];
+      for (let a = 0; a < w; a++) { g.set(15 + a - (w > 1 ? 1 : 0), 20, a === 0 ? '#fff6c0' : '#ffd75e'); g.set(15 + a - (w > 1 ? 1 : 0), 21, '#b8860b'); }
+    },
+  });
+
   // ======================================================================== game glue
   const doc = root.document;
   // set id -> cosmetic ids in js/cosmetics.js
@@ -1436,6 +1536,7 @@
     eye: ['back_eye', 'face_eye'], sunrise: ['back_sunrise', 'face_sunrise'],
 stillwater: ['back_stillwater', 'face_stillwater'], halcyon: ['back_halcyon', 'face_halcyon'], owl: ['back_owl', 'face_owl'], laurel: ['back_laurel', 'face_laurel'], dragon: ['back_dragon', 'face_dragon'], goldace: ['back_goldace', 'face_goldace'], marquee: ['back_marquee', 'face_marquee'],
 shark: ['back_shark', 'face_shark'], houseeye: ['back_houseeye', 'face_houseeye'], skyeye: ['back_skyeye', 'face_skyeye'],
+    raincoat: ['back_raincoat', 'face_raincoat'],
     inferno: ['back_inferno'], storm: ['back_storm'], slots: ['back_slots'], starfield: ['back_starfield'],
   };
   const BY_BACK = {}, BY_FACE = {};

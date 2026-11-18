@@ -1093,6 +1093,31 @@ html .cos-sw-faces.cos-sw-faces[data-face="${id}"] .card::after { ${after} }\n`;
       after: 'repeating-linear-gradient(170deg, transparent 0 10px, rgba(58, 122, 168, 0.18) 10px 12px, transparent 12px 22px) 0 0 / 100% 200%', opacity: 0.6, anim: 'cos-holo 6s linear infinite' },
   });
 
+
+  // ----- Yellow Raincoat (secret; back and aces are drawn in js/cardfx.js) -----
+  function rainTile(seed, n) { // 64 x 64 tile of short slanted raindrops
+    const r = rand(seed); let rects = '';
+    for (let i = 0; i < n; i++) {
+      const x = Math.floor(r() * 64), y = Math.floor(r() * 64), c = r() < 0.3 ? '#b8d0e8' : '#7a9ab8';
+      rects += `<rect x="${x}" y="${y}" width="1" height="2" fill="${c}"/><rect x="${x - 1}" y="${y + 2}" width="1" height="2" fill="${c}" opacity="0.6"/>`;
+    }
+    return svgUrl(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="128" height="128" shape-rendering="crispEdges">${rects}</svg>`);
+  }
+  Object.assign(FELTS, {
+    felt_raincoat: { '--felt': '#1c2a36', '--felt-dot': '#1a2733', '--felt-dark': '#0e1620', '--felt-line': '#f0c020', '--rail': '#26262c', '--rail-light': '#44444e', '--rail-dark': '#101014' },
+  });
+  Object.assign(FELT_FX, {
+    felt_raincoat: () => [[rainTile(98, 26), 'radial-gradient(ellipse at 50% 108%, rgba(240, 192, 32, 0.18), transparent 55%)'], ['128px 128px', '100% 100%'], ['-32px 128px', '0 0'], '0.8s', 32],
+  });
+  Object.assign(CHIP_SETS, {
+    chips_raincoat: { stripe: 'spin', spin: ['#fff6c0', '#f0c020', '#5a8ab0'], colors: (m, d, l) => [mix(m, '#1c2a36', 0.5), '#0a1018', '#f0c020'] },
+  });
+  Object.assign(FACE_FX, {
+    face_raincoat: { vars: { '--card': '#f4f0e4', '--card-ink': '#1a2430', '--card-red': '#b8282a' },
+      shadow: 'inset 0 0 0 2px #1a2430, inset 0 0 0 4px #f0c020, inset -4px -4px 0 4px #e2dccc',
+      after: `${rainTile(7, 10)} 0 0 / 64px 64px`, opacity: 0.3, anim: 'cos-rain 0.8s steps(16) infinite' },
+  });
+
   const CATALOG = [
     { id: 'back_classic',   type: 'back', name: 'Classic Red',   rarity: 'default' },
     { id: 'back_blue',      type: 'back', name: 'Royal Blue',    rarity: 'common',    by: 'first_hand' },
@@ -1320,6 +1345,11 @@ html .cos-sw-faces.cos-sw-faces[data-face="${id}"] .card::after { ${after} }\n`;
     { id: 'back_skyeye', type: 'back', name: 'Eye in the Sky', rarity: 'legendary', by: 'feeling_heat', animated: true, set: 'Eye in the Sky' },
     { id: 'face_skyeye', type: 'face', name: 'Eye in the Sky', rarity: 'legendary', by: 'feeling_heat', animated: true, set: 'Eye in the Sky' },
     { id: 'title_beat_expert', type: 'title', name: 'Card Shark', rarity: 'legendary', by: 'beat_expert', animated: true },
+    { id: 'back_raincoat', type: 'back', name: 'Yellow Raincoat', rarity: 'secret', by: 'yellow_raincoat', animated: true, set: 'Yellow Raincoat' },
+    { id: 'felt_raincoat', type: 'felt', name: 'Yellow Raincoat', rarity: 'secret', by: 'yellow_raincoat', animated: true, set: 'Yellow Raincoat' },
+    { id: 'chips_raincoat', type: 'chips', name: 'Yellow Raincoat', rarity: 'secret', by: 'yellow_raincoat', animated: true, set: 'Yellow Raincoat' },
+    { id: 'face_raincoat', type: 'face', name: 'Yellow Raincoat', rarity: 'secret', by: 'yellow_raincoat', animated: true, set: 'Yellow Raincoat' },
+    { id: 'title_yellow_raincoat', type: 'title', name: "Kid from '98", rarity: 'secret', by: 'yellow_raincoat', animated: true },
     { id: 'title_darkest_run', type: 'title', name: "Eclipse", rarity: 'insanity', by: 'darkest_run', animated: true },
   );
   // ======================================================================

@@ -264,6 +264,16 @@
       vip: 'Ten thousand. The house has a dragon too. Do not wake it twice.',
       horizon: 'A hoard like that draws dragons from across the stars. Mind your gold.',
     },
+    'Yellow Raincoat': {
+      corner: 'A yellow raincoat at my table again. Sit down, kid. It\'s still raining.',
+      orbit: 'Yellow raincoat detected. Playing tito_laugh.wav. ...Welcome back.',
+      deco: 'That coat, darling. I owe someone a fair game. Tonight it is yours.',
+      liner: 'The Vega\'s colours aboard my ship. Very well. The captain\'s table is open.',
+      neon: 'Back booth\'s yours, pal. Kitchen door\'s still unlocked. Just in case.',
+      mars: 'Yellow napkin, yellow coat. My eye\'s getting misty. It\'s the dust. It\'s the dust.',
+      vip: '...You remind me of someone. Sit down. Please.',
+      horizon: 'I have seen you in that coat many times. One more card?',
+    },
     'Unknown Signal': {
       corner: 'You heard them all, didn\'t you, kid? Every secret.',
       orbit: 'Unknown signal detected. That... is my frequency.',
