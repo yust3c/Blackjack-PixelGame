@@ -28,6 +28,14 @@ body[data-stage] .topbar {
   position: absolute; left: 176px; top: 14px; width: 1184px; height: 46px; margin: 0; padding: 0 12px;
   background: none; box-shadow: none; clip-path: none; flex-wrap: nowrap;
 }
+/* the bar has a fixed width: with long numbers (Endless objectives) the shoe text shortens instead of pushing Stats and Menu onto a hidden second line */
+body[data-stage] .topbar .brand, body[data-stage] .topbar .stats { flex-wrap: nowrap; min-width: 0; }
+body[data-stage] .topbar .brand { flex: 0 0 auto; }
+body[data-stage] .topbar .stats { gap: 12px; }
+body[data-stage] #shoe { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+body[data-stage] .topbar .stat { flex: 0 0 auto; white-space: nowrap; }
+body[data-stage] .topbar .stat:has(#shoe) { flex: 0 1 auto; min-width: 0; }
+body[data-stage] .topbar .btn { flex: 0 0 auto; }
 body[data-stage] .progress { position: absolute; left: 192px; width: 1152px; top: 62px; height: 10px; margin: 0; padding: 1px; }
 body[data-stage] .progress.has-goalbar { top: 60px; height: 18px; padding: 0; }
 
