@@ -1107,7 +1107,7 @@ html .cos-sw-faces.cos-sw-faces[data-face="${id}"] .card::after { ${after} }\n`;
     { id: 'back_moon',      type: 'back', name: 'Midnight Moon', rarity: 'epic',      by: 'endless_10k' },
     { id: 'back_neon',      type: 'back', name: 'Neon Marquee',  rarity: 'legendary', by: 'beat_expert',  animated: true },
     { id: 'back_goldrush',  type: 'back', name: 'Gold Rush',     rarity: 'legendary', by: 'grand_slam',   animated: true },
-    { id: 'back_inferno',   type: 'back', name: 'Inferno',       rarity: 'legendary', by: 'hat_trick',    animated: true },
+    { id: 'back_inferno',   type: 'back', name: 'Inferno',       rarity: 'legendary', by: 'untouchable',  was: 'hat_trick', animated: true },
     { id: 'back_starfield', type: 'back', name: 'Starfield',     rarity: 'legendary', by: 'whale',        animated: true },
     { id: 'back_orange',    type: 'back', name: 'Sunset',        rarity: 'common',    by: 'winner' },
     { id: 'back_pink',      type: 'back', name: 'Bubblegum',     rarity: 'common',    by: 'bj_5' },
@@ -1430,7 +1430,8 @@ html .cos-sw-faces.cos-sw-faces[data-face="${id}"] .card::after { ${after} }\n`;
     const item = byId[id];
     if (!item) return false;
     if (!item.by || state.previewAll) return true;
-    return !!(root.Achievements && root.Achievements.isUnlocked(item.by));
+    // `was`: the achievement that used to give this item, so players who earned it there keep it
+    return !!(root.Achievements && (root.Achievements.isUnlocked(item.by) || (item.was && root.Achievements.isUnlocked(item.was))));
   }
 
   // ======================================================================

@@ -537,7 +537,8 @@
     const pieces = all.filter((r) => r.type !== 'title');
     const title = all.find((r) => r.type === 'title');
     const parts = [];
-    if (pieces.length > 1) parts.push(`New set: ${pieces[0].set || pieces[0].name} (${pieces.map((r) => KIND[r.type]).join(', ')})`);
+    if (pieces.length > 1 && pieces[0].set && pieces.every((r) => r.set === pieces[0].set)) parts.push(`New set: ${pieces[0].set} (${pieces.map((r) => KIND[r.type]).join(', ')})`);
+    else if (pieces.length > 1) parts.push(`New ${pieces.map((r) => `${KIND[r.type]}: ${r.name}`).join(' + ')}`);
     else if (pieces.length) parts.push(`New ${KIND[pieces[0].type]}: ${pieces[0].name}`);
     if (title) parts.push(`${parts.length ? 'title' : 'New title'}: ${title.name}`);
     return parts.join(' + ');
