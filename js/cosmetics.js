@@ -1319,7 +1319,7 @@ html .cos-sw-faces.cos-sw-faces[data-face="${id}"] .card::after { ${after} }\n`;
     { id: 'face_houseeye', type: 'face', name: 'The House Sees', rarity: 'legendary', by: 'rigged', animated: true, set: 'The House Sees' },
     { id: 'back_skyeye', type: 'back', name: 'Eye in the Sky', rarity: 'legendary', by: 'feeling_heat', animated: true, set: 'Eye in the Sky' },
     { id: 'face_skyeye', type: 'face', name: 'Eye in the Sky', rarity: 'legendary', by: 'feeling_heat', animated: true, set: 'Eye in the Sky' },
-    { id: 'title_beat_expert', type: 'title', name: 'Card Shark', rarity: 'legendary', by: 'beat_expert' },
+    { id: 'title_beat_expert', type: 'title', name: 'Card Shark', rarity: 'legendary', by: 'beat_expert', animated: true },
     { id: 'title_darkest_run', type: 'title', name: "Eclipse", rarity: 'insanity', by: 'darkest_run', animated: true },
   );
   // ======================================================================
@@ -1414,6 +1414,19 @@ html .cos-sw-faces.cos-sw-faces[data-face="${id}"] .card::after { ${after} }\n`;
     { id: 'title_daily_7', type: 'title', name: 'Daily Regular', rarity: 'rare', by: 'daily_7' },
     { id: 'title_daily_14', type: 'title', name: 'Devoted', rarity: 'epic', by: 'daily_14' },
     { id: 'title_daily_30', type: 'title', name: 'Clockwork', rarity: 'legendary', by: 'daily_30', animated: true },
+    // Titles for the Legendary achievements that had none
+    { id: 'title_hat_trick', type: 'title', name: 'Lucky Bastard', rarity: 'legendary', by: 'hat_trick', animated: true },
+    { id: 'title_endless_expert', type: 'title', name: 'Singularity', rarity: 'legendary', by: 'endless_expert', animated: true },
+    { id: 'title_feeling_heat', type: 'title', name: 'Marked Man', rarity: 'legendary', by: 'feeling_heat', animated: true },
+    { id: 'title_grand_slam', type: 'title', name: 'Grand Champion', rarity: 'legendary', by: 'grand_slam', animated: true },
+    { id: 'title_untouchable', type: 'title', name: 'Untouchable', rarity: 'legendary', by: 'untouchable', animated: true },
+    { id: 'title_six_shooter', type: 'title', name: 'Sharpshooter', rarity: 'legendary', by: 'six_shooter', animated: true },
+    { id: 'title_four_of_a_kind', type: 'title', name: 'Split Personality', rarity: 'legendary', by: 'four_of_a_kind', animated: true },
+    { id: 'title_endless_all', type: 'title', name: 'Marathoner', rarity: 'legendary', by: 'endless_all', animated: true },
+    { id: 'title_whale', type: 'title', name: 'The Whale', rarity: 'legendary', by: 'whale', animated: true },
+    { id: 'title_legend', type: 'title', name: 'Legend', rarity: 'legendary', by: 'legend', animated: true },
+    { id: 'title_bj_250', type: 'title', name: 'Ace High', rarity: 'legendary', by: 'bj_250', animated: true },
+    { id: 'title_millionaire', type: 'title', name: 'Old Money', rarity: 'legendary', by: 'millionaire', animated: true },
   );
 
   const RANK = { default: 0, common: 1, rare: 2, epic: 3, legendary: 4, secret: 5, insanity: 6 };
