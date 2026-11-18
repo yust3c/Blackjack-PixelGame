@@ -21,7 +21,7 @@ No install and no internet needed. With a connection it also loads the two pixel
   | Hard | 300 | 2500 | 25-500 | 1 |
   | Expert | 200 | 5000 | 25-500 | none (play two seats) |
 
-- **Endless**: one per difficulty, unlocked by beating that difficulty in Challenge, and set in a space version of its casino. Chase 8 objectives based on the difficulty's goal, then keep going for a high score. Lose when you run out of chips.
+- **Endless**: one per difficulty, unlocked by beating that difficulty in Challenge, and set in a space version of its casino. Chase 8 objectives based on the difficulty's goal, then keep going for a high score. Bets go up to 1,000 here. Lose when you run out of chips.
 - **Daily**: a new deal every day, the same shoe for everyone, dealt in a different casino each day. You get 25 hands and 1000 chips; what you finish with is your score. Replay as often as you like, your best of the day counts. Play every day to grow your streak.
 
 Each difficulty has its own casino and dealer. **Achievements** unlock **cosmetics** (card backs, felts, chip sets and card faces, some animated), and the **Lore** section tells the story of every dealer and room, with new chapters that open up as you play. Progress is saved in your browser.

@@ -72,6 +72,8 @@
   // One deal a day, the same for everyone: Easy table limits, 1,000 chips, 25 hands, and a shoe shuffled from the
   // day's seed. The casino rotates with the day. You can replay it; the best result of the day is kept, and
   // finishing it at least once a day builds a streak.
+  // Endless tables take bigger bets than Challenge: up to 1000.
+  const ENDLESS_MAX_BET = 1000;
   const DAILY = { start: 1000, hands: 25, minBet: 5, maxBet: 500, maxBots: 4 };
   function dailyDifficulty(day) { return DIFFICULTIES[daySeed(day) % DIFFICULTIES.length].id; }   // picks the casino
   function dailyRecord(save, day) {
@@ -114,5 +116,5 @@
   }
 
   root.Modes = { DIFFICULTIES, endlessObjectives, endlessRecord, load, store, blankSave, seededRng, localDay, daySeed,
-    DAILY, dailyDifficulty, dailyRecord, currentStreak, finishDaily, streakTier, prevDay };
+    DAILY, ENDLESS_MAX_BET, dailyDifficulty, dailyRecord, currentStreak, finishDaily, streakTier, prevDay };
 })(window);

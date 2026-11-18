@@ -365,7 +365,7 @@
       coach = null;
     } else {
       const d = M.DIFFICULTIES.find((x) => x.id === diffId);
-      rules = { startingBankroll: d.start, minBet: d.minBet, maxBet: d.maxBet, maxBots: d.maxBots };
+      rules = { startingBankroll: d.start, minBet: d.minBet, maxBet: M.ENDLESS_MAX_BET || d.maxBet, maxBots: d.maxBots };
       label = `Endless · ${d.name}`;
       coach = null;
       endlessIndex = run ? run.endlessIndex || 0 : 0;
