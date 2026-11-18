@@ -540,11 +540,15 @@
     // earlier one; a running (invisible) opacity animation keeps the timeline ticking.
     const tick = `<rect width="0" height="0"><animate attributeName="opacity" values="1;0.99" dur="${ms(ev.dur)}"/></rect>`;
     const svg = (head, inner, clip) => `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" shape-rendering="crispEdges">${head}${tick}<g${clip ? ' clip-path="url(#fx-room)"' : ''}>${inner}</g></svg>`;
-    // the back layer owns the clip paths, the front one the gradient and the warp filter
-    back.innerHTML = ev.back ? svg(`<defs>${backClip(L.art, scene)}</defs>`, ev.back(), true) : '';
-    front.innerHTML = svg(DEFS, ev.front ? ev.front() : '', false);
+    // In the stage layout the effects layer (js/fxlayer.js) draws the event; the room itself still sways or bends.
+    const pixi = !!(root.FXLayer && root.FXLayer.playEvent(scene, ev.id));
+    if (!pixi) {
+      // the back layer owns the clip paths, the front one the gradient and the warp filter
+      back.innerHTML = ev.back ? svg(`<defs>${backClip(L.art, scene)}</defs>`, ev.back(), true) : '';
+      front.innerHTML = svg(DEFS, ev.front ? ev.front() : '', false);
+    }
     // every event starts its own animation clock at zero (a new svg can otherwise inherit a running clock)
-    if (ev.body) doc.body.classList.add(ev.body);
+    if (ev.body && (!pixi || ev.body === 'fx-chandelier' || ev.body === 'fx-warp')) doc.body.classList.add(ev.body);
     if (ev.sound) {
       duck(ev.dur);
       root.setTimeout(() => { if (st && st.current === ev && SOUNDS[ev.sound]) SOUNDS[ev.sound](); }, ev.soundAt || 0);

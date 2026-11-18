@@ -1,0 +1,11 @@
+/* Effects layer (js/fxlayer.js): two transparent canvases on the stage grid. The back one sits in the room picture
+   (under the table), the front one over the table but under the dialogs and the achievement toast. Never takes clicks. */
+.fx-layer { display: none; pointer-events: none; image-rendering: pixelated; }
+body[data-stage] .fx-layer.on {
+  display: block; left: var(--stage-x); top: var(--stage-y);
+  width: calc(1536px * var(--stage-s)); height: calc(864px * var(--stage-s));
+}
+body[data-stage] .fx-back.on { position: absolute; }
+body[data-stage] .fx-front.on { position: fixed; z-index: 35; }
+/* events that move the room move this layer with it */
+body.fx-warp #scene-backdrop .fx-back { animation: fx-lens 3.2s ease-in-out both; transform-origin: 50% 18%; }

@@ -39,6 +39,7 @@
     mode = null;
     if (window.TableFX) window.TableFX.reset();
     if (window.SceneEvents) window.SceneEvents.stop();
+    if (window.FXLayer) window.FXLayer.stop();
     if (window.GameSounds) { GameSounds.stop(); GameSounds.closeSettings(); }
     $('game').hidden = true;
     $('lore').hidden = true;
@@ -366,6 +367,8 @@
     if (window.SessionStats) SessionStats.start(game, run && run.stats);
     // Now and then something happens in the room (js/sceneevents.js).
     if (window.SceneEvents) window.SceneEvents.start(game, window.Scenarios ? Scenarios.forMode(sceneType, diffId) : null);
+    // Pixel effects over the room and the table (js/fxlayer.js): scene life, events, wins and unlocks.
+    if (window.FXLayer) window.FXLayer.start(game, window.Scenarios ? Scenarios.forMode(sceneType, diffId) : null);
     // Table sounds follow the game, and the scene's music plays (js/gamesounds.js, js/music.js).
     if (window.GameSounds) GameSounds.start(game, window.Scenarios ? Scenarios.forMode(sceneType, diffId) : null);
   }
@@ -377,6 +380,7 @@
     if (g !== game) return; // a game abandoned mid-hand finishing in the background
     if (window.Achievements) window.Achievements.roundEnd(g);
     if (window.SceneEvents && window.SceneEvents.roundEnd) window.SceneEvents.roundEnd(g);
+    if (window.FXLayer) window.FXLayer.roundEnd(g);
     storeRun(g, false);
 
     if (mode.type === 'practice') {

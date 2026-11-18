@@ -533,6 +533,7 @@
         ${reward && C ? `<div class="cos-toast-art">${C.swatch(reward)}</div>` : ''}
       </div>`;
     toastEl.classList.remove('show'); void toastEl.offsetWidth; toastEl.classList.add('show');
+    doc.dispatchEvent(new CustomEvent('achievement:toast', { detail: { achievement: a } }));   // js/fxlayer.js plays the unlock effect
     setTimeout(() => { toastEl.classList.remove('show'); setTimeout(nextToast, 300); }, 4200);
   }
 
