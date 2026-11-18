@@ -245,6 +245,7 @@
       bjStreak: 0, winStreak: 0, doubleStreak: 0, pushStreak: 0, insuranceLost: 0, dealerBustStreak: 0, countBefore: 0,
       rounds: 0, hands: 0, maxSeats: 0, hadBots: false, usedTricks: false, lossStreak: 0, winsAfter: 0, recovering: false, lostCounted: false,
       lostHand: false, offBook: false, naturals: 0, heat: 0,   // Perfect Day, Iron Professor, Twenty-One
+      rainStreak: 0,   // Rainy Night: blackjacks in a row at The Corner since the Lore letter opened
     };
     if (session.mode === 'challenge' && !o.resumed) sweepStart(session.difficulty);
   }
@@ -305,6 +306,15 @@
   }
 
   const isBlack = (c) => c.suit === '♠' || c.suit === '♣';
+  // Rainy Night: three blackjacks in a row at The Corner, like the girl in the yellow raincoat in '98.
+  // Old Tito recognises the moment before the achievement shows.
+  function rainyNight() {
+    if (save.unlocked.yellow_raincoat || session.rainSaid) return;
+    session.rainSaid = true;
+    const T = root.DealerTalk;
+    if (T && T.line) { T.line('...Kid? Is that you?'); root.setTimeout(() => unlock('yellow_raincoat'), 2600); }
+    else unlock('yellow_raincoat');
+  }
   function today() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
 
   function roundEnd(game) {
@@ -321,6 +331,8 @@
 
     save.stats.rounds++;
     if (game.shoe && game.shoe.roundsDealt === 1) session.countBefore = 0; // shuffled before this round
+    // Rainy Night counts only at The Corner, and only once every Lore chapter is open (js/lore.js).
+    const rainy = session.scene === 'corner' && !save.unlocked.yellow_raincoat && !!(root.Lore && root.Lore.complete && root.Lore.complete());
     for (const seat of seats) {
       // blackjack streak: count each seat's starting hand, in seat order
       const first = seat.hands[0];
@@ -333,9 +345,12 @@
         const has = (r, suits) => [a, b].some((c) => c.rank === r && suits.includes(c.suit));
         if (has('A', ['♠']) && has('J', ['♠', '♣'])) unlock('black_jack');
         if (has('A', ['♥']) && has('K', ['♥']) && first.bet >= 500) unlock('suited_royalty');
+        if (rainy) session.rainStreak++;
       } else {
         session.bjStreak = 0;
+        session.rainStreak = 0;
       }
+      if (rainy && session.rainStreak >= 3) rainyNight();
       if (session.bjStreak >= 2) unlock('double_natural');
       if (session.bjStreak >= 3) unlock('hat_trick');
 

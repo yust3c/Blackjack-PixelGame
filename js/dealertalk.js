@@ -323,6 +323,8 @@
 
   root.DealerTalk = {
     start, stop, say: (ev) => trigger(ev, true),
+    /** Say one fixed line now, as a secret line (achievements.js: Old Tito at Rainy Night). */
+    line: (text) => { if (st) say(text, 3, 'secret'); },
     /** Ids of the secret lines (all of them heard = the Off the Record achievement). */
     get SECRET_IDS() { return secretIds(); },
     /** Secret line ids this player has seen, from the save. */
