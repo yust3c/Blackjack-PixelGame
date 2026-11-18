@@ -1,10 +1,10 @@
-/* Table settings: dealer speed, bot turns and reduce motion. Saved under SaveData.KEYS.prefs (js/save.js)
+/* Table settings: dealer speed, bot turns, win messages and reduce motion. Saved under SaveData.KEYS.prefs (js/save.js)
    and shown on the Settings screen (js/gamesounds.js). ui.js applies the speeds to the running game. */
 (function (root) {
   'use strict';
 
   const KEY = (root.SaveData && root.SaveData.KEYS.prefs) || 'blackjack-prefs-v1';
-  const DEFAULTS = { speed: 'normal', botTurns: 'normal', reduceMotion: false };
+  const DEFAULTS = { speed: 'normal', botTurns: 'normal', winMessages: true, reduceMotion: false };
   const CHOICES = { speed: ['slow', 'normal', 'fast'], botTurns: ['normal', 'quick'] };
   // Milliseconds per dealing step, and how much of that a bot's turn takes.
   const DELAY = { slow: 750, normal: 450, fast: 220 };

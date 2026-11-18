@@ -5,7 +5,7 @@
 
   // Bump CURRENT and add a step to MIGRATIONS whenever a new game version changes the
   // shape of a save. Steps upgrade old data in place and never throw it away.
-  const CURRENT = 4;
+  const CURRENT = 5;
   const META_KEY = 'blackjack-meta';
   const KEYS = { progress: 'blackjack-save-v1', achievements: 'blackjack-achievements-v1', cosmetics: 'blackjack-cosmetics-v1', settings: 'blackjack-settings-v1', dealertalk: 'blackjack-dealertalk-v1', prefs: 'blackjack-prefs-v1', sceneevents: 'blackjack-sceneevents-v1' };
   // Parts that belong to this computer, not to the player: an imported save without them keeps the current ones.
@@ -29,6 +29,11 @@
       if (!isObj(data.prefs)) data.prefs = { speed: 'normal', botTurns: 'normal', reduceMotion: false };
       if (isObj(data.progress) && !isObj(data.progress.daily)) data.progress.daily = {};
       if (isObj(data.progress) && !isObj(data.progress.streak)) data.progress.streak = { last: '', count: 0, best: 0 };
+      return data;
+    },
+    // 4 -> 5: the win messages for big wins (js/fxlayer.js) can be switched off in Settings > Table.
+    5: (data) => {
+      if (isObj(data.prefs) && typeof data.prefs.winMessages !== 'boolean') data.prefs.winMessages = true;
       return data;
     },
   };

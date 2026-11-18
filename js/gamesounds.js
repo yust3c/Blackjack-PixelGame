@@ -194,6 +194,8 @@
             <span class="snd-seg" role="group" aria-label="Dealer speed">${['slow', 'normal', 'fast'].map((v) => `<button class="snd-switch" data-pref="speed" data-val="${v}" aria-pressed="false">${v[0].toUpperCase() + v.slice(1)}</button>`).join('')}</span></div>
           <div class="snd-row snd-toggle"><span class="snd-label">Bot turns<span class="snd-note">Quick plays the bots' hands without the pauses.</span></span>
             <span class="snd-seg" role="group" aria-label="Bot turns">${['normal', 'quick'].map((v) => `<button class="snd-switch" data-pref="botTurns" data-val="${v}" aria-pressed="false">${v[0].toUpperCase() + v.slice(1)}</button>`).join('')}</span></div>
+          <div class="snd-row snd-toggle"><span class="snd-label">Win messages<span class="snd-note">Big wins from 1,000 chips get their own message and sound.</span></span>
+            <button class="snd-switch" data-pref="winMessages" aria-pressed="true"></button></div>
           <div class="snd-row snd-toggle"><span class="snd-label">Reduce motion<span class="snd-note">Stops animations. Your system setting also counts.</span></span>
             <button class="snd-switch" data-pref="reduceMotion" aria-pressed="false"></button></div>
         </div>` : ''}`;
