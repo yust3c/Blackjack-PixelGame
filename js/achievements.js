@@ -143,6 +143,7 @@
     { id: 'phoenix', rarity: 'rare', group: 'Challenge', name: 'Phoenix', desc: 'Beat a Challenge difficulty after losing it 3 times.' },
     { id: 'split_blackjack', rarity: 'rare', group: 'Luck', name: 'Split Natural', desc: 'Split Aces and draw a 10-value card on one of them.' },
     { id: 'full_recovery', rarity: 'epic', group: 'Skill', name: 'Full Recovery', desc: 'Lose 5 rounds in a row, then win the next 5.' },
+    { id: 'feeling_heat', rarity: 'legendary', group: 'Luck', name: 'Feeling the Heat', desc: 'Win 1,000 or more in three rounds in a row.' },
     { id: 'pro_counter', rarity: 'epic', group: 'Skill', name: 'Pro Counter', desc: 'Win 10 hands bet at 250+ while the true count is +3 or higher.', counter: ['proCount',  10] },
     { id: 'double_or_nothing', rarity: 'epic', group: 'Totals', name: 'Double or Nothing', desc: 'Win 100 doubled hands.', counter: ['doublesWon',  100] },
     { id: 'seven_up', rarity: 'legendary', group: 'Table', name: 'Seven Up', desc: 'Play all 7 seats yourself and win on every one in one round.' },
@@ -234,7 +235,7 @@
       lowest: Infinity, alwaysAboveStart: true,
       bjStreak: 0, winStreak: 0, doubleStreak: 0, pushStreak: 0, insuranceLost: 0, dealerBustStreak: 0, countBefore: 0,
       rounds: 0, hands: 0, maxSeats: 0, hadBots: false, usedTricks: false, lossStreak: 0, winsAfter: 0, recovering: false, lostCounted: false,
-      lostHand: false, offBook: false, naturals: 0,   // Perfect Day, Iron Professor, Twenty-One
+      lostHand: false, offBook: false, naturals: 0, heat: 0,   // Perfect Day, Iron Professor, Twenty-One
     };
     if (session.mode === 'challenge' && !o.resumed) sweepStart(session.difficulty);
   }
@@ -448,6 +449,8 @@
     if (session.winStreak >= 7) unlock('hot_streak');
     if (session.winStreak >= 10) unlock('untouchable');
     if (roundNet >= 1000) unlock('big_score');
+    session.heat = roundNet >= 1000 ? session.heat + 1 : 0;   // Feeling the Heat: big wins back to back
+    if (session.heat >= 3) unlock('feeling_heat');
     if (roundNet >= 10000) unlock('insane_win');
     if (session.mode === 'endless' && session.naturals >= 21) unlock('twenty_one');
     if (seats.length >= 3 && seatsWon === seats.length) unlock('table_sweep');
@@ -1361,6 +1364,13 @@
         const t = i / 6, x = 2 + t * 12, y = 9 - Math.sin(t * Math.PI) * 7;
         p.rect(Math.round(x), Math.round(y), 1, 3, i % 2 ? C.blue[0] : C.white);
       }
+    } },
+    feeling_heat: { frames: 8, dur: 1.6, draw(p, f) {
+      p.rect(2, 1, 12, 1, C.grey[1]); p.disc(8, 3, 4.5, 4.5, C.dark);
+      const lk = [0, -1, -1, 0, 1, 1, 0, 0][f], red = f >= 6;
+      for (let x = -3; x <= 3; x++) for (let y = -1; y <= 1; y++) if (Math.abs(y) <= 1 - (Math.abs(x) > 2 ? 1 : 0)) p.set(8 + x, 4 + y, '#f2eee4');
+      p.set(8 + lk, 4, red ? '#ff3a4a' : '#2a8a4a'); p.set(8 + lk - 1, 4, red ? '#a8102a' : '#0a3a1a');
+      for (let y = 7; y < 16; y++) { const half = 1 + (y - 7) * 0.4, x = 8 + lk * (y - 6) * 0.5; for (let u = Math.ceil(x - half); u < x + half; u++) if ((u + y) % 2 === 0) p.set(u, y, red ? '#c0202a' : '#bfe8a8'); }
     } },
     pro_counter: { draw(p) {
       p.rect(0, 1, 16, 14, C.brown[1]).rect(1, 2, 14, 12, C.dark[2]).rect(0, 1, 16, 1, C.brown[0]);

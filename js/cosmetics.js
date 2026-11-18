@@ -262,27 +262,6 @@
     }),
 
     // ---------- animated backs ----------
-    // Neon marquee: casino bulbs chase round the edge, "21" glows in the middle.
-    back_neon: () => buildBack(3, (f) => {
-      const ring = [];
-      for (let u = 0; u < IW; u++) ring.push([u, 0]);
-      for (let v = 1; v < IH; v++) ring.push([IW - 1, v]);
-      for (let u = IW - 2; u >= 0; u--) ring.push([u, IH - 1]);
-      for (let v = IH - 2; v > 0; v--) ring.push([0, v]);
-      const bulbs = new Map();
-      ring.forEach(([u, v], i) => { if (i % 2 === 0) bulbs.set(u + ',' + v, (i / 2 + f) % 3 === 0); });
-      const g = backFrame('#2a1a3a', (u, v) => {
-        const b = bulbs.get(u + ',' + v);
-        if (b !== undefined) return b ? '#fff27a' : '#6a4a1a';
-        if (u === 2 || v === 2 || u === IW - 3 || v === IH - 3) return '#ff4fa8';
-        return (u + v) % 2 ? '#1a0a28' : '#140820';
-      }, f);
-      const glow = f === 1 ? '#4ff0ff' : '#2a9ac0';
-      stampOutlined(g, DIGIT_2, { X: '#ff7ac8' }, glow, 6, 13, 2);
-      stampOutlined(g, DIGIT_1, { X: '#ff7ac8' }, glow, 16, 13, 2);
-      return g;
-    }, 0.6),
-
     // Gold rush: solid gold with a diamond, and a shine that sweeps across every two seconds.
     back_goldrush: () => buildBack(16, (f) => {
       const shine = f < 10 ? f * 6 - 6 : -99;
@@ -1092,6 +1071,28 @@ html .cos-sw-faces.cos-sw-faces[data-face="${id}"] .card::after { ${after} }\n`;
       after: 'linear-gradient(120deg, transparent 0 44%, rgba(255, 215, 94, 0.5) 48%, rgba(255, 246, 192, 0.7) 50%, rgba(255, 215, 94, 0.5) 52%, transparent 56% 100%) 0 0 / 400% 100%', opacity: 0.4, anim: 'cos-holo 3.5s steps(35) infinite' },
   });
 
+
+  // ----- Card Shark: the Last Lap set (the back and the ace are drawn in js/cardfx.js) -----
+  Object.assign(FELTS, {
+    felt_shark: { '--felt': '#0e3a5a', '--felt-dot': '#0d3552', '--felt-dark': '#04121e', '--felt-line': '#bfe8ff', '--rail': '#1a2a3a', '--rail-light': '#3a4a5a', '--rail-dark': '#0a121a' },
+  });
+  Object.assign(FELT_FX, {
+    felt_shark: () => [['repeating-linear-gradient(115deg, transparent 0 22px, rgba(191, 232, 255, 0.07) 22px 26px, transparent 26px 48px)', 'repeating-linear-gradient(65deg, transparent 0 30px, rgba(191, 232, 255, 0.05) 30px 33px, transparent 33px 60px)', 'radial-gradient(ellipse at 50% -10%, rgba(191, 232, 255, 0.18), transparent 60%)'], ['100% 100%', '100% 100%', '100% 100%'], ['48px 0', '-60px 0', '0 0'], '5s', 24],
+  });
+  Object.assign(CHIP_SETS, {
+    chips_shark: { stripe: 'spin', spin: ['#e8eef2', '#6a7a88', '#c0202a'], colors: (m, d, l) => [mix(grey(m), '#0e3a5a', 0.45), '#04121e', '#e8f8ff'] },
+  });
+  Object.assign(FACE_FX, {
+    face_houseeye: { vars: { '--card': '#f6f2ea', '--card-ink': '#1a0e2a', '--card-red': '#a8102a' },
+      shadow: 'inset 0 0 0 2px #1a0e2a, inset 0 0 0 3px #c8a040, inset 0 0 0 5px #2a1640, inset -4px -4px 0 5px #e2d8c8' },
+    face_skyeye: { vars: { '--card': '#f2f2f4', '--card-ink': '#14141c', '--card-red': '#c0202a' },
+      shadow: 'inset 0 0 0 2px #14141c, inset 0 0 0 4px #5a5a64, inset -4px -4px 0 4px #dcdce2',
+      after: 'linear-gradient(180deg, transparent 0 48%, rgba(191, 232, 168, 0.35) 49% 51%, transparent 52% 100%) 0 0 / 100% 300%', opacity: 0.7, anim: 'cos-holo 3s linear infinite' },
+    face_shark: { vars: { '--card': '#f2f7fa', '--card-ink': '#0e1e2e', '--card-red': '#c0202a' },
+      shadow: 'inset 0 0 0 2px #0e1e2e, inset 0 0 0 4px #3a7aa8, inset -4px -4px 0 4px #d8e4ec',
+      after: 'repeating-linear-gradient(170deg, transparent 0 10px, rgba(58, 122, 168, 0.18) 10px 12px, transparent 12px 22px) 0 0 / 100% 200%', opacity: 0.6, anim: 'cos-holo 6s linear infinite' },
+  });
+
   const CATALOG = [
     { id: 'back_classic',   type: 'back', name: 'Classic Red',   rarity: 'default' },
     { id: 'back_blue',      type: 'back', name: 'Royal Blue',    rarity: 'common',    by: 'first_hand' },
@@ -1105,7 +1106,6 @@ html .cos-sw-faces.cos-sw-faces[data-face="${id}"] .card::after { ${after} }\n`;
     { id: 'back_crown',     type: 'back', name: 'Crown Jewels',  rarity: 'epic',      by: 'double_natural' },
     { id: 'back_ace',       type: 'back', name: 'Ace of Spades', rarity: 'epic',      by: 'black_jack' },
     { id: 'back_moon',      type: 'back', name: 'Midnight Moon', rarity: 'epic',      by: 'endless_10k' },
-    { id: 'back_neon',      type: 'back', name: 'Neon Marquee',  rarity: 'legendary', by: 'beat_expert',  animated: true },
     { id: 'back_goldrush',  type: 'back', name: 'Gold Rush',     rarity: 'legendary', by: 'grand_slam',   animated: true },
     { id: 'back_inferno',   type: 'back', name: 'Inferno',       rarity: 'legendary', by: 'untouchable',  was: 'hat_trick', animated: true },
     { id: 'back_starfield', type: 'back', name: 'Starfield',     rarity: 'legendary', by: 'whale',        animated: true },
@@ -1173,7 +1173,7 @@ html .cos-sw-faces.cos-sw-faces[data-face="${id}"] .card::after { ${after} }\n`;
     { id: 'face_fourcolor', type: 'face', name: 'Four-Colour',   rarity: 'common',    by: 'regular' },
     { id: 'face_ivory',     type: 'face', name: 'Ivory & Gold',  rarity: 'rare',      by: 'split_sweep' },
     { id: 'face_noir',      type: 'face', name: 'Noir',          rarity: 'epic',      by: 'comeback' },
-    { id: 'face_holo',      type: 'face', name: 'Holo Foil',     rarity: 'legendary', by: 'beat_expert',  animated: true },
+    { id: 'face_holo',      type: 'face', name: 'Holo Foil',     rarity: 'legendary', by: 'professor',    was: 'flawless', animated: true },
     { id: 'face_newsprint', type: 'face', name: 'Newsprint',     rarity: 'common',    by: 'overinsured' },
     { id: 'face_void',      type: 'face', name: 'Event Horizon', rarity: 'legendary', by: 'endless_expert', animated: true, set: 'Event Horizon' },
     { id: 'face_platinum',  type: 'face', name: 'Platinum',      rarity: 'secret',    by: 'completionist', animated: true, set: 'Platinum' },
@@ -1311,6 +1311,15 @@ html .cos-sw-faces.cos-sw-faces[data-face="${id}"] .card::after { ${after} }\n`;
     { id: 'felt_marquee', type: 'felt', name: 'Marquee', rarity: 'legendary', by: 'hat_trick', animated: true, set: 'Marquee' },
     { id: 'chips_marquee', type: 'chips', name: 'Marquee', rarity: 'legendary', by: 'hat_trick', animated: true, set: 'Marquee' },
     { id: 'face_marquee', type: 'face', name: 'Marquee', rarity: 'legendary', by: 'hat_trick', animated: true, set: 'Marquee' },
+    { id: 'back_shark', type: 'back', name: 'Last Lap', rarity: 'legendary', by: 'beat_expert', animated: true, set: 'Last Lap' },
+    { id: 'felt_shark', type: 'felt', name: 'Last Lap', rarity: 'legendary', by: 'beat_expert', animated: true, set: 'Last Lap' },
+    { id: 'chips_shark', type: 'chips', name: 'Last Lap', rarity: 'legendary', by: 'beat_expert', animated: true, set: 'Last Lap' },
+    { id: 'face_shark', type: 'face', name: 'Last Lap', rarity: 'legendary', by: 'beat_expert', animated: true, set: 'Last Lap' },
+    { id: 'back_houseeye', type: 'back', name: 'The House Sees', rarity: 'legendary', by: 'rigged', animated: true, set: 'The House Sees' },
+    { id: 'face_houseeye', type: 'face', name: 'The House Sees', rarity: 'legendary', by: 'rigged', animated: true, set: 'The House Sees' },
+    { id: 'back_skyeye', type: 'back', name: 'Eye in the Sky', rarity: 'legendary', by: 'feeling_heat', animated: true, set: 'Eye in the Sky' },
+    { id: 'face_skyeye', type: 'face', name: 'Eye in the Sky', rarity: 'legendary', by: 'feeling_heat', animated: true, set: 'Eye in the Sky' },
+    { id: 'title_beat_expert', type: 'title', name: 'Card Shark', rarity: 'legendary', by: 'beat_expert' },
     { id: 'title_darkest_run', type: 'title', name: "Eclipse", rarity: 'insanity', by: 'darkest_run', animated: true },
   );
   // ======================================================================

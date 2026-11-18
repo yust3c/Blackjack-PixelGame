@@ -1289,6 +1289,142 @@
     },
   });
 
+
+  // ===== LAST LAP (Card Shark, Legendary) ============================================
+  // Seen from above: a lone playing card floats on rippling water while a shark's shadow circles it, closer every lap.
+  // On the last lap it lunges, the card is dragged under in a red swirl and bubbles, then a new card drifts in.
+  Object.assign(SUIT_FX, {
+    shark(s) { // a little dorsal fin cutting the water at the corner
+      const g = pad(grid(BASE[s]), 1);
+      putIf(g, [[9, 7], [9, 8], [8, 8], [9, 9], [8, 9], [7, 9], [10, 9]], 'o');
+      return g;
+    },
+  });
+  const SEA_TOP = ['#2a7aa0', '#145a80', '#0c4468'];
+  const seaFromAbove = (g, f, c) => g.each((u, v) => { const s = Math.sin(u * 0.7 + f * 0.12) + Math.sin(v * 0.55 - f * 0.1) + Math.sin((u + v) * 0.4 + f * 0.07); return s > 1.7 ? c[0] : s > 0.6 ? c[1] : c[2]; });
+  const sharkShadow = (g, cx, cy, a, R, sx, col, fin) => { // a body of discs trailing the head round a circle, the fin breaking the surface
+    for (let i = 9; i >= 0; i--) { const b = a - i * 0.16, x = cx + Math.cos(b) * R, y = cy + Math.sin(b) * R * sx, r = i === 0 ? 1.5 : i < 4 ? 2.2 - i * 0.05 : 2.0 - (i - 3) * 0.28; g.disc(x, y, r, () => col); }
+    if (fin) { const b = a - 0.6, x = cx + Math.cos(b) * R, y = cy + Math.sin(b) * R * sx; g.set(x, y, '#8a9aa8'); g.set(x, y - 1, '#c8d4dc'); }
+  };
+  const floatingCard = (g, x, y, tilt) => { for (let v = 0; v < 5; v++) for (let u = 0; u < 4; u++) g.set(x + u + (tilt && v < 2 ? 1 : 0), y + v, u === 3 || v === 4 ? '#c8d4dc' : '#f2f7fa'); g.set(x + 1 + (tilt ? 1 : 0), y + 1, '#c0202a'); g.set(x + 2, y + 2, '#c0202a'); };
+  SETS.push({
+    id: 'shark', name: 'Last Lap', rarity: 'legendary', code: 'L2',
+    border: '#3a7aa8', frames: 96, fps: 12,
+    backNote: 'Seen from above: a lone playing card floats on rippling water while a shark\'s shadow circles it, fin breaking the surface, a little closer every lap. On the last lap it lunges: the card is dragged under in a red swirl and a burst of bubbles, the frame flashes red, then a new card drifts in and it all starts again.',
+    face: { card: '#f2f7fa', ink: '#0e1e2e', red: '#c0202a', edge: '#0e1e2e', shade: '#d8e4ec', ring: '#3a7aa8', accent: '#6a7a88' },
+    faceNote: '<b>Suits:</b> a little dorsal fin cuts the water at the corner. <b>Ace:</b> a shark\'s shadow circles the big suit, closer and closer, then it snaps and the suit jolts.',
+    back(g, f) {
+      seaFromAbove(g, f, SEA_TOP);
+      const cx = 11, cy = 17, lap = Math.min(1, f / 70), R = lerp(10, 2.5, ease(lap)), a = lap * TAU * 2.5;
+      const gone = f >= 72 && f < 86, lunge = f >= 66 && f < 72;
+      if (f < 72) {
+        const rr = (f % 20) / 3; g.each((u, v) => (Math.abs(Math.hypot(u + 0.5 - cx, (v + 0.5 - cy) * 0.8) - (3 + rr)) < 0.4 && rr < 5 ? '#4a9ac0' : null));
+        sharkShadow(g, cx, cy, a, lunge ? lerp(R, 0, (f - 66) / 6) : R, 1.35, '#071e30', true);
+      }
+      if (lunge || (f >= 72 && f < 80)) { const s = lunge ? (f - 66) / 6 : 1 - (f - 72) / 8; g.disc(cx, cy, 2 + s * 5, (x, y, d) => (d > 1 + s * 4 ? '#e8f8ff' : d > s * 3 ? '#bfe8ff' : '#8a1a2a')); }
+      if (gone) { const r0 = rand(8); for (let i = 0; i < 8; i++) g.set(cx - 3 + r0() * 6, cy - 3 + r0() * 6 - (f - 72) * 0.3, '#bfe8ff'); }
+      if (f < 66) floatingCard(g, cx - 2, cy - 2, f % 24 < 12);
+      else if (f >= 86) floatingCard(g, Math.round(lerp(-4, cx - 2, (f - 86) / 9)), cy - 2, false); // a new card drifts in
+    },
+    borderFx(g, f) { BORDER_RUN(g, f, f >= 66 && f < 80 ? '#8a1a2a' : '#0c4468', '#bfe8ff', 6, 1, 1); },
+    ace(g, f, F, ink) {
+      const T = f % 72, cx = 9, cy = this.s === '♥' ? 9 : this.s === '♣' ? 12 : 10;
+      // the shadow circles under the suit, tighter each lap, and snaps at the end
+      const lap = Math.min(1, T / 56), R = lerp(9.5, 5.5, ease(lap)), a = lap * TAU * 2;
+      if (T < 60) for (let i = 7; i >= 0; i--) { const b = a - i * 0.2, x = cx + Math.cos(b) * R, y = cy + Math.sin(b) * R * 1.15, r = i === 0 ? 1.1 : i < 3 ? 1.5 : 1.4 - (i - 2) * 0.22; g.disc(x, y, r, () => '#5a8aa8'); }
+      if (T < 60) { const b = a - 0.5; g.set(cx + Math.cos(b) * R, cy + Math.sin(b) * R * 1.15 - 1, '#3a4a5a'); }
+      const jolt = T >= 58 && T < 64 ? (T % 2 ? 1 : -1) : 0;
+      g.bits(BASE[this.s], jolt, 2, { X: ink }, 2);
+      if (T >= 58 && T < 66) { const s = (T - 58) / 8; for (let i = 0; i < 10; i++) { const b = (i / 10) * TAU; g.set(cx + Math.cos(b) * (4 + s * 6), cy + Math.sin(b) * (4 + s * 6), '#8ac8e8'); } }
+    },
+  });
+
+  // ===== THE HOUSE SEES (Rigged?) and EYE IN THE SKY (new achievement), Legendary back + faces ==========
+  const eyeAt = (g, cx, cy, W, H, o) => { // an almond eye: o = { open 0..1, look -1..1, col [inner, outer, rim], spade, glint }
+    const open = o.open, hh = H * open;
+    for (let y = -H; y <= H; y++) for (let x = -W; x <= W; x++) {
+      const edge = hh * (1 - (x / W) ** 2); if (Math.abs(y + 0.5) > edge + 0.3) continue;
+      const px = cx + x, py = cy + y, ix = x - o.look * W * 0.35, r = Math.hypot(ix, y + 0.5), R = H * 0.95;
+      let c = mix('#f2eee4', '#c8b8a8', Math.min(1, (x / W) ** 2 * 1.2));
+      if ((x * 7 + y * 3) % 11 === 0 && r > R && Math.abs(x) > W * 0.5) c = '#d89090';
+      if (r < R) { const a = Math.atan2(y + 0.5, ix); c = mix(o.col[0], o.col[1], r / R); if (Math.sin(a * 9) > 0.6 && r > R * 0.45) c = mix(c, '#000000', 0.3); if (r > R - 0.8) c = o.col[2]; }
+      if (r < R * 0.42 && !o.spade) c = '#05040c';
+      g.set(px, py, c);
+    }
+    if (o.spade && open > 0.3) g.bits(MINI['♠'], Math.round(cx - 2 + o.look * W * 0.35), Math.round(cy - 2), { X: '#05040c' });
+    if (open > 0.3 && o.glint) g.set(cx + Math.round(o.look * W * 0.35) + 1, cy - 2, '#ffffff');
+    for (let x = -W; x <= W; x++) { const e = hh * (1 - (x / W) ** 2); g.set(cx + x, cy - Math.round(e) - 1, '#14081a'); if (open > 0.2) g.set(cx + x, cy + Math.round(e) + 1, '#3a2030'); if (open > 0.5 && x % 3 === 0 && Math.abs(x) < W - 1) g.set(cx + x + Math.sign(x), cy - Math.round(e) - 2, '#14081a'); }
+  };
+  const eyeOpen = (T, a, b) => (T < a ? 0 : T < a + 6 ? (T - a) / 6 : T >= b - 2 && T < b ? 0.15 : 1);
+  const GOLD_EYE = ['#ffd75e', '#c88a20', '#6a4410'], RED_EYE = ['#ff6a3a', '#a8102a', '#5a0a14'], GREEN_EYE = ['#a0ffa0', '#2a8a4a', '#0a3a1a'];
+  Object.assign(SUIT_FX, {
+    houseeye(s) { // a little gold pyramid at the corner
+      const g = pad(grid(BASE[s]), 1);
+      putIf(g, [[9, 7], [8, 8], [9, 8], [10, 8], [7, 9], [8, 9], [9, 9], [10, 9]], 'o');
+      return g;
+    },
+    skyeye(s) { // a little camera lens at the corner
+      const g = pad(grid(BASE[s]), 1);
+      putIf(g, [[9, 8], [8, 9], [10, 9], [9, 10]], 'o');
+      return g;
+    },
+  });
+
+  SETS.push({
+    id: 'houseeye', name: 'The House Sees', rarity: 'legendary', code: 'L3',
+    border: '#c8a040', frames: 96, fps: 12,
+    backNote: 'One huge eye fills a gold triangle, rays turning behind it, and its pupil is a spade. It opens, looks left and right, then fixes on you: the iris and the frame burn red.',
+    face: { card: '#f6f2ea', ink: '#1a0e2a', red: '#a8102a', edge: '#1a0e2a', shade: '#e2d8c8', ring: '#c8a040', accent: '#c8a040' },
+    faceNote: '<b>Suits:</b> a little gold pyramid at the corner. <b>Ace:</b> an eye with a spade pupil opens inside the big suit, looks around and stares at you in red.',
+    back(g, f) {
+      const T = f % 96, stare = T >= 62 && T < 86;
+      g.each((u, v) => { const d = Math.hypot((u + 0.5 - 11) / 11, (v + 0.5 - 17) / 17); return mix(stare ? '#3a0a18' : '#2a1640', '#05030a', Math.min(1, d)); });
+      g.each((u, v) => { const top = 4, bot = 29, hw = ((v - top) / (bot - top)) * 11; if (v < top || v > bot) return null; const dx = Math.abs(u + 0.5 - 11); return (Math.abs(dx - hw) < 0.7 || v === bot) && dx <= hw + 0.7 ? (stare && T % 4 < 2 ? '#ff5a3a' : '#c8a040') : null; });
+      for (let i = 0; i < 12; i++) { const a = (i / 12) * TAU + T * 0.03; for (let d = 14; d < 22; d += 2) g.set(11 + Math.cos(a) * d, 20 + Math.sin(a) * d * 1.2, stare ? '#8a1a30' : '#5a4278'); }
+      const look = T < 14 ? 0 : T < 28 ? -1 : T < 42 ? 1 : T < 50 ? -0.4 : 0;
+      eyeAt(g, 11, 21, 8, 4.4, { open: eyeOpen(T, 0, 54), look, col: stare ? RED_EYE : GOLD_EYE, spade: true, glint: true });
+    },
+    borderFx(g, f) { const T = f % 96; BORDER_RUN(g, f, T >= 62 && T < 86 ? '#5a0a14' : '#2a1640', '#c8a040', 10, 2, 1); },
+    ace(g, f, F, ink) {
+      const T = f % 72, cy = this.s === '♥' ? 9 : this.s === '♣' ? 12 : 11, stare = T >= 44 && T < 62;
+      g.bits(BASE[this.s], 0, 2, { X: ink }, 2);
+      const look = T < 12 ? 0 : T < 24 ? -1 : T < 36 ? 1 : 0;
+      eyeAt(g, 9, cy, 5, 2.8, { open: eyeOpen(T, 0, 40), look, col: stare ? RED_EYE : GOLD_EYE, spade: false, glint: true });
+    },
+  });
+
+  SETS.push({
+    id: 'skyeye', name: 'Eye in the Sky', rarity: 'legendary', code: 'L4',
+    border: '#c0202a', frames: 96, fps: 12,
+    backNote: 'The casino ceiling camera is an eye. Its searchlight sweeps over the cards on the felt, then locks onto your chips: the light turns red, the eye glares and the REC light blinks.',
+    face: { card: '#f2f2f4', ink: '#14141c', red: '#c0202a', edge: '#14141c', shade: '#dcdce2', ring: '#5a5a64', accent: '#c0202a' },
+    faceNote: '<b>Suits:</b> a little red camera lens at the corner. <b>Ace:</b> a camera dome over the big suit; its beam scans across, locks on and goes red.',
+    back(g, f) {
+      const T = f % 96, lock = T >= 60 && T < 86, cx = 11;
+      g.each((u, v) => (v < 8 ? ((u + v) % 4 === 0 ? '#1a1420' : '#100c16') : v >= 22 ? ((u * 3 + v) % 7 === 0 ? '#0c5030' : '#0e5a32') : mix('#100c16', '#0a2a1a', (v - 8) / 14)));
+      [[3, 25], [7, 25]].forEach(([x, y]) => { for (let v = 0; v < 6; v++) for (let u = 0; u < 4; u++) g.set(x + u, y + v, u === 3 || v === 5 ? '#c8c4b8' : '#f8f6f0'); g.set(x + 1, y + 1, '#c0202a'); });
+      for (let i = 0; i < 4; i++) for (let u = 0; u < 4; u++) g.set(15 + u, 29 - i, ['#d8323a', '#4f9cff', '#20202a', '#ffd75e'][i]);
+      const sweep = lock ? 17 : 11 + Math.sin(T * 0.11) * 9;
+      for (let v = 9; v < IH; v++) { const k = (v - 9) / (IH - 9), half = 1 + k * 4.5, x = lerp(cx, sweep, k); for (let u = Math.ceil(x - half); u < x + half; u++) if (u >= 0 && u < IW && (u + v + (T >> 1)) % 2 === 0) g.set(u, v, lock ? '#c0202a' : '#d8e8c8'); }
+      g.each((u, v) => (v <= 8 && Math.hypot(u + 0.5 - cx, v - 1) < 7 ? (Math.hypot(u + 0.5 - cx, v - 1) > 6 ? '#3a3a44' : '#1a1a22') : null));
+      for (let u = 3; u < 20; u++) g.set(u, 1, '#5a5a64');
+      eyeAt(g, cx, 5, 4.4, 2.2, { open: eyeOpen(T, 0, 54), look: lock ? 0.8 : Math.sin(T * 0.11) * 0.8, col: lock ? RED_EYE : GREEN_EYE, glint: true });
+      if (lock && T % 6 < 3) { g.set(19, 3, '#ff3a4a'); g.set(20, 3, '#ff3a4a'); }
+    },
+    borderFx(g, f) { const T = f % 96; BORDER_RUN(g, f, T >= 60 && T < 86 ? '#5a0a14' : '#1a1a22', '#c0202a', 6, 1, 1); },
+    ace(g, f, F, ink) {
+      const T = f % 60, lock = T >= 36 && T < 52;
+      g.bits(BASE[this.s], 0, 4, { X: ink }, 2);
+      // the beam scanning across the suit, then holding on it in red
+      const x = lock ? 9 : Math.round(9 + Math.sin(T * 0.18) * 7);
+      for (let y = 4; y < 22; y++) { const half = 1 + (y - 4) * 0.12; for (let u = Math.ceil(x - half); u < x + half; u++) if ((u + y + T) % 2 === 0) g.set(u, y, lock ? '#ff3a4a' : '#bfe8a8'); }
+      // the camera dome on top
+      for (let u = 4; u < 14; u++) { g.set(u, 0, '#5a5a64'); g.set(u, 1, '#1a1a22'); }
+      for (let u = 6; u < 12; u++) g.set(u, 2, '#1a1a22');
+      g.set(x < 9 ? 8 : 9, 1, lock ? '#ff3a4a' : '#7aff6a');
+    },
+  });
+
   // ======================================================================== game glue
   const doc = root.document;
   // set id -> cosmetic ids in js/cosmetics.js
@@ -1299,6 +1435,7 @@
     ghost: ['back_ghost', 'face_ghost'], platinum: ['back_platinum', 'face_platinum'], house: ['back_house', 'face_house'],
     eye: ['back_eye', 'face_eye'], sunrise: ['back_sunrise', 'face_sunrise'],
 stillwater: ['back_stillwater', 'face_stillwater'], halcyon: ['back_halcyon', 'face_halcyon'], owl: ['back_owl', 'face_owl'], laurel: ['back_laurel', 'face_laurel'], dragon: ['back_dragon', 'face_dragon'], goldace: ['back_goldace', 'face_goldace'], marquee: ['back_marquee', 'face_marquee'],
+shark: ['back_shark', 'face_shark'], houseeye: ['back_houseeye', 'face_houseeye'], skyeye: ['back_skyeye', 'face_skyeye'],
     inferno: ['back_inferno'], storm: ['back_storm'], slots: ['back_slots'], starfield: ['back_starfield'],
   };
   const BY_BACK = {}, BY_FACE = {};
