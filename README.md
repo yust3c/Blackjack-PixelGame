@@ -26,13 +26,13 @@ No install and no internet needed. With a connection it also loads the two pixel
 
 Each difficulty has its own casino and dealer. **Achievements** unlock **cosmetics** (card backs, felts, chip sets and card faces, some animated), and the **Lore** section tells the story of every dealer and room. Progress is saved in your browser.
 
-Casinos are not always quiet: keep an eye on the room, things happen there now and then. Some of them are very rare.
+Casinos are not always quiet: rain runs down the windows, dust drifts in the lamplight, and things happen in the room now and then. Some of them are very rare. Each casino also has its own goal bar, and a big win gets its own message, from Big win up to Insane win.
 
 **Stats**: press `T` (or the **Stats** button) at the table to see how this session is going, with a graph of your chips. **Profile → Stats** shows your lifetime numbers and your last session.
 
 ## Sound
 
-The game has chiptune sound effects and music. Secret card backs and sets come with their own sounds. Open **Settings** in the main menu to change the volume or turn the set sounds off. Settings also has the dealer's speed, quick bot turns and a switch to reduce motion. Press `M` anywhere to mute. Sound starts after your first click, because browsers block it until then.
+The game has chiptune sound effects and music. Secret card backs and sets come with their own sounds. Open **Settings** in the main menu to change the volume or turn the set sounds off. Settings also has the dealer's speed, quick bot turns, a switch for the big win messages and one to reduce motion. Press `M` anywhere to mute. Sound starts after your first click, because browsers block it until then.
 
 ## Your save
 
@@ -60,7 +60,7 @@ On your turn: `H` hit, `S` stand, `D` double, `P` split, `R` surrender. When the
 
 ## Made with
 
-Plain HTML, CSS and JavaScript. Every card, chip, dealer and casino is pixel art drawn in code, and every sound is generated in code too. Card and chip moves are animated with [GSAP](https://gsap.com), included in the `vendor` folder under [its own license](https://gsap.com/standard-license).
+Plain HTML, CSS and JavaScript. Every card, chip, dealer and casino is pixel art drawn in code, and every sound is generated in code too. Card and chip moves are animated with [GSAP](https://gsap.com), included in the `vendor` folder under [its own license](https://gsap.com/standard-license). The pixel effects over the room and the table are drawn with [PixiJS](https://pixijs.com) (MIT license), also in `vendor`.
 
 ## License
 
