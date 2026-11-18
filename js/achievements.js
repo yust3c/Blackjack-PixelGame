@@ -200,11 +200,12 @@
       fx_corner: 0, fx_deco: 0, fx_neon: 0, fx_vip: 0, fx_orbit: 0, fx_liner: 0, fx_mars: 0, fx_horizon: 0, dailyBest: 0, dailies: 0 },
     days: {},   // 'YYYY-MM-DD' -> true, for Seven Days
     losses: {}, // difficulty -> Challenges lost, for Phoenix
+    sweep: { n: 0, leg: null }, // Clean Sweep: Challenges beaten in order so far, and the one being played now
   });
   let save = blank();
   try {
     const raw = root.localStorage.getItem(SAVE_KEY);
-    if (raw) { const s = JSON.parse(raw); save = { unlocked: s.unlocked || {}, stats: Object.assign(blank().stats, s.stats || {}), days: s.days || {}, losses: s.losses || {} }; }
+    if (raw) { const s = JSON.parse(raw); save = { unlocked: s.unlocked || {}, stats: Object.assign(blank().stats, s.stats || {}), days: s.days || {}, losses: s.losses || {}, sweep: Object.assign({ n: 0, leg: null }, s.sweep || {}) }; }
   } catch (e) { /* no storage */ }
   function persist() { try { root.localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) { /* ignore */ } }
 
@@ -233,7 +234,19 @@
       lowest: Infinity, alwaysAboveStart: true,
       bjStreak: 0, winStreak: 0, doubleStreak: 0, pushStreak: 0, insuranceLost: 0, dealerBustStreak: 0, countBefore: 0,
       rounds: 0, hands: 0, maxSeats: 0, hadBots: false, usedTricks: false, lossStreak: 0, winsAfter: 0, recovering: false, lostCounted: false,
+      lostHand: false, offBook: false, naturals: 0,   // Perfect Day, Iron Professor, Twenty-One
     };
+    if (session.mode === 'challenge' && !o.resumed) sweepStart(session.difficulty);
+  }
+  // Clean Sweep: Easy, Medium, Hard and Expert beaten one after another. Starting a Challenge fresh
+  // (not Continue) begins the next leg; starting over, starting another difficulty or going broke ends the sweep,
+  // and a fresh Easy always begins a new one.
+  const SWEEP = ['easy', 'medium', 'hard', 'expert'];
+  function sweepStart(d) {
+    const w = save.sweep;
+    if (d === SWEEP[w.n] && w.leg !== d) w.leg = d;
+    else { w.n = 0; w.leg = d === 'easy' ? 'easy' : null; }
+    persist();
   }
   // Continue (ui.js): a saved run carries its session trackers, so streaks and
   // "never dropped below the start" keep counting across a break.
@@ -241,10 +254,13 @@
     return session ? Object.assign({}, session, { lowest: session.lowest === Infinity ? null : session.lowest }) : null;
   }
   function resumeSession(saved, opts) {
-    startSession(opts);
+    startSession(Object.assign({}, opts, { resumed: true }));
     if (saved && typeof saved === 'object') {
       for (const k of Object.keys(session)) if (k in saved && k !== 'mode' && k !== 'difficulty') session[k] = saved[k];
       if (typeof session.lowest !== 'number') session.lowest = Infinity;
+      // a run saved by an older version never tracked these, so it can't prove a clean record
+      if (!('lostHand' in saved)) session.lostHand = true;
+      if (!('offBook' in saved)) session.offBook = true;
     }
   }
   const counts = () => session && session.mode !== 'practice';
@@ -300,6 +316,7 @@
       const first = seat.hands[0];
       if (first.natural) {
         session.bjStreak++;
+        session.naturals++;
         save.stats.blackjacks++;
         unlock('natural');
         const [a, b] = first.cards;
@@ -353,6 +370,8 @@
           save.stats.highStreak = won(h) && base >= 500 ? save.stats.highStreak + 1 : 0;
           if (save.stats.highStreak >= 5) unlock('high_society');
           if (h.achDecisions) save.stats.bookStreak = h.achOffBook ? 0 : save.stats.bookStreak + 1;
+          if (h.achOffBook) session.offBook = true;
+          if (h.result === 'lose' || h.result === 'bust' || h.result === 'surrender') session.lostHand = true;
         }
         roundNet += h.net || 0;
         seatNet += h.net || 0;
@@ -421,6 +440,7 @@
       session.lostCounted = true;
       unlock('bankrupt');
       if (session.difficulty) save.losses[session.difficulty] = (save.losses[session.difficulty] || 0) + 1;
+      save.sweep = { n: 0, leg: null };
     }
     // count for the next round's bets (a fresh shoe starts at 0)
     session.countBefore = game.trueCount || 0;
@@ -428,6 +448,8 @@
     if (session.winStreak >= 7) unlock('hot_streak');
     if (session.winStreak >= 10) unlock('untouchable');
     if (roundNet >= 1000) unlock('big_score');
+    if (roundNet >= 10000) unlock('insane_win');
+    if (session.mode === 'endless' && session.naturals >= 21) unlock('twenty_one');
     if (seats.length >= 3 && seatsWon === seats.length) unlock('table_sweep');
 
     session.lowest = Math.min(session.lowest, game.bankroll);
@@ -444,6 +466,11 @@
     unlock('beat_' + difficultyId);
     if (session.start && session.lowest <= session.start / 4) unlock('comeback');
     if (difficultyId === 'expert' && session.alwaysAboveStart) unlock('flawless');
+    if (difficultyId === 'expert' && !session.offBook) unlock('iron_professor');
+    if (save.sweep.leg === difficultyId && SWEEP[save.sweep.n] === difficultyId) {
+      save.sweep = { n: save.sweep.n + 1, leg: null };
+      if (save.sweep.n >= SWEEP.length) { save.sweep = { n: 0, leg: null }; unlock('clean_sweep'); }
+    } else save.sweep = { n: 0, leg: null };
     if (['easy', 'medium', 'hard', 'expert'].every((d) => save.unlocked['beat_' + d])) unlock('grand_slam');
     if (session.rounds <= 30) unlock('speedrun');
     if ((save.losses[difficultyId] || 0) >= 3) unlock('phoenix');
@@ -572,6 +599,7 @@
   }
   // Daily challenge (ui.js): called when a Daily run ends, with the current streak of days in a row.
   function dailyDone(streak) {
+    if (session && session.mode === 'daily' && session.hands > 0 && !session.lostHand) unlock('perfect_day');
     save.stats.dailies = (save.stats.dailies || 0) + 1;
     save.stats.dailyBest = Math.max(save.stats.dailyBest || 0, streak || 0);
     for (const a of LIST) if (a.counter && a.counter[0] === 'dailyBest' && save.stats.dailyBest >= a.counter[1]) unlock(a.id);

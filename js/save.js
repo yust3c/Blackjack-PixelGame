@@ -5,7 +5,7 @@
 
   // Bump CURRENT and add a step to MIGRATIONS whenever a new game version changes the
   // shape of a save. Steps upgrade old data in place and never throw it away.
-  const CURRENT = 5;
+  const CURRENT = 6;
   const META_KEY = 'blackjack-meta';
   const KEYS = { progress: 'blackjack-save-v1', achievements: 'blackjack-achievements-v1', cosmetics: 'blackjack-cosmetics-v1', settings: 'blackjack-settings-v1', dealertalk: 'blackjack-dealertalk-v1', prefs: 'blackjack-prefs-v1', sceneevents: 'blackjack-sceneevents-v1' };
   // Parts that belong to this computer, not to the player: an imported save without them keeps the current ones.
@@ -34,6 +34,11 @@
     // 4 -> 5: the win messages for big wins (js/fxlayer.js) can be switched off in Settings > Table.
     5: (data) => {
       if (isObj(data.prefs) && typeof data.prefs.winMessages !== 'boolean') data.prefs.winMessages = true;
+      return data;
+    },
+    // 5 -> 6: Clean Sweep (beat the four Challenges in a row) keeps its streak in the achievements save.
+    6: (data) => {
+      if (isObj(data.achievements) && !isObj(data.achievements.sweep)) data.achievements.sweep = { n: 0, leg: null };
       return data;
     },
   };
