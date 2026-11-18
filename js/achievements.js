@@ -183,7 +183,7 @@
     { id: 'eyewitness', rarity: 'secret', group: 'Secret', name: 'Eyewitness', desc: 'See the secret event of every scene.', secret: true,
       hint: 'Secret. Look up from the cards once in a while. Some things happen only once in a blue moon.' },
     { id: 'darkest_run', rarity: 'insanity', group: 'Secret', name: 'The Darkest Run', desc: 'Complete Endless on Expert using only 2 seats, without ever splitting, doubling or surrendering.', secret: true,
-      hint: 'Secret. The darkest run there is.' },
+      hint: 'Insanity. No tricks, no light, no way out.' },
   ];
   const RANK = { common: 0, rare: 1, epic: 2, legendary: 3, secret: 4, insanity: 5 };
   LIST.sort((a, b) => RANK[a.rarity] - RANK[b.rarity]);
