@@ -5,7 +5,7 @@
 
   // Bump CURRENT and add a step to MIGRATIONS whenever a new game version changes the
   // shape of a save. Steps upgrade old data in place and never throw it away.
-  const CURRENT = 6;
+  const CURRENT = 7;
   const META_KEY = 'blackjack-meta';
   const KEYS = { progress: 'blackjack-save-v1', achievements: 'blackjack-achievements-v1', cosmetics: 'blackjack-cosmetics-v1', settings: 'blackjack-settings-v1', dealertalk: 'blackjack-dealertalk-v1', prefs: 'blackjack-prefs-v1', sceneevents: 'blackjack-sceneevents-v1' };
   // Parts that belong to this computer, not to the player: an imported save without them keeps the current ones.
@@ -39,6 +39,12 @@
     // 5 -> 6: Clean Sweep (beat the four Challenges in a row) keeps its streak in the achievements save.
     6: (data) => {
       if (isObj(data.achievements) && !isObj(data.achievements.sweep)) data.achievements.sweep = { n: 0, leg: null };
+      return data;
+    },
+    // 6 -> 7: the Lore chapters count the hands played at each table, in the achievements stats.
+    7: (data) => {
+      const st = isObj(data.achievements) && isObj(data.achievements.stats) ? data.achievements.stats : null;
+      if (st) for (const s of ['corner', 'orbit', 'deco', 'liner', 'neon', 'mars', 'vip', 'horizon']) if (typeof st['handsAt_' + s] !== 'number') st['handsAt_' + s] = 0;
       return data;
     },
   };

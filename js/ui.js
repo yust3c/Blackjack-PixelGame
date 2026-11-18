@@ -67,10 +67,31 @@
     window.scrollTo(0, 0);
   }
 
+  // Tabs: Dealers (bio, place and three chapters each), Legends (one per secret and Insanity set, once unlocked),
+  // and the letter, which appears once all 24 chapters are read. Chapter progress lives in js/lore.js.
+  let loreTab = 'dealers';
+  const ROMAN = ['I', 'II', 'III'];
+  const escHtml = (str) => String(str).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   function renderLore() {
     const S = window.Scenarios;
     const D = window.ScenarioDealers;
     const L = window.Lore || {};
+    const C = window.Cosmetics;
+    const sceneName = (id) => (S && S.SCENES[id] ? S.SCENES[id].name : id);
+    const chapters = (id) => {
+      const list = (L.CHAPTERS && L.CHAPTERS[id]) || [];
+      if (!list.length) return '';
+      return `<h4>Chapters</h4><div class="lore-chs">${list.map((ch, i) => {
+        const p = L.chapter(id, i);
+        if (p.open) return `<details class="lore-ch${i === 2 ? ' her' : ''}"><summary><span class="num">${ROMAN[i]}.</span> ${escHtml(ch.title)}</summary><p>${escHtml(ch.text)}</p></details>`;
+        const who = D && D.DEALERS[id] ? D.DEALERS[id].name : 'The dealer';
+        const how = ch.unlock.type === 'hands' ? `Play ${ch.unlock.n} hands at ${sceneName(id)}.`
+          : ch.unlock.type === 'events' ? `Look up from the cards at ${sceneName(id)}. See everything that happens there.`
+          : `Some things ${who} only says when they think nobody is listening.`;
+        const bar = p.need ? `<div class="lore-bar"><i style="width:${Math.round((p.have / p.need) * 100)}%"></i></div>` : '';
+        return `<div class="lore-ch locked"><div class="row">${lockIcon()}<span>${ROMAN[i]}. ???</span>${p.need ? `<span class="lore-n">${p.have}/${p.need}</span>` : ''}</div><div class="how">${how}</div>${bar}</div>`;
+      }).join('')}</div>`;
+    };
     const entry = (id, diff, space) => {
       const scene = S && S.SCENES[id];
       const dealer = D && D.DEALERS[id];
@@ -94,23 +115,54 @@
           <h4>${dealer ? dealer.name : 'The dealer'}</h4>
           <p>${lore.dealer || (dealer ? dealer.line : '')}</p>
           ${lore.place ? `<h4>The place</h4><p>${lore.place}</p>` : ''}
+          ${L.chapter ? chapters(id) : ''}
         </div></article>`;
     };
-    const rows = M.DIFFICULTIES.map((d) => {
-      const ids = S ? S.BY_DIFFICULTY[d.id] : null;
-      if (!ids) return '';
-      return `<section class="lore-row">
-        <h2>${d.name}</h2>
-        <div class="lore-pair">${entry(ids.challenge, d, false)}${entry(ids.endless, d, true)}</div>
-      </section>`;
-    }).join('');
+    const legends = () => {
+      const names = Object.keys(L.LEGENDS || {});
+      return `<div class="lore-legends">${names.map((name) => {
+        const [by, text] = L.LEGENDS[name];
+        const back = C && C.CATALOG.find((c) => c.set === name && c.type === 'back');
+        if (!back || !C.isUnlocked(back.id)) return `<div class="lore-leg locked"><div class="art">${lockIcon()}</div><div><h3>???</h3><div class="by">Unlock this set to hear its legend.</div></div></div>`;
+        const rar = C.RARITIES[back.rarity] ? C.RARITIES[back.rarity].color : 'var(--gold)';
+        const teller = D && D.DEALERS[by] ? D.DEALERS[by].name : '';
+        return `<div class="lore-leg" style="--rar:${rar}"><div class="art">${C.swatch(back)}</div><div class="lore-leg-text"><h3>${escHtml(name)}</h3>
+          <div class="by">${D ? D.sprite(by) : ''} as told by ${escHtml(teller)}</div><p>${escHtml(text)}</p></div></div>`;
+      }).join('')}</div>`;
+    };
+    const letter = () => {
+      const ls = (L.LETTER && L.LETTER.lines) || [], n = ls.length;
+      return `<div class="lore-letter"><span class="stain" aria-hidden="true"></span><h3>${escHtml(L.LETTER.title)}</h3>
+        ${ls.slice(0, n - 2).map((l) => `<p>${escHtml(l)}</p>`).join('')}<p class="sig">${escHtml(ls[n - 2])}</p><p class="ps">${escHtml(ls[n - 1])}</p></div>`;
+    };
+    const her = !!(L.complete && L.complete());
+    if (loreTab === 'letter' && !her) loreTab = 'dealers';
+    let body = '';
+    if (loreTab === 'dealers') {
+      body = M.DIFFICULTIES.map((d) => {
+        const ids = S ? S.BY_DIFFICULTY[d.id] : null;
+        if (!ids) return '';
+        return `<section class="lore-row">
+          <h2>${d.name}</h2>
+          <div class="lore-pair">${entry(ids.challenge, d, false)}${entry(ids.endless, d, true)}</div>
+        </section>`;
+      }).join('') || '<p class="tagline">No scenes installed.</p>';
+    }
+    if (loreTab === 'legends') body = legends();
+    if (loreTab === 'letter') body = letter();
+    const legOpen = C ? Object.keys(L.LEGENDS || {}).filter((name) => { const b = C.CATALOG.find((c) => c.set === name && c.type === 'back'); return b && C.isUnlocked(b.id); }).length : 0;
+    const tab = (k, label, cls = '') => `<button type="button" class="lore-tab${cls}${loreTab === k ? ' on' : ''}" data-lore-tab="${k}">${label}</button>`;
+    const tabs = tab('dealers', 'Dealers') + tab('legends', 'Legends')
+      + (her ? tab('letter', 'A Letter', ' her') : `<span class="lore-tab off">${lockIcon()} ???</span>`);
     $('lore').innerHTML = `
       <div class="lore-head">
         <button class="btn btn-ghost" data-lore-back>Back</button>
         <h1>LORE</h1>
       </div>
-      <p class="tagline">The dealers and the rooms where they deal.</p>
-      ${rows || '<p class="tagline">No scenes installed.</p>'}`;
+      <p class="tagline">The dealers, the rooms where they deal, and the stories they don't tell.</p>
+      ${L.chaptersOpen ? `<div class="lore-count">Chapters <b>${L.chaptersOpen()}/${L.chaptersTotal()}</b> · Legends <b>${legOpen}/${Object.keys(L.LEGENDS || {}).length}</b></div>` : ''}
+      <div class="lore-tabs">${tabs}</div>
+      ${body}`;
   }
 
   function runLine(type, diffId) {
@@ -893,6 +945,7 @@
     if (d.lore !== undefined) { showLore(); return; }
     if (d.settings !== undefined) { window.GameSounds.openSettings(); return; }
     if (d.loreBack !== undefined) { showMenu(); return; }
+    if (d.loreTab !== undefined) { loreTab = d.loreTab; renderLore(); return; }
     if (d.exportSave !== undefined) { window.SaveData.exportSave(); return; }
     if (d.importSave !== undefined) { pickSaveFile(); return; }
     if (d.resetProgress !== undefined) {

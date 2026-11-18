@@ -200,7 +200,9 @@
     stats: { hands: 0, rounds: 0, blackjacks: 0, handsWon: 0, chipsWon: 0, doublesWon: 0, dealerBusts: 0,
       doubles: 0, surrenders: 0, minWins: 0, shuffles: 0, daysPlayed: 0, disciplined: 0, proCount: 0,
       hands_easy: 0, hands_medium: 0, hands_hard: 0, hands_expert: 0, noBustStreak: 0, bookStreak: 0, bustStreak: 0, highStreak: 0, dealerBJStreak: 0,
-      fx_corner: 0, fx_deco: 0, fx_neon: 0, fx_vip: 0, fx_orbit: 0, fx_liner: 0, fx_mars: 0, fx_horizon: 0, dailyBest: 0, dailies: 0 },
+      fx_corner: 0, fx_deco: 0, fx_neon: 0, fx_vip: 0, fx_orbit: 0, fx_liner: 0, fx_mars: 0, fx_horizon: 0, dailyBest: 0, dailies: 0,
+      // hands played at each table, for the Lore chapters (js/lore.js)
+      handsAt_corner: 0, handsAt_orbit: 0, handsAt_deco: 0, handsAt_liner: 0, handsAt_neon: 0, handsAt_mars: 0, handsAt_vip: 0, handsAt_horizon: 0 },
     days: {},   // 'YYYY-MM-DD' -> true, for Seven Days
     losses: {}, // difficulty -> Challenges lost, for Phoenix
     sweep: { n: 0, leg: null }, // Clean Sweep: Challenges beaten in order so far, and the one being played now
@@ -238,6 +240,7 @@
     if (!save.unlocked.completionist && allDone()) unlock('completionist');   // saves that already qualify under the Legendary-only rule
     session = {
       mode: o.mode || 'practice', difficulty: o.difficulty || null, start: o.start || 0,
+      scene: root.Scenarios ? root.Scenarios.forMode(o.mode === 'daily' ? 'challenge' : o.mode, o.difficulty) : null,   // the Daily is dealt in the day's casino
       lowest: Infinity, alwaysAboveStart: true,
       bjStreak: 0, winStreak: 0, doubleStreak: 0, pushStreak: 0, insuranceLost: 0, dealerBustStreak: 0, countBefore: 0,
       rounds: 0, hands: 0, maxSeats: 0, hadBots: false, usedTricks: false, lossStreak: 0, winsAfter: 0, recovering: false, lostCounted: false,
@@ -263,7 +266,7 @@
   function resumeSession(saved, opts) {
     startSession(Object.assign({}, opts, { resumed: true }));
     if (saved && typeof saved === 'object') {
-      for (const k of Object.keys(session)) if (k in saved && k !== 'mode' && k !== 'difficulty') session[k] = saved[k];
+      for (const k of Object.keys(session)) if (k in saved && k !== 'mode' && k !== 'difficulty' && k !== 'scene') session[k] = saved[k];
       if (typeof session.lowest !== 'number') session.lowest = Infinity;
       // a run saved by an older version never tracked these, so it can't prove a clean record
       if (!('lostHand' in saved)) session.lostHand = true;
@@ -356,6 +359,7 @@
         save.stats.hands++;
         session.hands++;
         if (session.difficulty) save.stats['hands_' + session.difficulty] = (save.stats['hands_' + session.difficulty] || 0) + 1;
+        if (session.scene) save.stats['handsAt_' + session.scene] = (save.stats['handsAt_' + session.scene] || 0) + 1;
         {
           const tot = value(h.cards);
           const busted = h.result === 'bust' || tot > 21;

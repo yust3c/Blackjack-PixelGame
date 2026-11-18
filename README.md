@@ -24,7 +24,7 @@ No install and no internet needed. With a connection it also loads the two pixel
 - **Endless**: one per difficulty, unlocked by beating that difficulty in Challenge, and set in a space version of its casino. Chase 8 objectives based on the difficulty's goal, then keep going for a high score. Lose when you run out of chips.
 - **Daily**: a new deal every day, the same shoe for everyone, dealt in a different casino each day. You get 25 hands and 1000 chips; what you finish with is your score. Replay as often as you like, your best of the day counts. Play every day to grow your streak.
 
-Each difficulty has its own casino and dealer. **Achievements** unlock **cosmetics** (card backs, felts, chip sets and card faces, some animated), and the **Lore** section tells the story of every dealer and room. Progress is saved in your browser.
+Each difficulty has its own casino and dealer. **Achievements** unlock **cosmetics** (card backs, felts, chip sets and card faces, some animated), and the **Lore** section tells the story of every dealer and room, with new chapters that open up as you play. Progress is saved in your browser.
 
 Casinos are not always quiet: rain runs down the windows, dust drifts in the lamplight, and things happen in the room now and then. Some of them are very rare. Each casino also has its own goal bar, and a big win gets its own message, from Big win up to Insane win.
 
