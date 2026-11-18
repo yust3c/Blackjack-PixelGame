@@ -220,13 +220,6 @@ function blackjack() {
     } });
   }
 }
-// A good round under the win messages' 1,000: the amount pops up and chips shower onto the felt.
-function bigWin(amount) {
-  label(`+${fmtN(amount)}`, MID.x, MID.y - 8, 0x8affa0, 1.8);
-  if (reduce) return;
-  const n = Math.max(6, Math.min(48, Math.round(Math.sqrt(amount) * 0.9)));
-  chipBurst(MID.x, MID.y, n, MID.y + 16);
-}
 const RARITY = { rare: [0x4aa8ff, 0xbfe4ff, 0xffffff], epic: [0xb06aff, 0xe0c0ff, 0xffffff], legendary: [0xffb02a, 0xffd75e, 0xfff6c0], secret: [0xff5a6a, 0xffb0b8, 0xffffff] };
 const RAINBOW = [0xff5a6a, 0xffb020, 0xfff06a, 0x6aff9a, 0x5af2ff, 0x6a8aff, 0xc069f0];
 const rainbow = (i) => RAINBOW[((i % 7) + 7) % 7];
@@ -1012,8 +1005,9 @@ function roundEnd(game) {
   game.seats.filter((x) => x.type === 'player' && x.hands && x.hands.length).forEach((x) => x.hands.forEach((h) => { net += h.net || 0; if (h.natural && (h.net || 0) > 0) natural = true; }));
   if (natural) blackjack();
   const wins = !root.Prefs || root.Prefs.get('winMessages') !== false;
-  const go = () => { if (!on()) return; if (net >= 1000 && wins) winTier(net, 'scene'); else if (net >= 200) bigWin(net); };
-  if (natural && net >= 200) later(0.9, go); else go();
+  // only wins of 1,000 or more get a message; smaller wins keep the table's normal payout
+  const go = () => { if (on() && net >= 1000 && wins) winTier(net, 'scene'); };
+  if (natural && net >= 1000) later(0.9, go); else go();
 }
 
 // The toast's own text for the two top rarities (works in every layout, effects layer or not):
@@ -1063,6 +1057,6 @@ root.addEventListener('resize', () => { if (backApp && cur) { const want = stage
 root.FXLayer = {
   start, stop, roundEnd, playEvent,
   /** For testing: FXLayer.test('blackjack' | 'win', amount | 'unlock', rarity). */
-  test: (what, v) => { if (!on()) return false; if (what === 'blackjack') blackjack(); else if (what === 'win') (v >= 1000 ? winTier(v, 'scene') : bigWin(v)); else if (what === 'unlock') unlock(v, 192, 20); return true; },
+  test: (what, v) => { if (!on()) return false; if (what === 'blackjack') blackjack(); else if (what === 'win') winTier(v, 'scene'); else if (what === 'unlock') unlock(v, 192, 20); return true; },
 };
 })(window);
