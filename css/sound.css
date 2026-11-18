@@ -42,3 +42,6 @@
 /* Table settings (js/prefs.js): one-of-several choices sit side by side */
 .snd-seg { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
 .snd-seg .snd-switch { min-width: 0; }
+/* Save section: plain buttons on the right of each row */
+.snd-act { font-size: 11px; padding: 10px 16px; min-width: 110px; }
+.snd-act.danger { color: #ffb0a8; }

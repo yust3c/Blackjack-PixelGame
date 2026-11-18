@@ -41,4 +41,14 @@
 .stv-mini b { font-size: 9px; color: var(--ink); }
 .stv-mini span { font-size: 14px; color: #b8a890; }
 #stats-btn.on { background: var(--gold); color: var(--btn-ink); }
-.mode-col { display: grid; gap: 20px; align-content: start; min-width: 0; }
+/* Daily as one wide bar under the three modes: text | streak | today's numbers | button. Stacks again on narrow screens. */
+@media (min-width: 900px) {
+  .dl-wide { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.5fr) auto; column-gap: 22px; row-gap: 8px; align-items: center; padding: 20px 24px; }
+  .dl-wide .dl-head { grid-column: 1; grid-row: 1; }
+  .dl-wide > p { grid-column: 1; grid-row: 2; font-size: 19px; }
+  .dl-wide .dl-streak { grid-column: 2; grid-row: 1 / 3; }
+  .dl-wide .dl-facts { grid-column: 3; grid-row: 1 / 3; }
+  .dl-wide .dl-facts span { white-space: nowrap; }
+  .dl-wide .dl-done { grid-column: 1 / 4; grid-row: 3; }
+  .dl-wide .btn { grid-column: 4; grid-row: 1 / 3; align-self: center; }
+}

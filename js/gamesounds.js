@@ -198,7 +198,16 @@
             <button class="snd-switch" data-pref="winMessages" aria-pressed="true"></button></div>
           <div class="snd-row snd-toggle"><span class="snd-label">Reduce motion<span class="snd-note">Stops animations. Your system setting also counts.</span></span>
             <button class="snd-switch" data-pref="reduceMotion" aria-pressed="false"></button></div>
-        </div>` : ''}`;
+        </div>` : ''}
+        <div class="snd-panel snd-panel-save">
+          <h2>Save</h2>
+          ${root.SaveData && root.SaveData.available ? `<div class="snd-row snd-toggle"><span class="snd-label">Export save<span class="snd-note">Download your progress as a file.</span></span>
+            <button class="btn btn-ghost snd-act" data-export-save>Export</button></div>
+          <div class="snd-row snd-toggle"><span class="snd-label">Import save<span class="snd-note">Load progress from a save file. It replaces what you have now.</span></span>
+            <button class="btn btn-ghost snd-act" data-import-save>Import</button></div>` : ''}
+          <div class="snd-row snd-toggle"><span class="snd-label">Reset progress<span class="snd-note">Erase all your progress. This cannot be undone.</span></span>
+            <button class="btn btn-ghost snd-act danger" data-reset-progress>Reset</button></div>
+        </div>`;
     }
     section.querySelectorAll('input[type=range]').forEach((r) => {
       const v = Math.round(s[r.dataset.key] * 100);

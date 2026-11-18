@@ -205,14 +205,11 @@
         <p class="tagline">6 decks · Blackjack pays 3 to 2 · Dealer stands on all 17s</p>
       </div>
       <div class="modes">
-        <div class="mode-col">
         <article class="mode-card">
           <h2>Practice</h2>
           <p>Learn to play well. Hints show the basic strategy move, and a coach tracks the Hi-Lo count for you.</p>
           <button class="btn btn-primary" data-start="practice">Play practice</button>
         </article>
-        ${dailyCard()}
-        </div>
         <article class="mode-card">
           <h2>Challenge</h2>
           <p>You against the dealer. Reach the goal before you run out of chips.</p>
@@ -223,21 +220,17 @@
           ${endless}
         </article>
       </div>
+      ${dailyCard()}
       <div class="menu-extras">
         ${window.Cosmetics && window.Cosmetics.playerName ? `<button class="btn btn-ghost extra-btn" data-locker="profile">Profile</button>` : ''}
         ${window.Cosmetics ? `<button class="btn btn-ghost extra-btn" data-locker="cosmetics">Cosmetics</button>` : ''}
         ${window.Achievements ? `<button class="btn btn-ghost extra-btn" data-locker="achievements">Achievements${collectionCount()}</button>` : ''}
         <button class="btn btn-ghost extra-btn" data-lore>Lore</button>
         ${window.GameSounds ? `<button class="btn btn-ghost extra-btn" data-settings>Settings</button>` : ''}
-      </div>
-      <div class="menu-foot">
-        ${window.SaveData && window.SaveData.available ? `<button class="link-btn" data-export-save>Export save</button>
-        <button class="link-btn" data-import-save>Import save</button>` : ''}
-        <button class="link-btn" data-reset-progress>${resetArmed ? 'Click again to erase all progress' : 'Reset progress'}</button>
       </div>`;
   }
 
-  // The Daily card: today's casino, the streak with its tier icon, and today's best.
+  // The Daily card: a wide bar under the three modes with today's casino, the streak with its tier icon, and today's best.
   const SCENE_OF = { easy: ['The Corner', 'Old Tito'], medium: ['Grand Hotel', 'Madame Odette'], hard: ['Neon', 'Vinnie'], expert: ['VIP Lounge', 'Mr. Valdez'] };
   function dailyPlace(day) {
     const id = M.dailyDifficulty(day);
@@ -254,7 +247,7 @@
     const I = window.AchievementIcons;
     const date = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
     const tierLine = tier ? `${tier.name} · ${tier.next ? `${tier.next.days} more day${tier.next.days === 1 ? '' : 's'} to ${tier.next.name}` : 'Top tier'}` : 'Play today to start one';
-    return `<article class="mode-card dl-card">
+    return `<article class="mode-card dl-card dl-wide">
       <div class="dl-head"><h2>Daily</h2><span class="dl-date">${date}</span></div>
       <p>Today's deal at <b class="dl-place">${dailyPlace(day)}</b>. The same shoe for everyone. ${M.DAILY.hands} hands, start with ${fmt(M.DAILY.start)}.</p>
       <div class="dl-streak"><span class="ic">${tier && I ? I.html('streak_' + tier.id, 48) : ''}</span>
@@ -948,15 +941,18 @@
     if (d.loreTab !== undefined) { loreTab = d.loreTab; renderLore(); return; }
     if (d.exportSave !== undefined) { window.SaveData.exportSave(); return; }
     if (d.importSave !== undefined) { pickSaveFile(); return; }
-    if (d.resetProgress !== undefined) {
+    if (d.resetProgress !== undefined) {   // the Save section of Settings (js/gamesounds.js): a second click within 4 s erases
       if (resetArmed) {
         save = M.blankSave();
         M.store(save);
         if (window.Achievements) window.Achievements.reset();
         if (window.Cosmetics) window.Cosmetics.apply();
         resetArmed = false;
+        t.textContent = 'Progress erased';
+      } else {
+        resetArmed = true; t.textContent = 'Click again to erase';
+        setTimeout(() => { resetArmed = false; if (t.isConnected && t.textContent === 'Click again to erase') t.textContent = 'Reset'; }, 4000);
       }
-      else { resetArmed = true; setTimeout(() => { resetArmed = false; if (!$('menu').hidden) renderMenu(); }, 4000); }
       renderMenu();
       return;
     }
