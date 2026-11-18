@@ -676,7 +676,7 @@
       const done = endlessIndex >= objectives.length;
       label = done ? 'Best' : `Objective ${endlessIndex + 1}/${objectives.length}`;
       goal = done ? null : objectives[endlessIndex];
-      start = endlessIndex > 0 ? objectives[endlessIndex - 1] : 0;
+      start = 0;   // the bar counts from 0 to each objective, so it carries on from where the last one ended
     }
     if (mode.type === 'daily') {
       label = 'Hand';
