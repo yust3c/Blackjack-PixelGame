@@ -256,6 +256,21 @@
   const bell = (at, f, vol = 0.08, o = {}) => { for (const [m, v] of [[1, 1], [2.76, 0.4], [5.4, 0.2]]) tone(Object.assign({ at, f: hz(f) * m, dur: o.dur || 0.6, vol: vol * v, wave: 'sine' }, o)); };
   const howl = (at, base, vol = 0.1, wet = 0.5) => tone({ at, f: base, to: base * 1.5, slide: 0.35, dur: 1.3, hold: 0.6, attack: 0.15, vol, wave: 'sine', vib: { rate: 5, depth: 0.025 }, wet });
 
+  // ----- helpers for the Insanity / round 2 set packs (Still Water, Halcyon, Iron Owl, Golden Ace, Marquee, Laurel)
+  const drop = (at, f, vol = 0.07, pan = 0) => tone({ at, f, to: f * 2.4, slide: 0.05, dur: 0.11, vol, wave: 'sine', pan, wet: 0.5 }); // a water drop: a quick rising sine
+  const bowl = (at, n, vol = 0.06) => [[1, 1], [2.7, 0.3]].forEach(([m, v]) => tone({ at, f: hz(n) * m, dur: 2.2, vol: vol * v, wave: 'sine', attack: 0.02, vib: { rate: 4, depth: 0.006 }, wet: 0.7 }));
+  const chirp = (at, f, vol = 0.04, pan = 0) => tone({ at, f, to: f * 1.35, slide: 0.05, dur: 0.07, vol, wave: 'sine', pan });
+  const trill = (at, f, vol = 0.04, pan = 0) => tone({ at, f, dur: 0.22, vol, wave: 'sine', pan, vib: { rate: 28, depth: 0.06 } });
+  const servo = (at, from, to, vol = 0.05, pan = 0) => tone({ at, f: from, to, slide: 0.12, dur: 0.14, vol, wave: 'sawtooth', pan, vib: { rate: 60, depth: 0.04 } });
+  const relay = (at, pan = 0) => { noise({ at, f: 4200, dur: 0.012, vol: 0.2, q: 9, pan }); noise({ at: at + 0.025, f: 3000, dur: 0.012, vol: 0.14, q: 9, pan }); };
+  const hoot = (at, vol = 0.1) => [[0, 'E4', 'C4'], [0.32, 'E4', 'C4']].forEach(([d, a, b]) => tone({ at: at + d, f: a, to: b, slide: 0.18, dur: 0.24, vol, duty: 0.125, vib: { rate: 40, depth: 0.03 } }));
+  const brass = (notes, at, dur, vol = 0.06) => notes.forEach((n, i) => tone({ at: at + i * 0.012, f: n, dur, hold: dur * 0.5, vol: vol * (i ? 0.75 : 1), wave: 'sawtooth', attack: 0.03, vib: { rate: 5.5, depth: 0.008 }, wet: 0.3 }));
+  const buzz = (at, dur, vol = 0.04, pan = 0) => tone({ at, f: 120, dur, hold: dur * 0.7, vol, wave: 'sawtooth', pan, vib: { rate: 60, depth: 0.05 } });
+  const slotBell = (at, dur) => { for (let t = 0; t < dur; t += 0.05) tone({ at: at + t, f: (t / 0.05) % 2 ? 'E6' : 'G6', dur: 0.05, vol: 0.035, wave: 'square' }); };
+  const coins = (at, n) => { for (let i = 0; i < n; i++) bell(at + i * 0.045 + Math.random() * 0.02, jitter(3300, 0.12), 0.025, { dur: 0.25, pan: Math.random() * 0.8 - 0.4 }); };
+  const lyre = (at, n, vol = 0.05, pan = 0) => { tone({ at, f: n, dur: 0.8, vol, wave: 'triangle', pan, wet: 0.45 }); tone({ at, f: hz(n) * 2, dur: 0.3, vol: vol * 0.3, wave: 'sine', pan }); };
+  const drum = (at, vol = 0.3, pan = 0) => { tone({ at, f: 95, to: 55, dur: 0.22, vol, wave: 'triangle', pan }); noise({ at, f: 260, dur: 0.12, vol: vol * 0.4, q: 1.2, pan }); };
+  const cornu = (notes, at, dur, vol = 0.06) => notes.forEach((n, i) => tone({ at, f: n, dur, hold: dur * 0.6, vol: vol * (i ? 0.7 : 1), wave: 'sawtooth', attack: 0.06, vib: { rate: 5, depth: 0.012 }, wet: 0.45 }));
   const PACKS = {
     'Heartbreak': {
       card_deal: (o) => { swish(o.pan, 0.12); tone({ at: 0.06, f: 75, to: 50, dur: 0.1, vol: 0.4, wave: 'sine', pan: o.pan }); },
@@ -394,6 +409,62 @@
         chord(['E4', 'B4', 'G5'], 1.3, 1.4, { vol: 0.05, wave: 'sine', attack: 0.3, wet: 0.6 });
         bell(1.3, hz('E7'), 0.03, { dur: 1.0 });
       },
+    },
+    'Still Water': {                                      // water drops, a trickle, a glug, a singing bowl
+      card_deal: (o) => { swish(o.pan, 0.08); drop(0.05, jitter(700, 0.1), 0.08, o.pan); },
+      card_flip: (o) => { drop(0, jitter(900, 0.08), 0.07, o.pan); drop(0.07, jitter(1300, 0.08), 0.05, o.pan); },
+      shuffle: () => { noise({ f: 900, to: 500, dur: 1.0, vol: 0.05, q: 0.7, filter: 'lowpass', attack: 0.15 }); for (let i = 0; i < 14; i++) drop(i * 0.065 + Math.random() * 0.03, jitter(800, 0.35), 0.05, Math.random() * 0.8 - 0.4); },
+      win: () => { [523, 659, 784, 1047, 1319].forEach((f, i) => drop(i * 0.11, f, 0.08, i % 2 ? 0.3 : -0.3)); bowl(0.55, 'E5', 0.05); },
+      lose: () => { tone({ f: 320, to: 110, dur: 0.35, vol: 0.12, wave: 'sine', vib: { rate: 18, depth: 0.08 }, wet: 0.4 }); drop(0.5, 500, 0.05); drop(0.9, 420, 0.04); },
+      blackjack: () => { noise({ f: 300, to: 1400, dur: 0.6, vol: 0.08, q: 0.6, filter: 'lowpass', attack: 0.3 }); for (let i = 0; i < 12; i++) drop(0.2 + i * 0.06, 500 + i * 90, 0.06, i % 2 ? 0.5 : -0.5); bowl(0.9, 'E5', 0.07); bowl(1.1, 'B5', 0.05); },
+    },
+    'Halcyon': {                                          // a kingfisher's whistle, dawn chorus, a warm morning chord
+      card_deal: (o) => { swish(o.pan, 0.1); chirp(0.05, jitter(2600, 0.08), 0.04, o.pan); },
+      card_flip: (o) => { chirp(0, 3000, 0.04, o.pan); chirp(0.08, 3400, 0.035, o.pan); },
+      shuffle: () => riffle(0, (t) => { for (let i = 0; i < 4; i++) chirp(t + i * 0.1, jitter(3000, 0.12), 0.035, i % 2 ? 0.4 : -0.4); }),
+      win: () => { trill(0, 2800, 0.04); seq(['G4', 'B4', 'D5', 'G5'], 0.1, { at: 0.15, dur: 0.45, vol: 0.07, wave: 'triangle', wet: 0.4 }); chord(['G5', 'B5', 'D6'], 0.6, 0.9, { vol: 0.05, wave: 'sine', attack: 0.15, wet: 0.5 }); },
+      lose: () => { seq(['D5', 'B4', 'G4'], 0.2, { dur: 0.45, vol: 0.06, wave: 'triangle', wet: 0.4 }); for (let i = 0; i < 6; i++) tone({ at: 0.6 + i * 0.09, f: 4200, dur: 0.03, vol: 0.02, duty: 0.125 }); },
+      blackjack: () => { for (let i = 0; i < 5; i++) trill(i * 0.18, jitter(2800, 0.15), 0.035, i % 2 ? 0.5 : -0.5); tone({ at: 0.9, f: 2400, to: 3600, slide: 0.12, dur: 0.18, vol: 0.05, wave: 'sine' }); tone({ at: 1.05, f: 3600, to: 2600, slide: 0.15, dur: 0.2, vol: 0.05, wave: 'sine' }); chord(['G4', 'D5', 'G5', 'B5', 'F#6'], 1.0, 1.8, { vol: 0.06, wave: 'sine', attack: 0.4, wet: 0.6 }); },
+    },
+    'Iron Owl': {                                         // servos, relays, data beeps and a robot hoot
+      card_deal: (o) => { servo(0, 220, 520, 0.05, o.pan); relay(0.08, o.pan); },
+      card_flip: (o) => { relay(0, o.pan); tone({ at: 0.03, f: 1760, dur: 0.05, vol: 0.05, duty: 0.125, pan: o.pan }); },
+      shuffle: () => { servo(0, 150, 900, 0.05); for (let i = 0; i < 14; i++) tone({ at: 0.1 + i * 0.05, f: [880, 1320, 1760, 660][Math.floor(Math.random() * 4)], dur: 0.035, vol: 0.04, wave: 'square' }); relay(0.85); },
+      win: () => { seq(['C5', 'E5', 'G5', 'C6'], 0.07, { dur: 0.08, vol: 0.06, wave: 'square' }); hoot(0.35, 0.1); },
+      lose: () => { tone({ f: 420, to: 55, slide: 0.6, dur: 0.65, vol: 0.09, wave: 'sawtooth' }); [0.7, 0.85].forEach((t) => tone({ at: t, f: 110, dur: 0.1, vol: 0.08, wave: 'square' })); },
+      blackjack: () => { for (let i = 0; i < 18; i++) tone({ at: i * 0.03, f: 660 + Math.random() * 1600, dur: 0.025, vol: 0.035, wave: 'square' }); servo(0.55, 200, 1200, 0.06); hoot(0.7, 0.12); chord(['C5', 'E5', 'G5'], 1.05, 0.7, { vol: 0.05, wave: 'square' }); relay(1.6); },
+    },
+    'Golden Ace': {                                       // art deco jazz: brushes, a celesta, a big band in gold
+      card_deal: (o) => { noise({ f: 6000, to: 3000, dur: 0.12, vol: 0.09, q: 0.6, pan: o.pan }); bell(0.05, 'G6', 0.025, { dur: 0.35, pan: o.pan }); },
+      card_flip: (o) => { bell(0, 'D7', 0.025, { dur: 0.4, pan: o.pan }); bell(0.05, 'G6', 0.02, { dur: 0.4, pan: o.pan }); },
+      shuffle: () => { for (let i = 0; i < 10; i++) noise({ at: i * 0.08, f: 5000, to: 2500, dur: 0.14, vol: 0.06, q: 0.5, pan: i % 2 ? 0.3 : -0.3 }); chord(['D4', 'F#4', 'A4', 'C#5'], 0.85, 0.6, { vol: 0.04, wave: 'triangle', wet: 0.4 }); },
+      win: () => { brass(['C5', 'E5', 'G5', 'B5'], 0, 0.5, 0.06); bell(0.1, 'E7', 0.025, { dur: 0.8, wet: 0.5 }); },
+      lose: () => { [['G4', 0], ['F#4', 0.25], ['F4', 0.5]].forEach(([n, t]) => tone({ at: t, f: n, dur: 0.24, vol: 0.07, wave: 'sawtooth', vib: { rate: 6, depth: 0.03 }, attack: 0.05 })); tone({ at: 0.75, f: 'E4', to: 'D4', slide: 0.4, dur: 0.6, vol: 0.07, wave: 'sawtooth', vib: { rate: 5, depth: 0.04 }, attack: 0.05 }); },
+      blackjack: () => { seq(['C5', 'D5', 'E5', 'G5', 'A5', 'C6'], 0.06, { dur: 0.12, vol: 0.06, wave: 'sawtooth' }); brass(['C4', 'E4', 'A4', 'D5', 'G5'], 0.45, 1.1, 0.06); noise({ at: 0.45, f: 7000, dur: 1.2, vol: 0.06, q: 0.4, attack: 0.02 }); for (let i = 0; i < 6; i++) bell(0.6 + i * 0.08, ['C7', 'G6', 'E7', 'D7', 'A6', 'C7'][i], 0.02, { dur: 0.6, wet: 0.5 }); },
+    },
+    'Marquee': {                                          // neon buzz, light bulbs, slot bells and a coin hopper
+      card_deal: (o) => { swish(o.pan, 0.12); buzz(0.03, 0.04, 0.03, o.pan); },
+      card_flip: (o) => { tone({ f: 'E7', dur: 0.05, vol: 0.04, wave: 'square', pan: o.pan }); tone({ at: 0.05, f: 'B6', dur: 0.05, vol: 0.035, wave: 'square', pan: o.pan }); },
+      shuffle: () => { let t = 0; for (let i = 0; i < 20; i++) { noise({ at: t, f: 2600, dur: 0.015, vol: 0.12, q: 6 }); t += 0.025 + i * 0.004; } tone({ at: t + 0.02, f: 'C6', dur: 0.12, vol: 0.05, wave: 'square' }); },
+      win: () => { slotBell(0, 0.5); coins(0.4, 6); },
+      lose: () => { buzz(0, 0.1, 0.05); buzz(0.15, 0.04, 0.04); buzz(0.25, 0.2, 0.05); tone({ at: 0.5, f: 'E5', to: 'A3', slide: 0.4, dur: 0.45, vol: 0.06, wave: 'square' }); },
+      blackjack: () => { buzz(0, 0.3, 0.05); slotBell(0.25, 1.1); seq(['C5', 'E5', 'G5', 'C6', 'E6'], 0.08, { at: 0.3, dur: 0.12, vol: 0.06, wave: 'square' }); coins(0.9, 18); chord(['C5', 'E5', 'G5', 'C6'], 1.3, 0.8, { vol: 0.05, wave: 'square' }); },
+    },
+    'Laurel': {                                           // a lyre, war drums, Roman cornu horns and a cheering crowd
+      card_deal: (o) => { swish(o.pan, 0.1); lyre(0.05, ['D5', 'E5', 'A5', 'C6'][Math.floor(Math.random() * 4)], 0.05, o.pan); },
+      card_flip: (o) => { drum(0, 0.18, o.pan); lyre(0.04, 'A5', 0.04, o.pan); },
+      shuffle: () => { ['D4', 'E4', 'F4', 'A4', 'C5', 'D5', 'E5', 'A5'].forEach((n, i) => lyre(i * 0.07, n, 0.04, i % 2 ? 0.3 : -0.3)); },
+      win: () => { drum(0, 0.3); drum(0.2, 0.25); cornu(['D4', 'A4'], 0.2, 0.35); cornu(['D4', 'A4', 'D5'], 0.55, 0.7); },
+      lose: () => { cornu(['A3', 'D4'], 0, 0.5, 0.05); tone({ at: 0.5, f: 'D4', to: 'A3', slide: 0.5, dur: 0.7, vol: 0.06, wave: 'sawtooth', attack: 0.08 }); drum(0.4, 0.3); drum(1.1, 0.35); },
+      blackjack: () => { for (let i = 0; i < 10; i++) drum(i * 0.07, 0.15 + i * 0.02); cornu(['D4', 'A4'], 0.75, 0.3); cornu(['D4', 'A4', 'D5'], 1.05, 0.3); cornu(['D4', 'A4', 'D5', 'F#5'], 1.35, 1.2); noise({ at: 1.3, f: 900, dur: 1.6, vol: 0.09, q: 0.5, attack: 0.4 }); drum(1.35, 0.45); },
+    },
+    'Dragon’s Hoard': {                                   // coins, scales, a growl, a roar and a gust of fire
+      card_deal: (o) => { swish(o.pan, 0.1); bell(0.05, jitter(3200, 0.08), 0.025, { dur: 0.25, pan: o.pan }); },
+      card_flip: (o) => { noise({ f: 1800, to: 900, dur: 0.1, vol: 0.12, q: 2, pan: o.pan }); bell(0.04, jitter(3600, 0.06), 0.02, { dur: 0.2, pan: o.pan }); },
+      shuffle: () => { coins(0, 16); tone({ at: 0.2, f: 70, dur: 0.6, vol: 0.06, wave: 'sawtooth', vib: { rate: 9, depth: 0.08 }, attack: 0.1 }); },
+      win: () => { coins(0, 10); tone({ at: 0.1, f: 90, to: 110, dur: 0.5, vol: 0.07, wave: 'sawtooth', vib: { rate: 12, depth: 0.1 }, attack: 0.08 }); },
+      lose: () => { tone({ f: 80, to: 55, dur: 0.8, vol: 0.12, wave: 'sawtooth', vib: { rate: 8, depth: 0.12 }, attack: 0.1 }); noise({ at: 0.7, f: 600, to: 200, dur: 0.3, vol: 0.12, q: 0.8 }); },
+      blackjack: () => { tone({ f: 150, to: 70, slide: 0.9, dur: 1.0, vol: 0.14, wave: 'sawtooth', vib: { rate: 14, depth: 0.15 }, attack: 0.08 }); noise({ f: 400, to: 3000, dur: 0.9, vol: 0.12, q: 0.6, attack: 0.1 }); noise({ at: 0.5, f: 3000, to: 800, dur: 0.9, vol: 0.1, q: 0.5 }); coins(0.9, 22); },
     },
     'Eclipse': {                                          // a black hole: deep groans, things falling in, time slowing down
       card_deal: (o) => {                                 // the card is pulled in: the swish slows and sinks, then a sub thump

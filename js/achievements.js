@@ -50,7 +50,7 @@
     { id: 'grand_slam',     rarity: 'legendary', group: 'Challenge',  name: 'Grand Slam',       desc: 'Beat every Challenge difficulty.' },
     { id: 'hat_trick',      rarity: 'legendary', group: 'Luck',       name: 'Hat Trick',        desc: 'Get 3 blackjacks in a row.' },
     { id: 'four_of_a_kind', rarity: 'legendary', group: 'Luck',       name: 'Four Ways',        desc: 'Split into 4 hands and win at least 3 of them.' },
-    { id: 'flawless',       rarity: 'legendary', group: 'Challenge',  name: 'Flawless',         desc: 'Beat Expert without ever ending a round below your starting chips.' },
+    { id: 'flawless',       rarity: 'insanity',  group: 'Challenge',  name: 'Flawless',         desc: 'Beat Expert without ever ending a round below your starting chips.' },
     { id: 'endless_all',    rarity: 'legendary', group: 'Endless',    name: 'The Long Game',    desc: 'Complete Endless on every difficulty.' },
     { id: 'whale',          rarity: 'legendary', group: 'Endless',    name: 'Whale',            desc: 'Hold 100000 chips in Endless.' },
 
@@ -156,6 +156,13 @@
       hint: 'Secret. The house always knows its own name.' },
     { id: 'whisper_name', rarity: 'secret', group: 'Secret', name: 'Hitman', desc: 'Go by a name that is only ever whispered.', secret: true,
       hint: 'Secret. Some names are whispered, not spoken.' },
+    { id: 'perfect_day', rarity: 'insanity', group: 'Daily', name: 'Perfect Day', desc: 'Finish a Daily without losing a single hand.' },
+    { id: 'iron_professor', rarity: 'insanity', group: 'Challenge', name: 'Iron Professor', desc: 'Beat Expert following basic strategy on every decision.' },
+    { id: 'twenty_one', rarity: 'insanity', group: 'Endless', name: 'Twenty-One', desc: 'Get 21 blackjacks in a single Endless run.' },
+    { id: 'insane_win', rarity: 'secret', group: 'Secret', name: 'Insane Win', desc: 'Win 10,000 or more in a single round.', secret: true,
+      hint: 'Secret. Win big. No, bigger.' },
+    { id: 'clean_sweep', rarity: 'secret', group: 'Secret', name: 'Clean Sweep', desc: 'Beat Easy, Medium, Hard and Expert back to back without starting over or losing a run.', secret: true,
+      hint: 'Secret. Four in a row, no second chances.' },
     { id: 'wolf_endless_expert', rarity: 'secret', group: 'Secret', name: 'Silver Moon', desc: 'Complete Endless on Expert using only 2 seats every round.', secret: true,
       hint: 'Secret. Alone at the very top, for as long as it takes.' },
     // ---------- round 5: scene events and the Daily challenge ----------
@@ -1428,6 +1435,31 @@
       for (let i = -7; i <= 7; i++) if (Math.abs(i) > 1) { p.set(cx + i, 8, '#d8b040'); p.set(cx, 8 + i, '#d8b040'); }
       if (f % 2 === 0) p.set(cx, 8, '#ff2a2a');
     } },
+    perfect_day: { frames: 8, dur: 2.4, draw(p, f) {
+      p.ring(8, 8, 6.2, 7.6, (x, y) => (Math.atan2(y + 0.5 - 8, x + 0.5 - 8) < -Math.PI + (f + 1) * (Math.PI / 4) ? C.yellow[1] : C.dark[1]));
+      p.disc(8, 8, 3.2, 3.2, C.yellow);
+      for (let a = 0; a < 8; a++) { const ang = a * (Math.PI / 4) + f * 0.2; p.set(Math.round(8 + Math.cos(ang) * 4.6 - 0.5), Math.round(8 + Math.sin(ang) * 4.6 - 0.5), C.orange[0]); }
+    } },
+    iron_professor: { frames: 6, dur: 1.2, draw(p, f) {
+      p.ring(8, 8, 5, 7.5, (x, y) => { const a = Math.atan2(y + 0.5 - 8, x + 0.5 - 8); const r = Math.hypot(x + 0.5 - 8, y + 0.5 - 8); return r > 6.6 && Math.sin(a * 8 + f * 0.5) < 0 ? null : C.grey[r > 6 ? 1 : 2]; });
+      p.disc(8, 8, 4.6, 4.6, C.dark, true);
+      [[5, 8], [6, 9], [7, 10], [8, 9], [9, 8], [10, 7], [11, 6]].forEach(([x, y]) => p.set(x, y, '#5fd068'));
+    }, post(p, f) { if (f < 2) p.sparkle(13, 2, C.orange[0]); } },
+    twenty_one: { frames: 4, dur: 0.8, draw(p, f) {
+      const col = f % 2 ? C.yellow[0] : C.yellow[1];
+      p.rect(1, 2, 14, 12, '#0e5a32');
+      [['111', '001', '111', '100', '111'], ['010', '110', '010', '010', '111']].forEach((g, i) => g.forEach((r, y) => [...r].forEach((c, x) => { if (c === '1') p.rect(3 + i * 6 + x * 2 - (i ? 1 : 0), 3 + y * 2, 2, 2, col); })));
+    }, post(p) { p.line(0, 1, 15, 1, C.yellow[2]); p.line(0, 14, 15, 14, C.yellow[2]); } },
+    insane_win: { frames: 8, dur: 1.6, draw(p, f) {
+      for (let x = 1; x < 15; x++) for (let y = 11; y < 15; y++) if (y > 10 + Math.abs(x - 7.5) * 0.45) p.set(x, y, (x + y) % 3 ? C.yellow[1] : C.yellow[2]);
+      const lid = f === 3 ? 1 : 0;
+      for (let y = -2; y <= 2; y++) for (let x = -4; x <= 4; x++) if ((x / 4.4) ** 2 + (y / 2.6) ** 2 <= 1) p.set(7 + x, 6 + y, lid ? '#1a6a38' : x === 0 ? '#0a0a0a' : Math.abs(x) < 3 ? '#ffd040' : '#e8a020');
+    }, post(p, f) { if (f % 4 === 0) p.sparkle(13, 10, '#ffffff'); } },
+    clean_sweep: { frames: 8, dur: 1.6, draw(p, f) {
+      for (let i = 0; i < 12; i++) { const side = i % 2 ? 1 : -1, k = Math.floor(i / 2) / 5, a = Math.PI / 2 + side * (0.4 + k * 2.2); p.set(Math.round(7.5 + Math.cos(a) * 6), Math.round(7.5 + Math.sin(a) * 6), i <= f * 2 ? '#9ab030' : C.dark[1]); }
+      p.disc(8, 8, 3.2, 3.2, C.yellow);
+      [[7, 13], [8, 13], [6, 14], [9, 14]].forEach(([x, y]) => p.set(x, y, '#c0202a'));
+    }, post(p, f) { if (f >= 6) p.sparkle(8, 2, '#ffffff'); } },
     darkest_run: { frames: 8, dur: 1.6, draw(p, f) {
       p.ring(8, 8, 4.5, 7.9, (x, y, d) => {
         const a = Math.atan2(y + 0.5 - 8, x + 0.5 - 8);

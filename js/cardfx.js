@@ -854,6 +854,441 @@
     },
   });
 
+
+  // ======================================================================= INSANITY ROUND 2
+  // Four sets for the skill runs promoted to Insanity: Still Water (Flawless), Halcyon (Perfect Day),
+  // Ironclad (Iron Professor), Twenty-One (Twenty-One). Each has a long animated back, themed suits and an animated ace.
+  const BORDER_RUN = (g, f, base, lit, every = 9, n = 2, speed = 1) => { // lights running around a card's 2px frame
+    const per = []; for (let x = 1; x < BW - 1; x++) per.push([x, 1]); for (let y = 2; y < BH - 1; y++) per.push([BW - 2, y]); for (let x = BW - 3; x >= 1; x--) per.push([x, BH - 2]); for (let y = BH - 3; y >= 2; y--) per.push([1, y]);
+    g.each((x, y) => (x >= 1 && y >= 1 && x < BW - 1 && y < BH - 1 && (x < IN || y < IN || x >= BW - IN || y >= BH - IN) ? base : null));
+    per.forEach(([x, y], i) => { if ((i + f * speed) % every < n) g.set(x, y, lit); });
+  };
+  const DIG = { // 3 x 5 digits
+    0: ['XXX', 'X.X', 'X.X', 'X.X', 'XXX'], 1: ['.X.', 'XX.', '.X.', '.X.', 'XXX'], 2: ['XXX', '..X', 'XXX', 'X..', 'XXX'], 3: ['XXX', '..X', 'XXX', '..X', 'XXX'],
+    4: ['X.X', 'X.X', 'XXX', '..X', '..X'], 5: ['XXX', 'X..', 'XXX', '..X', 'XXX'], 6: ['XXX', 'X..', 'XXX', 'X.X', 'XXX'], 7: ['XXX', '..X', '.X.', '.X.', '.X.'],
+    8: ['XXX', 'X.X', 'XXX', 'X.X', 'XXX'], 9: ['XXX', 'X.X', 'XXX', '..X', 'XXX'],
+  };
+
+  Object.assign(SUIT_FX, {
+    stillwater(s) { // a ripple line under the suit
+      const g = pad(grid(BASE[s]), 1);
+      for (let x = 1; x < 10; x++) if (x % 2) g[10][x] = 'o';
+      return g;
+    },
+  });
+
+  // ===== STILL WATER (Flawless) =================================================
+  SETS.push({
+    id: 'stillwater', name: 'Still Water', rarity: 'insanity', code: 'I1',
+    border: '#bff4ff', frames: 96, fps: 12,
+    backNote: 'A night lake, perfectly still, with the moon on it. One drop falls from the top of the card and lands without a splash. Three rings spread out across the whole card, the moon\'s reflection wobbles as they pass, and the water goes still again.',
+    face: { card: '#eefcff', ink: '#0c2a32', red: '#c0306a', edge: '#0c2a32', shade: '#d8f2f8', ring: '#bff4ff', accent: '#3aa0b0' },
+    faceNote: '<b>Suits:</b> a dotted ripple under each suit. <b>Ace:</b> a drop falls onto the big suit and rings spread out under it.',
+    back(g, f, F) {
+      const H = 13, dropX = 11, hitY = 23, hit = 22;
+      const r0 = rand(5); const stars = Array.from({ length: 14 }, () => [Math.floor(r0() * IW), Math.floor(r0() * (H - 1)), r0()]);
+      const rings = [0, 9, 18].map((d) => (f - hit - d) * 0.42).filter((R) => R > 0 && R < 26);
+      g.each((u, v) => {
+        if (v < H) return mix('#0a1830', '#163a4e', v / H);
+        const du = u + 0.5 - dropX, dv = (v + 0.5 - hitY) / 0.38, r = Math.hypot(du, dv);
+        for (const R of rings) if (Math.abs(r - R) < 0.7) return R < 10 ? '#bff4ff' : R < 18 ? '#6ad0e0' : '#2a7a8a';
+        return v === H ? '#2a5a6a' : mix('#0e2c3a', '#06141c', (v - H) / (IH - H));
+      });
+      stars.forEach(([x, y, w], i) => g.set(x, y, (i + (f >> 2)) % 7 ? (w > 0.5 ? '#e8fcff' : '#6a8aa8') : '#163a4e'));
+      g.disc(16, 5, 2.6, (x, y, d) => (d < 1.6 ? '#ffffff' : '#d8f4ff'));
+      // the moon's reflection: a dashed column that wobbles while rings pass under it
+      const wob = rings.some((R) => R > 3 && R < 14) ? 1 : 0;
+      for (let v = H + 1; v < IH - 1; v += 1) { if ((v + (f >> 1)) % 3 === 0) continue; const sh = wob ? Math.round(Math.sin(v * 1.3 + f * 0.9) * 1.2) : 0; const w = v < H + 6 ? 2 : 1; for (let i = 0; i < w; i++) g.set(15 + i + sh, v, v < H + 5 ? '#d8f4ff' : '#6ad0e0'); }
+      // the drop
+      if (f < hit) { const y = (f / hit) * hitY; g.set(dropX - 0.5, y, '#ffffff'); g.set(dropX - 0.5, y - 1, '#bff4ff'); if (y > 2) g.set(dropX - 0.5, y - 2, '#3a7a9a'); }
+      else if (f < hit + 3) { g.set(dropX - 0.5, hitY - 1, '#ffffff'); g.set(dropX - 1.5, hitY - 1, '#bff4ff'); g.set(dropX + 0.5, hitY - 1, '#bff4ff'); }
+    },
+    borderFx(g, f) { BORDER_RUN(g, f, '#bff4ff', '#ffffff', 24, 1, 1); },
+    ace(g, f, F, ink) {
+      const T = f % 48, cx = 9, cy = 20;
+      const rings = [0, 8, 16].map((d) => (T - 10 - d) * 0.45).filter((R) => R > 0 && R < 13);
+      g.each((x, y) => { if (y < 15) return null; const r = Math.hypot(x + 0.5 - cx, (y + 0.5 - cy) / 0.4); return rings.some((R) => Math.abs(r - R) < 0.6) ? '#6ad0e0' : null; });
+      g.bits(BASE[this.s], 0, 2, { X: ink }, 2);
+      if (T < 10) { const y = -2 + T * 0.5; g.set(cx - 0.5, y, '#3aa0b0'); g.set(cx - 0.5, y - 1, '#bff4ff'); }
+      else if (T < 13) { g.set(cx - 1.5, 1, '#bff4ff'); g.set(cx + 0.5, 1, '#bff4ff'); }
+    },
+  });
+
+  // ===== HALCYON (Perfect Day) ==================================================
+  // One full day in ten seconds: dawn, the sun's arc, dusk, a starry night with the moon, dawn again.
+  const SKY = [[0, '#ff9a7a', '#ffd0a0'], [0.12, '#5aa0ff', '#bfe0ff'], [0.42, '#4a8aff', '#a8d0ff'], [0.55, '#ff7a4a', '#ffc070'], [0.62, '#5a3a8a', '#ff8a6a'], [0.7, '#0a1030', '#1a2a5a'], [0.92, '#0a1030', '#1a2a5a'], [1, '#ff9a7a', '#ffd0a0']];
+  const skyAt = (t) => { for (let i = 0; i < SKY.length - 1; i++) { const [a, ta, ba] = SKY[i], [b, tb, bb] = SKY[i + 1]; if (t <= b) { const k = (t - a) / (b - a); return [mix(ta, tb, k), mix(ba, bb, k)]; } } return [SKY[0][1], SKY[0][2]]; };
+  SETS.push({
+    id: 'halcyon', name: 'Halcyon', rarity: 'insanity', code: 'I2',
+    border: '#ffd75e', frames: 120, fps: 12,
+    backNote: 'A whole perfect day in ten seconds. Dawn turns the sky pink, the sun climbs its arc over the hills while small clouds drift by, the sky burns orange at dusk, then night falls with stars and a crescent moon crossing, and dawn comes back.',
+    face: { card: '#fffaf2', ink: '#1a2a5a', red: '#e0502a', edge: '#1a2a5a', shade: '#f4e6cc', ring: '#ffb040', accent: '#ffb040' },
+    faceNote: '<b>Suits:</b> sunset stripes cut across the lower half. <b>Ace:</b> the big suit is a window on the sky: the same day passes inside it as on the back, sun, dusk, stars and moon.',
+    back(g, f, F) {
+      const t = f / F; const [top, bot] = skyAt(t);
+      const day = t < 0.58, night = t > 0.66 && t < 0.95;
+      g.each((u, v) => mix(top, bot, v / IH));
+      if (night || t > 0.62) { const r0 = rand(31); for (let i = 0; i < 22; i++) { const x = r0() * IW, y = r0() * 24; if ((i + (f >> 2)) % 5) g.set(x, y, i % 3 ? '#ffffff' : '#a8b0e0'); } }
+      // sun on its arc
+      if (t < 0.62) { const k = t / 0.62; const sx = -2 + k * 26, sy = 22 - Math.sin(k * Math.PI) * 17; g.disc(sx, sy, 3.2, (x, y, d) => (d < 2.2 ? '#fff6c0' : k < 0.12 || k > 0.85 ? '#ff7a3a' : '#ffd75e')); if (k > 0.15 && k < 0.85) for (let a = 0; a < 8; a++) { const ang = a * (TAU / 8) + f * 0.08; g.set(sx - 0.5 + Math.cos(ang) * 4.6, sy - 0.5 + Math.sin(ang) * 4.6, '#ffe9a0'); } }
+      // moon
+      if (t > 0.64) { const k = (t - 0.64) / 0.36; const mx = -2 + k * 26, my = 20 - Math.sin(k * Math.PI) * 14; g.disc(mx, my, 2.8, (x, y, d) => (Math.hypot(x + 0.5 - mx - 1.4, y + 0.5 - my + 0.6) < 2.4 ? null : '#f4f0d8')); }
+      // clouds in the daytime
+      if (day) [[3, 6, 0], [14, 11, 40]].forEach(([x0, y0, ph]) => { const x = ((x0 + (f + ph) * 0.25) % 30) - 5; [[0, 1], [1, 0], [2, 0], [3, 1], [1, 1], [2, 1], [4, 1]].forEach(([dx, dy]) => g.set(x + dx, y0 + dy, '#ffffff')); });
+      // hills
+      const hill = night ? ['#0e1a2a', '#0a1420'] : t > 0.55 ? ['#3a2a3a', '#2a1a2a'] : ['#3a8a4a', '#2a6a3a'];
+      g.each((u, v) => { const h1 = 27 + Math.sin(u * 0.35) * 2, h2 = 30 + Math.sin(u * 0.6 + 2) * 1.5; return v >= h2 ? hill[1] : v >= h1 ? hill[0] : null; });
+    },
+    borderFx(g, f, F) { const t = f / F; BORDER_RUN(g, f, t > 0.64 && t < 0.95 ? '#4a5a9a' : '#ffd75e', '#ffffff', 12, 1, 1); },
+    ace(g, f, F, ink) {
+      const t = f / F, [top, bot] = skyAt(t), is = big(this.s), night = t > 0.66 && t < 0.95;
+      const inside = (x, y) => is(x, y);
+      for (let y = -1; y < 19; y++) for (let x = -1; x < 19; x++) {
+        if (inside(x, y)) {
+          const hill = y >= 13 + Math.round(Math.sin(x * 0.5) * 1.2);
+          g.set(x, y + 2, hill ? (night ? '#0e1a2a' : t > 0.55 ? '#3a2a3a' : '#3a8a4a') : mix(top, bot, y / 18));
+        } else if ([[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => inside(x + dx, y + dy))) g.set(x, y + 2, ink);
+      }
+      const dot = (x, y, c) => { if (inside(Math.round(x), Math.round(y)) && !(y >= 13)) g.set(x, y + 2, c); };
+      if (t < 0.62) { const k = t / 0.62, sx = 1 + k * 16, sy = 15 - Math.sin(k * Math.PI) * 12; for (let a = -2; a <= 2; a++) for (let b = -2; b <= 2; b++) if (a * a + b * b <= 5) dot(sx + a, sy + b, a * a + b * b <= 1 ? '#fff6c0' : k < 0.12 || k > 0.85 ? '#ff7a3a' : '#ffd75e'); }
+      if (t > 0.62) { const r0 = rand(8); for (let i = 0; i < 12; i++) { const x = r0() * 18, y = r0() * 12; if ((i + (f >> 2)) % 4) dot(x, y, '#ffffff'); } }
+      if (t > 0.66) { const k = (t - 0.66) / 0.34, mx = 1 + k * 16, my = 12 - Math.sin(k * Math.PI) * 9; for (let a = -2; a <= 2; a++) for (let b = -2; b <= 2; b++) if (a * a + b * b <= 4 && (a + 1) * (a + 1) + (b + 1) * (b + 1) > 3) dot(mx + a, my + b, '#f4f0d8'); }
+    },
+  });
+
+
+  // ----- round 2 options: Halcyon faces (Sky Window, Kingfisher), Iron Professor (The Forge, Top Marks), Twenty-One (Marquee, Golden Ace)
+  const MINI = { // 5 x 5 suits
+    '♠': ['..X..', '.XXX.', 'XXXXX', '..X..', '.XXX.'], '♥': ['XX.XX', 'XXXXX', 'XXXXX', '.XXX.', '..X..'],
+    '♦': ['..X..', '.XXX.', 'XXXXX', '.XXX.', '..X..'], '♣': ['.XXX.', '.XXX.', 'XXXXX', 'XXXXX', '..X..'],
+  };
+  const LET = { H: ['X.X', 'X.X', 'XXX', 'X.X', 'X.X'], S: ['XXX', 'X..', 'XXX', '..X', 'XXX'], D: ['XX.', 'X.X', 'X.X', 'X.X', 'XX.'], P: ['XXX', 'X.X', 'XXX', 'X..', 'X..'], A: ['.X.', 'X.X', 'XXX', 'X.X', 'X.X'], '+': ['...', '.X.', 'XXX', '.X.', '...'] };
+  const big = (s) => { const g = grid(BASE[s]); return (x, y) => { const u = Math.floor(x / 2), v = Math.floor(y / 2); return !!(g[v] && g[v][u] === 'X'); }; }; // 18 x 18 suit test
+  const putIf = (g, pts, ch) => pts.forEach(([x, y]) => { if (g[y] && g[y][x] === '.') g[y][x] = ch; });
+  const hash = (x, y) => { let h = (x * 374761393 + y * 668265263) >>> 0; h = ((h ^ (h >>> 13)) * 1274126177) >>> 0; return (h & 0xffff) / 65536; };
+
+  Object.assign(SUIT_FX, {
+    halcyon(s) { // sunset stripes cut across the lower half of the suit
+      const g = grid(BASE[s]);
+      [5, 7].forEach((y) => { const n = g[y].filter((c) => c === 'X').length; if (n >= 3) g[y] = g[y].map((c) => (c === 'X' ? 'c' : c)); });
+      return g;
+    },
+    goldace(s) { // art deco corner fans
+      const g = pad(grid(BASE[s]), 1);
+      putIf(g, [[0, 0], [1, 0], [0, 1], [10, 10], [9, 10], [10, 9]], 'o');
+      return g;
+    },
+  });
+
+  // ===== GOLDEN ACE (Twenty-One) ==================================================
+  SETS.push({
+    id: 'goldace', name: 'Golden Ace', rarity: 'insanity', code: 'I4',
+    border: '#d8a020', frames: 84, fps: 12,
+    backNote: 'Black and gold, art deco. A big golden ace of spades over a dark sunburst; a sheen of light runs across the gold, then 21 gold stars light up around it one by one, and at the 21st they all flash and fade.',
+    face: { card: '#fbf6e6', ink: '#14110a', red: '#a8142a', edge: '#14110a', shade: '#ece2c4', ring: '#d8a020', accent: '#d8a020' },
+    faceNote: '<b>Suits:</b> small gold art deco corners. <b>Ace:</b> the big suit gets a gold outline and a sheen of light runs across it.',
+    back(g, f, F) {
+      const cx = 11, cy = 17;
+      g.each((u, v) => { const a = Math.atan2(v + 0.5 - cy, u + 0.5 - cx); return Math.floor(((a + Math.PI) / TAU) * 16) % 2 ? '#15100a' : '#0c0a08'; });
+      g.each((u, v) => ((u === 1 || u === IW - 2 || v === 1 || v === IH - 2) && u >= 1 && v >= 1 && u <= IW - 2 && v <= IH - 2 ? '#8a6a1a' : null));
+      [[2, 2, 1, 1], [IW - 3, 2, -1, 1], [2, IH - 3, 1, -1], [IW - 3, IH - 3, -1, -1]].forEach(([x, y, dx, dy]) => { g.set(x, y, '#d8a020'); g.set(x + dx, y, '#8a6a1a'); g.set(x, y + dy, '#8a6a1a'); g.set(x + 2 * dx, y, '#5a420a'); g.set(x, y + 2 * dy, '#5a420a'); });
+      const is = (x, y) => { const px = x + 0.5, py = y + 0.5; if (py < 0.5 || py > 19.5 || px < 0 || px > 18) return false; if (py <= 11 && Math.abs(px - 9) <= (py - 0.5) * 0.82) return true; if (Math.hypot(px - 5.2, py - 11) <= 4.2 || Math.hypot(px - 12.8, py - 11) <= 4.2) return true; if (py >= 11 && py <= 17 && Math.abs(px - 9) <= 0.9 + Math.max(0, py - 14) * 0.5) return true; return py > 17 && py <= 19.5 && Math.abs(px - 9) <= 3.5; };
+      const ox = 2, oy = 7, sweep = (f % 42) * 1.4 - 8;
+      for (let y = -1; y < 21; y++) for (let x = -1; x < 19; x++) {
+        if (is(x, y)) { const d = x + y - sweep; g.set(ox + x, oy + y, Math.abs(d) < 1.2 ? '#ffffff' : Math.abs(d) < 2.4 ? '#fff6c0' : y < 6 ? '#fff0a0' : y < 12 ? '#ffd75e' : '#c8961a'); }
+        else if ([[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => is(x + dx, y + dy))) g.set(ox + x, oy + y, '#5a420a');
+      }
+      g.bits(LET.A, 3, 3, { X: '#ffd75e' }); g.bits(LET.A, IW - 6, IH - 8, { X: '#ffd75e' });
+      // 21 stars around the ace
+      const n = Math.min(21, Math.floor(f / 3)), party = f >= 63;
+      for (let i = 0; i < 21; i++) {
+        const a = -Math.PI / 2 + (i / 21) * TAU, x = cx - 0.5 + Math.cos(a) * 9.6, y = cy - 0.5 + Math.sin(a) * 14.2;
+        if (i < n) { const c = party ? (f % 4 < 2 ? '#ffffff' : '#ffd75e') : i === n - 1 ? '#ffffff' : '#ffd75e'; g.set(x, y, c); if (i === n - 1 || (party && f < 72)) { g.set(x - 1, y, '#b8860b'); g.set(x + 1, y, '#b8860b'); g.set(x, y - 1, '#b8860b'); g.set(x, y + 1, '#b8860b'); } }
+        else g.set(x, y, '#3a2a0a');
+      }
+    },
+    borderFx(g, f) { BORDER_RUN(g, f, '#d8a020', '#fff6c0', 21, 2, 1); },
+    ace(g, f, F, ink) {
+      const is = big(this.s), sweep = (f % 42) * 1.3 - 6;
+      for (let y = -1; y < 19; y++) for (let x = -1; x < 19; x++) {
+        if (is(x, y)) { const d = x + y - sweep; g.set(x, y + 2, Math.abs(d) < 1 ? '#fff6c0' : Math.abs(d) < 2 ? mix(ink, '#ffd75e', 0.5) : ink); }
+        else if ([[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => is(x + dx, y + dy))) g.set(x, y + 2, '#d8a020');
+      }
+      if (f % 42 > 30) { const k = f % 42 - 30; g.set(16, 1, k % 4 < 2 ? '#ffd75e' : '#fff6c0'); if (k % 4 < 2) { g.set(15, 1, '#d8a020'); g.set(17, 1, '#d8a020'); g.set(16, 0, '#d8a020'); } }
+    },
+  });
+
+  // ===== Iron Professor, round 3 options: Night Owl, Laurel, Iron Knight =========
+  Object.assign(SUIT_FX, {
+    owl(s) { // two little iron ear tufts above the suit
+      const g = pad(grid(BASE[s]), 1);
+      putIf(g, [[2, 0], [8, 0]], 'o');
+      return g;
+    },
+    laurel(s) { // laurel sprigs at both lower corners
+      const g = pad(grid(BASE[s]), 1);
+      putIf(g, [[0, 8], [1, 9], [0, 7], [10, 8], [9, 9], [10, 7]], 'o');
+      return g;
+    },
+  });
+
+  // ===== NIGHT OWL ===============================================================
+  SETS.push({
+    id: 'owl', name: 'Iron Owl', rarity: 'insanity', code: 'I3',
+    border: '#8a909c', frames: 96, fps: 12,
+    backNote: 'The Iron Professor: a riveted clockwork owl sits on a stack of books under the moon, its amber lamp eyes in brass rims. Its iron shutters blink, it looks left and right, turns its head and winks, while the wind-up key in its side turns and a firefly drifts by.',
+    face: { card: '#f8f2e4', ink: '#22252c', red: '#a8302a', edge: '#22252c', shade: '#e8dcc4', ring: '#8a909c', accent: '#5a606c' },
+    faceNote: '<b>Suits:</b> two little iron ear tufts. <b>Ace:</b> two amber lamp eyes in brass rims switch on inside the big suit, look around and blink their iron shutters.',
+    back(g, f, F) {
+      g.each((u, v) => mix('#0e1630', '#24305a', v / IH));
+      const r0 = rand(44); for (let i = 0; i < 16; i++) { const x = r0() * IW, y = r0() * 20; if ((i + (f >> 3)) % 6) g.set(x, y, i % 3 ? '#ffffff' : '#a8b0e0'); }
+      g.disc(17, 5, 3.6, (x, y, d) => (Math.hypot(x + 0.5 - 15.6, y + 0.5 - 4.4) < 2.6 ? null : '#f4f0d8'));
+      // books
+      [[26, 2, 19, '#8a2a2a'], [29, 3, 18, '#2a4a8a'], [31, 1, 20, '#2a6a3a']].forEach(([y0, x0, x1, c], i) => {
+        const h = i === 2 ? 3 : i === 1 ? 2 : 3;
+        for (let v = y0; v < y0 + h; v++) for (let u = x0; u <= x1; u++) g.set(u, v, u === x1 ? '#f4ecd8' : v === y0 ? mix(c, '#ffffff', 0.18) : c);
+        g.set(x0 + 2, y0 + 1, '#d8a020'); g.set(x1 - 3, y0 + 1, '#d8a020');
+      });
+      // owl
+      const turn = f >= 40 && f < 52 ? 1 : f >= 52 && f < 60 ? -1 : 0;
+      const look = f >= 20 && f < 30 ? -1 : f >= 30 && f < 38 ? 1 : turn;
+      const blink = f === 12 || f === 13 || f === 74 || f === 75, wink = f >= 84 && f < 90;
+      const cx = 11, hx = cx + turn;
+      g.each((u, v) => { // body
+        const du = (u + 0.5 - cx) / 6.2, dv = (v + 0.5 - 20) / 6;
+        if (du * du + dv * dv > 1 || v > 25) return null;
+        const bu = (u + 0.5 - cx) / 4, bv = (v + 0.5 - 21) / 4.2;
+        if (bu * bu + bv * bv <= 1) return v % 3 === 0 ? '#6a707c' : (v % 3 === 1 && (u % 3 === 1)) ? '#e8eaee' : '#b8bec8'; // riveted chest plates
+        return Math.abs(u + 0.5 - cx) > 4.5 ? '#4a4e58' : (u + v) % 5 === 0 ? '#6a707c' : '#8a909c';
+      });
+      g.each((u, v) => { // head
+        const du = (u + 0.5 - hx) / 6, dv = (v + 0.5 - 12.5) / 4.6;
+        return du * du + dv * dv <= 1 ? (dv > 0.6 ? '#6a707c' : v === 9 && (u + turn) % 2 === 0 ? '#c8ced8' : '#8a909c') : null;
+      });
+      [[-4, -1], [4, 1]].forEach(([dx, s]) => { g.set(hx + dx, 7, '#4a4e58'); g.set(hx + dx + s, 6, '#4a4e58'); g.set(hx + dx, 8, '#4a4e58'); g.set(hx + dx + s, 7, '#4a4e58'); });
+      [-2.5, 2.5].forEach((dx, i) => {
+        const ex = hx + dx, closed = blink || (wink && i === 1);
+        g.disc(ex, 12.5, 2.9, (x, y, d) => (d > 2.1 ? '#c8a040' : closed ? '#5a606c' : d < 1.2 ? '#fff6c0' : d < 1.8 ? '#ffd040' : '#e8a020'));
+        if (closed) for (let a = -1; a <= 1; a++) g.set(ex - 0.5 + a, 12, '#2a2e36');
+        else { g.set(ex - 0.5 + look, 12, '#5a2a0a'); g.set(ex - 0.5 + look, 13, '#5a2a0a'); }
+      });
+      g.set(hx - 0.5, 12, '#c8a040'); // brass bridge
+      g.set(hx - 0.5, 15, '#c8a040'); g.set(hx - 0.5, 16, '#8a6a1a');
+      [9, 10, 12, 13].forEach((u) => g.set(u, 25, '#c8a040'));
+      // wind-up key turning in its side
+      const kf = Math.floor(f / 3) % 4; g.set(17, 20, '#c8a040'); g.set(18, 20, '#c8a040');
+      (kf === 0 ? [[19, 18], [19, 19], [19, 21], [19, 22]] : kf === 1 ? [[19, 19], [20, 18], [19, 21], [20, 22]] : kf === 2 ? [[19, 20], [20, 20], [19, 19], [19, 21]] : [[19, 19], [20, 22], [19, 21], [20, 18]]).forEach(([x, y]) => g.set(x, y, '#d8b040'));
+      // firefly
+      const fx = 3 + ((f * 0.25) % 20), fy = 19 + Math.sin(f * 0.3) * 3; if (f % 6 < 4) { g.set(fx, fy, '#d8ff6a'); g.set(fx, fy + 1, '#5a8a2a'); }
+    },
+    borderFx(g, f) { BORDER_RUN(g, f, '#8a909c', '#ffd040', 24, 1, 1); },
+    ace(g, f, F, ink) {
+      g.bits(BASE[this.s], 0, 3, { X: ink }, 2);
+      const T = f % 48, open = T > 4, half = T === 4 || T === 5 || T === 30;
+      const look = T >= 14 && T < 22 ? -1 : T >= 22 && T < 30 ? 1 : 0;
+      const ey = this.s === '♥' ? 9 : this.s === '♣' ? 13 : 11;
+      [5.5, 12.5].forEach((ex) => {
+        g.disc(ex, ey, 2.9, (x, y, d) => (d > 2.1 ? '#c8a040' : !open ? '#5a606c' : d < 1.2 ? '#fff6c0' : d < 1.8 ? '#ffd040' : '#e8a020'));
+        if (open && !half) g.set(ex - 0.5 + look, ey - 0.5, '#5a2a0a');
+        if (half || !open) for (let a = -1; a <= 1; a++) g.set(ex - 0.5 + a, ey - 0.5, '#2a2e36');
+      });
+      g.set(8.5, ey - 0.5, '#c8a040');
+    },
+  });
+
+  // ===== LAUREL ==================================================================
+  SETS.push({
+    id: 'laurel', name: 'Laurel', rarity: 'secret', code: 'S1',
+    border: '#8aa030', frames: 96, fps: 12,
+    backNote: 'White marble with grey veins and a gold medallion. A green-gold laurel wreath grows around it one leaf at a time; when it closes, a red ribbon ties it, a sheen runs across, and it starts again.',
+    face: { card: '#f6f5f0', ink: '#1e1c1a', red: '#a8202a', edge: '#1e1c1a', shade: '#e2e0d8', ring: '#8aa030', accent: '#7a9a28' },
+    faceNote: '<b>Suits:</b> small laurel sprigs at the lower corners. <b>Ace:</b> a laurel wreath grows up around the big suit, leaf by leaf, and shines.',
+    back(g, f, F) {
+      g.each((u, v) => { const w = Math.abs(Math.sin(u * 0.32 + v * 0.17 + Math.sin(v * 0.28) * 2.2)), w2 = Math.abs(Math.sin(u * 0.21 - v * 0.31 + 1.7)); return w < 0.07 ? '#b8b4ac' : w2 < 0.05 ? '#d0ccc4' : hash(u, v) > 0.85 ? '#e4e2dc' : '#eeede8'; });
+      const cx = 11.5, cy = 15.5, sweep = f >= 70 ? (f - 70) * 1.6 - 6 : -99;
+      g.disc(cx, cy, 6.6, (x, y, d) => { if (d > 5.7) return '#8a6a1a'; if (d > 4.9) return '#ffe080'; const s = Math.abs(x + y - cx - cy - sweep + 10) < 1.5; return s ? '#ffffff' : y < cy - 1 ? '#ffd75e' : '#d8a020'; });
+      g.bits(BASE['♠'], 7, 11, (ch, x, y) => (ch === 'X' ? (y < 4 ? '#8a6a1a' : '#6a4a0a') : null));
+      const leaves = 30, n = Math.min(leaves, Math.floor(f / 2.1));
+      for (let i = 0; i < leaves; i++) {
+        if (i >= n) break;
+        const side = i % 2 ? 1 : -1, k = Math.floor(i / 2) / (leaves / 2 - 1), a = Math.PI / 2 + side * (0.25 + k * 2.55);
+        const x = cx - 0.5 + Math.cos(a) * 9.2, y = cy - 0.5 + Math.sin(a) * 12;
+        const lit = sweep > -99 && Math.abs(x + y - cx - cy - sweep + 10) < 2;
+        const tx = -Math.sin(a) * side, ty = Math.cos(a) * side; // along the wreath, towards its tip
+        g.set(x - Math.cos(a), y - Math.sin(a), '#4a6a1a');
+        g.set(x, y, lit ? '#ffffff' : '#9ab030'); g.set(x + tx, y + ty, lit ? '#fff6c0' : '#d8d870'); g.set(x + Math.cos(a), y + Math.sin(a), lit ? '#fff6c0' : '#6a8a20');
+      }
+      if (n >= leaves) { [[10, 28], [11, 28], [12, 28], [9, 29], [13, 29], [8, 30], [14, 30]].forEach(([x, y]) => g.set(x, y, '#a8202a')); g.set(11, 29, '#d83040'); }
+      if (f >= 80) { const r1 = rand(f); for (let i = 0; i < 3; i++) g.set(2 + r1() * 18, 2 + r1() * 28, '#fff6c0'); }
+    },
+    borderFx(g, f) { BORDER_RUN(g, f, '#8aa030', '#fff6c0', 26, 1, 1); },
+    ace(g, f, F, ink) {
+      g.bits(BASE[this.s], 0, 2, { X: ink }, 2);
+      const T = f % 48, leaves = 14, n = Math.min(leaves, Math.floor(T / 2));
+      for (let i = 0; i < n; i++) {
+        const side = i % 2 ? 1 : -1, k = Math.floor(i / 2) / (leaves / 2 - 1), a = Math.PI / 2 + side * (0.35 + k * 1.6);
+        const x = 9 - 0.5 + Math.cos(a) * 9.4, y = 12 - 0.5 + Math.sin(a) * 10.2;
+        const shine = T > 30 && Math.abs(i - (T - 30)) < 1.5;
+        g.set(x, y, shine ? '#fff6c0' : '#7a9a28'); g.set(x + side * Math.sin(a), y - Math.cos(a) * side, shine ? '#ffffff' : '#b8c850');
+      }
+    },
+  });
+
+  Object.assign(SUIT_FX, {
+    marquee(s) { // eight bulbs around the suit
+      const g = pad(grid(BASE[s]), 1);
+      putIf(g, [[0, 0], [5, 0], [10, 0], [0, 5], [10, 5], [0, 10], [5, 10], [10, 10]], 'o');
+      return g;
+    },
+  });
+
+  // ===== MARQUEE (Hat Trick, Legendary) ============================================
+  SETS.push({
+    id: 'marquee', name: 'Marquee', rarity: 'legendary', code: 'L1',
+    border: '#ffd75e', frames: 84, fps: 12,
+    backNote: 'An old Vegas sign at night. The bulbs around it chase, the pink neon 21 buzzes and flickers on, the four suits light up one after another in their own neon colours, and at the end the whole sign flashes and changes colour before it starts again.',
+    face: { card: '#fff8ee', ink: '#1e0a2e', red: '#e0204a', edge: '#1e0a2e', shade: '#f2e2d0', ring: '#ff4fa8', accent: '#ffb020' },
+    faceNote: '<b>Suits:</b> eight little bulbs around each suit. <b>Ace:</b> the big suit sits inside a frame of chasing bulbs and buzzes like neon.',
+    back(g, f, F) {
+      const party = f >= 60, NEON = ['#ff4fa8', '#ffd75e', '#4ff0ff'];
+      const neon = party ? NEON[Math.floor((f - 60) / 4) % 3] : NEON[0];
+      g.each((u, v) => mix('#1a0a2e', '#3a0a2a', v / IH));
+      const r0 = rand(12); for (let i = 0; i < 10; i++) { const x = r0() * IW, y = 22 + r0() * 10; if ((i + (f >> 2)) % 4) g.set(x, y, '#8a7aa8'); }
+      [4, 17].forEach((x) => { for (let v = 21; v < IH; v++) g.set(x, v, '#3a2a3a'); });
+      // sign board
+      for (let v = 1; v <= 20; v++) for (let u = 1; u <= 20; u++) g.set(u, v, '#2a0a1e');
+      const per = []; for (let u = 1; u <= 20; u += 2) per.push([u, 1]); for (let v = 3; v <= 20; v += 2) per.push([20, v]); for (let u = 18; u >= 1; u -= 2) per.push([u, 20]); for (let v = 18; v >= 3; v -= 2) per.push([1, v]);
+      per.forEach(([u, v], i) => g.set(u, v, party ? (f % 4 < 2 ? '#fff6c0' : '#8a5a1a') : (i + Math.floor(f / 2)) % 4 < 2 ? '#fff6c0' : '#8a5a1a'));
+      // the 21, flickering on
+      const on2 = f >= 9 || f === 2 || f === 3 || f === 6, on1 = f >= 14 || f === 11 || f === 12;
+      const buzz = !party && f > 20 && f % 23 === 0;
+      const lit = []; const put = (d, x0, on) => DIG[d].forEach((r, y) => [...r].forEach((c, x) => { if (c === 'X') for (let a = 0; a < 2; a++) for (let b = 0; b < 2; b++) lit.push([x0 + x * 2 + a, 6 + y * 2 + b, on]); }));
+      put(2, 4, on2 && !buzz); put(1, 12, on1);
+      const isLit = new Set(lit.filter((p) => p[2]).map(([x, y]) => x + ',' + y));
+      g.each((u, v) => { if (u < 2 || u > 19 || v < 2 || v > 19 || isLit.has(u + ',' + v)) return null; return [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => isLit.has(u + dx + ',' + (v + dy))) ? mix(neon, '#2a0a1e', 0.65) : null; });
+      lit.forEach(([x, y, on]) => g.set(x, y, on ? (y % 2 ? neon : mix(neon, '#ffffff', 0.4)) : '#4a1a3a'));
+      // four neon suits
+      const COL = { '♠': '#4ff0ff', '♥': '#ff4f7a', '♦': '#ffd75e', '♣': '#6aff9a' };
+      const step = Math.floor(f / 6) % 5;
+      ['♠', '♥', '♦', '♣'].forEach((s, i) => { const on = party ? f % 4 < 2 : step === i || step === 4; g.bits(MINI[s], 0 + i * 6 - (i > 1 ? 1 : 0) + 1, 25, { X: on ? COL[s] : mix(COL[s], '#2a0a2a', 0.72) }); });
+    },
+    borderFx(g, f) { BORDER_RUN(g, f, f >= 60 ? '#ff4fa8' : '#ffd75e', '#ffffff', 4, 1, 1); },
+    ace(g, f, F, ink) {
+      const per = []; for (let x = 0; x < 18; x += 2) per.push([x, 0]); for (let y = 2; y < 22; y += 2) per.push([17, y]); for (let x = 15; x >= 0; x -= 2) per.push([x, 21]); for (let y = 19; y >= 2; y -= 2) per.push([0, y]);
+      per.forEach(([x, y], i) => g.set(x, y, (i + Math.floor(f / 2)) % 4 < 2 ? '#ffb020' : '#e8d8c0'));
+      const off = f % 42 === 30 || f % 42 === 32;
+      g.bits(BASE[this.s], 0, 2, { X: off ? mix(ink, '#fff8ee', 0.6) : ink }, 2);
+    },
+  });
+
+
+  // ===== DRAGON'S HOARD (secret: Insane Win) ====================================
+  // A green dragon with crimson wings sleeps on a mountain of gold. It wakes, rears up, spreads its wings,
+  // breathes a rainbow of fire into the sky and sends coins flying, then curls up and sleeps again.
+  const HUE = (h, s = 1, l = 0.55) => { // hsl -> hex, h in turns
+    h = ((h % 1) + 1) % 1; const a = s * Math.min(l, 1 - l); const f = (n) => { const k = (n + h * 12) % 12; const c = l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1)); return Math.round(c * 255).toString(16).padStart(2, '0'); };
+    return '#' + f(0) + f(8) + f(4);
+  };
+  Object.assign(SUIT_FX, {
+    dragon(s) { // a little stack of gold coins at the lower right corner
+      const g = pad(grid(BASE[s]), 1);
+      putIf(g, [[9, 9], [10, 9], [9, 10], [10, 10], [10, 8]], 'o');
+      return g;
+    },
+  });
+  const DRG = { g: '#2a9a50', l: '#5fd078', d: '#1a6a38', o: '#0a1e12', bl: '#f0e0a8', bd: '#c8b070', horn: '#f4ecd0', eye: '#ffd040', wm: '#b83a3a', wd: '#7a1a24', claw: '#f4f0e0' };
+  const lerp = (a, b, k) => a + (b - a) * k;
+  const ease = (k) => (k <= 0 ? 0 : k >= 1 ? 1 : k * k * (3 - 2 * k));
+  function goldPile(g, f, top) { // the hoard: coins, a few bars and gems, sparkling
+    g.each((u, v) => {
+      const t = top(u); if (v < t) return null;
+      const h = hash(u, v);
+      if (v === Math.round(t)) return h > 0.5 ? '#fff0a0' : '#ffd75e';
+      if ((u * 3 + v * 5) % 7 === 0) return '#b8860b';
+      if (h > 0.93) return ['#d8323a', '#4f9cff', '#5fd068'][Math.floor(h * 300) % 3];
+      return h > 0.6 ? '#ffd75e' : h > 0.3 ? '#e8b030' : '#c89020';
+    });
+    const r0 = rand(31); for (let i = 0; i < 6; i++) { const x = Math.floor(r0() * IW), y = Math.ceil(top(x)) + Math.floor(r0() * 6), ph = Math.floor(r0() * 24); const k = (f + ph) % 24; if (k < 3) { g.set(x, y, '#ffffff'); if (k === 1) { g.set(x - 1, y, '#fff6c0'); g.set(x + 1, y, '#fff6c0'); g.set(x, y - 1, '#fff6c0'); g.set(x, y + 1, '#fff6c0'); } } }
+  }
+  function dragonSprite(f) { // returns a map "x,y" -> colour, drawn in card-inner coordinates
+    const M = new Map(); const put = (x, y, c) => { x = Math.round(x); y = Math.round(y); if (x >= 0 && y >= 0 && x < IW && y < IH) M.set(x + ',' + y, c); };
+    const fill = (test, col) => { for (let y = 0; y < IH; y++) for (let x = 0; x < IW; x++) if (test(x + 0.5, y + 0.5)) put(x, y, typeof col === 'function' ? col(x, y) : col); };
+    // timeline
+    const wake = ease((f - 30) / 12) * (1 - ease((f - 84) / 10));
+    const wing = ease((f - 38) / 8) * (1 - ease((f - 80) / 8));
+    const breathe = f < 30 || f > 88 ? Math.round((Math.sin(f * 0.4) + 1) / 2) : 0;
+    // wings (behind the body): shoulder at (14, 13)
+    const tipA = [lerp(19, 23, wing), lerp(9, -1, wing)], tipB = [lerp(20, 23, wing), lerp(15, 8, wing)], tipC = [lerp(17, 19, wing), lerp(19, 17, wing)];
+    fill((x, y) => inPoly([[14, 13], tipA, tipB, tipC], x, y), (x, y) => (y > lerp(14, 8, wing) + (x - 14) * 0.3 ? DRG.wd : DRG.wm));
+    [tipA, tipB].forEach(([tx, ty]) => { for (let i = 0; i <= 10; i++) put(lerp(14, tx, i / 10), lerp(13, ty, i / 10), DRG.o); });
+    // haunch and chest
+    fill((x, y) => ((x - 14) / 5.2) ** 2 + ((y - 21) / 4.2) ** 2 <= 1, DRG.g);
+    fill((x, y) => ((x - 10.5) / 3.6) ** 2 + ((y - 16.5 + breathe * 0.5) / 5.2) ** 2 <= 1, DRG.g);
+    fill((x, y) => ((x - 9.6) / 2) ** 2 + ((y - 17) / 4.4) ** 2 <= 1, (x, y) => (y % 2 ? DRG.bd : DRG.bl)); // belly plates
+    // foreleg with claws
+    for (let y = 19; y <= 24; y++) { put(7, y, DRG.d); put(8, y, DRG.g); }
+    put(6, 25, DRG.claw); put(8, 25, DRG.claw);
+    // tail curling round the front of the pile
+    [[18, 23], [19, 24], [20, 25], [20, 26], [19, 27], [18, 28], [16, 28], [15, 28], [13, 28]].forEach(([x, y], i) => { put(x, y, DRG.g); if (i < 6) put(x - 1, y, DRG.g); });
+    put(12, 27, DRG.d); put(12, 28, DRG.d); put(11, 28, DRG.d); put(12, 29, DRG.d); // spade tip
+    // neck and head: asleep the head rests on the gold at the left, awake it rears up high
+    const hx = lerp(0, 3, wake), hy = lerp(20, 6, wake);
+    const nb = [hx + 6, hy + 3], ns = [10, 13];
+    for (let i = 0; i <= 12; i++) { const x = lerp(ns[0], nb[0], i / 12), y = lerp(ns[1], nb[1], i / 12); for (let a = -1; a <= 1; a++) put(x + a, y, a < 0 ? DRG.l : DRG.g); }
+    const open = f >= 34 && f < 86, blink = f === 60 || f === 61;
+    const HEAD = ['.....h.h.', '...lgggg.', '.ggggggeg', 'kggggggg.', '.ttdddd..'];
+    HEAD.forEach((row, y) => [...row].forEach((c, x) => {
+      const col = c === 'h' ? DRG.horn : c === 'l' ? DRG.l : c === 'g' ? DRG.g : c === 'd' ? DRG.d : c === 't' ? DRG.claw : c === 'k' ? DRG.o : c === 'e' ? (open && !blink ? DRG.eye : DRG.d) : null;
+      if (col) put(hx + x, hy + y, col);
+    }));
+    if (f >= 48 && f < 76) put(hx + 1, hy + 4, '#3a0a0a'); // jaw open
+    // outline
+    const out = new Map();
+    M.forEach((c, k) => out.set(k, c));
+    M.forEach((c, k) => { const [x, y] = k.split(',').map(Number); [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(([dx, dy]) => { const kk = (x + dx) + ',' + (y + dy); if (!M.has(kk) && x + dx >= 0 && y + dy >= 0 && x + dx < IW && y + dy < IH) out.set(kk, DRG.o); }); });
+    M.forEach((c, k) => out.set(k, c));
+    return { map: out, hx, hy, wake };
+  }
+  SETS.push({
+    id: 'dragon', name: 'Dragon’s Hoard', rarity: 'secret', code: 'S2',
+    border: '#d8a020', frames: 96, fps: 12,
+    backNote: 'A green dragon with crimson wings sleeps on a mountain of gold, smoke curling from its nose. It opens its eyes, rears up, spreads its wings and breathes a rainbow of fire into the sky, sending coins flying, then curls up on its hoard again.',
+    face: { card: '#fbf6e6', ink: '#0e2a1a', red: '#b8202a', edge: '#0e2a1a', shade: '#ece2c4', ring: '#d8a020', accent: '#d8a020' },
+    faceNote: '<b>Suits:</b> a little stack of gold coins at the corner. <b>Ace:</b> a dragon eye inside the big suit opens, looks around and narrows.',
+    back(g, f) {
+      g.each((u, v) => mix('#120c0a', '#3a2410', Math.max(0, (v - 8) / (IH - 8))));
+      const top = (u) => 24.5 + Math.abs(u + 0.5 - 12) * 0.28 + Math.sin(u * 1.3) * 0.5;
+      const r0 = rand(41); for (let i = 0; i < 8; i++) g.set(r0() * IW, r0() * 14, '#3a2a1a');
+      const D = dragonSprite(f);
+      goldPile(g, f, top);
+      D.map.forEach((c, k) => { const [x, y] = k.split(',').map(Number); g.set(x, y, c); });
+      // smoke while asleep
+      if (D.wake < 0.05) { const k = f % 20; if (k < 12) { g.set(D.hx - 1 - k * 0.2, D.hy + 2 - k * 0.6, k < 6 ? '#8a8a94' : '#4a4a54'); } }
+      // rainbow fire into the sky
+      if (f >= 48 && f < 76) {
+        const k = f - 48, len = Math.min(12, k * 2) - Math.max(0, (k - 22) * 2), mx = D.hx, my = D.hy + 2;
+        for (let i = 0; i < len * 4; i++) { const t = i / 4, w = 0.5 + t * 0.4, x = mx - t * 0.25 + Math.sin(i * 2.1 + f * 1.3) * w, y = my - t + Math.cos(i * 1.7 + f) * 0.3; const c = HUE(t / 12 + f * 0.04, 1, i % 5 === 0 ? 0.8 : 0.58); g.set(x, y, c); g.set(x + 1, y, c); }
+      }
+      // coins bursting out of the hoard
+      if (f >= 52 && f < 92) { const k = f - 52; const r1 = rand(19); for (let i = 0; i < 14; i++) { const t0 = Math.floor(r1() * 10), age = k - t0; if (age < 0) continue; const vx = (r1() - 0.5) * 1.4, vy = -0.9 - r1() * 0.8, x = 6 + r1() * 12 + vx * age, y = 25 + vy * age + 0.07 * age * age; if (y < top(Math.round(x)) + 1 || age < 4) { g.set(x, y, age % 4 < 2 ? '#ffd75e' : '#fff0a0'); g.set(x + 1, y, '#b8860b'); } } }
+    },
+    borderFx(g, f) { BORDER_RUN(g, f, f >= 48 && f < 76 ? HUE(f / 20, 1, 0.55) : '#d8a020', '#fff6c0', 12, 1, 1); },
+    ace(g, f, F, ink) {
+      g.bits(BASE[this.s], 0, 2, { X: ink }, 2);
+      const T = f % 48, cx = 9, cy = this.s === '♥' ? 9 : this.s === '♣' ? 13 : 11;
+      const lid = T < 4 ? 1 - T / 4 : T > 40 && T < 44 ? (T - 40) / 4 : T >= 44 ? 1 - (T - 44) / 4 : 0; // 0 open, 1 shut
+      const look = T >= 14 && T < 22 ? -1 : T >= 22 && T < 30 ? 1 : 0, slit = T >= 30 && T < 38 ? 0 : 1;
+      for (let y = -3; y <= 3; y++) for (let x = -5; x <= 5; x++) {
+        if ((x / 5.4) ** 2 + (y / 3.2) ** 2 > 1) continue;
+        const px = cx - 0.5 + x, py = cy - 0.5 + y;
+        if (y + 3 < lid * 7) { g.set(px, py, '#1a6a38'); continue; }
+        const r = Math.hypot(x - look, y * 1.2);
+        g.set(px, py, Math.abs(x - look) <= (slit ? 0 : 0.6) && Math.abs(y) <= 2 ? '#0a0a0a' : r < 2.4 ? '#ffd040' : r < 3.6 ? '#e8a020' : '#c86a10');
+      }
+      if (lid > 0 && lid < 1) for (let x = -4; x <= 4; x++) g.set(cx - 0.5 + x, cy - 0.5 - 3 + Math.round(lid * 7) - 1, '#0a1e12');
+    },
+  });
+
   // ======================================================================== game glue
   const doc = root.document;
   // set id -> cosmetic ids in js/cosmetics.js
@@ -863,6 +1298,7 @@
     heaven: ['back_heaven', 'face_heaven'], silverwolf: ['back_silverwolf', 'face_silverwolf'], deadwood: ['back_deadwood', 'face_deadwood'],
     ghost: ['back_ghost', 'face_ghost'], platinum: ['back_platinum', 'face_platinum'], house: ['back_house', 'face_house'],
     eye: ['back_eye', 'face_eye'], sunrise: ['back_sunrise', 'face_sunrise'],
+stillwater: ['back_stillwater', 'face_stillwater'], halcyon: ['back_halcyon', 'face_halcyon'], owl: ['back_owl', 'face_owl'], laurel: ['back_laurel', 'face_laurel'], dragon: ['back_dragon', 'face_dragon'], goldace: ['back_goldace', 'face_goldace'], marquee: ['back_marquee', 'face_marquee'],
     inferno: ['back_inferno'], storm: ['back_storm'], slots: ['back_slots'], starfield: ['back_starfield'],
   };
   const BY_BACK = {}, BY_FACE = {};
