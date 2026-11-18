@@ -230,26 +230,45 @@ function bigWin(amount) {
 const RARITY = { rare: [0x4aa8ff, 0xbfe4ff, 0xffffff], epic: [0xb06aff, 0xe0c0ff, 0xffffff], legendary: [0xffb02a, 0xffd75e, 0xfff6c0], secret: [0xff5a6a, 0xffb0b8, 0xffffff] };
 const RAINBOW = [0xff5a6a, 0xffb020, 0xfff06a, 0x6aff9a, 0x5af2ff, 0x6a8aff, 0xc069f0];
 const rainbow = (i) => RAINBOW[((i % 7) + 7) % 7];
-// Unlocks play behind the real achievement toast (which shows the name and rarity), centred on it: (cx, cy) in effect px.
-function unlock(rarity, cx, cy) {
-  if (rarity === 'secret') return unlockSecret(cx, cy);
-  if (rarity === 'insanity') return unlockInsanity(cx, cy);
+// Unlocks play around the real achievement toast (which shows the name and rarity): (cx, cy) is its centre and
+// box its half size, in effect px. Rays start just outside the toast's edge so the toast never hides them.
+const TOAST = { hw: 53, hh: 14 };
+const SQ = 0.8;   // rays travel a little flatter than they are wide
+function edge(box, a) {   // distance from the centre to just outside the toast along angle a
+  const c = Math.abs(Math.cos(a)), s = Math.abs(Math.sin(a)) * SQ;
+  return Math.min(c ? box.hw / c : 1e9, s ? box.hh / s : 1e9) + 4;
+}
+const rayPt = (cx, cy, a, r) => [Math.round(cx + Math.cos(a) * r), Math.round(cy + Math.sin(a) * r * SQ)];
+// a dotted frame that marches around the toast, 4 px outside it
+function toastFrame(g, cx, cy, box, t, colour, alpha) {
+  const x0 = Math.round(cx - box.hw - 4), y0 = Math.round(cy - box.hh - 4), w = Math.round(box.hw * 2 + 8), h = Math.round(box.hh * 2 + 8);
+  const per = 2 * (w + h), step = Math.floor(t * 18) * 2;
+  for (let s = 0; s < per; s += 4) {
+    const q = (s + step) % per; let x, y;
+    if (q < w) { x = x0 + q; y = y0; } else if (q < w + h) { x = x0 + w; y = y0 + q - w; } else if (q < 2 * w + h) { x = x0 + w - (q - w - h); y = y0 + h; } else { x = x0; y = y0 + h - (q - 2 * w - h); }
+    g.rect(x - 1, y - 1, 2, 2).fill({ color: colour(s), alpha });
+  }
+}
+function unlock(rarity, cx, cy, box = TOAST) {
+  if (rarity === 'secret') return unlockSecret(cx, cy, box);
+  if (rarity === 'insanity') return unlockInsanity(cx, cy, box);
   const cols = RARITY[rarity]; if (!cols) return;   // common unlocks keep just the toast
   fx.push({ t: 0, dur: 2.6, layer: 'front', draw(g, t) {
     if (!reduce) {
-      // rays: 12 dotted spokes turning in steps behind the toast
-      const turn = Math.floor(t * 6) * (Math.PI / 24), len = Math.min(1, t / 0.3) * 70;
-      for (let i = 0; i < 12; i++) {
-        const a = turn + (i / 12) * Math.PI * 2;
-        for (let d = 22; d < len; d += 3) g.rect(Math.round(cx + Math.cos(a) * d * 1.6), Math.round(cy + Math.sin(a) * d * 0.7), 2, 2).fill({ color: cols[(i + Math.floor(d / 9)) % 2], alpha: 1 - d / 80 });
+      // rays: 16 dotted spokes turning in steps around the toast, plus a marching frame
+      const turn = Math.floor(t * 6) * (Math.PI / 32), len = Math.min(1, t / 0.3) * 48, fade = Math.min(1, (2.6 - t) * 2);
+      for (let i = 0; i < 16; i++) {
+        const a = turn + (i / 16) * Math.PI * 2, e = edge(box, a);
+        for (let d = 0; d < len; d += 3) { const [x, y] = rayPt(cx, cy, a, e + d); g.rect(x, y, 2, 2).fill({ color: cols[(i + Math.floor(d / 9)) % 2], alpha: fade * (1 - d / 56) }); }
       }
+      toastFrame(g, cx, cy, box, t, (s) => cols[(s >> 3) % 2 ? 0 : 2], fade * 0.9);
     }
   } });
   if (reduce) return;
   for (let i = 0; i < 60; i++) spawn({ x: rand(60, 324), y: rand(-30, 0), vy: rand(30, 60), g: 0, wobble: rand(4, 8), sway: rand(10, 25), seed: rand(0, 6), life: 2.4, size: 2, color: (p) => (Math.floor(p.age * 9 + p.seed) % 2 ? cols[0] : cols[2]) });
 }
 // Secret: the room goes dark, red embers rise and red rays beat like a heart.
-function unlockSecret(cx, cy) {
+function unlockSecret(cx, cy, box) {
   const cols = RARITY.secret;
   fx.push({ t: 0, dur: 3.4, layer: 'front', draw(g, t) {
     const dark = Math.min(1, t / 0.25, (3.4 - t) / 0.4);
@@ -257,10 +276,11 @@ function unlockSecret(cx, cy) {
     if (!reduce && t > 0.4) {
       // two beats, like a heart: the rays punch out, then fade
       const beat = ((t - 0.4) % 0.9), r = beat < 0.12 ? 1 : beat < 0.25 ? 0.6 : beat < 0.35 ? 0.85 : Math.max(0, 0.85 - (beat - 0.35) * 1.6);
-      for (let i = 0; i < 16; i++) {
-        const a = (i / 16) * Math.PI * 2 + 0.1;
-        for (let d = 22; d < 22 + 50 * r; d += 3) if ((i + Math.floor(d / 3)) % 3) g.rect(Math.round(cx + Math.cos(a) * d * 1.6), Math.round(cy + Math.sin(a) * d * 0.7), 2, 2).fill({ color: d % 2 ? cols[0] : 0x8a1a2a, alpha: 0.9 - (d - 22) / 60 });
+      for (let i = 0; i < 18; i++) {
+        const a = (i / 18) * Math.PI * 2 + 0.1, e = edge(box, a);
+        for (let d = 0; d < 42 * r; d += 3) if ((i + Math.floor(d / 3)) % 3) { const [x, y] = rayPt(cx, cy, a, e + d); g.rect(x, y, 2, 2).fill({ color: d % 2 ? cols[0] : 0x8a1a2a, alpha: 0.9 - d / 48 }); }
       }
+      toastFrame(g, cx, cy, box, 0, (s) => ((s >> 2) % 3 ? cols[0] : 0x8a1a2a), 0.4 + 0.6 * r);
     }
   } });
   if (reduce) return;
@@ -268,20 +288,22 @@ function unlockSecret(cx, cy) {
 }
 // Insanity: the game's animated rainbow. The screen jolts, a double spiral of rainbow rays turns, and rainbow confetti
 // bursts out from the toast.
-function unlockInsanity(cx, cy) {
+function unlockInsanity(cx, cy, box) {
   fx.push({ t: 0, dur: 3.6, layer: 'front', draw(g, t) {
     const f = Math.floor(t * 18);
     if (!reduce) {
       if (t < 0.3 && f % 2) g.rect(0, 0, W, H).fill({ color: 0xffffff, alpha: 0.25 });
-      const len = Math.min(1, t / 0.35) * 90;
-      for (let arm = 0; arm < 2; arm++) for (let i = 0; i < 14; i++) {
-        const turn = (arm ? -1 : 1) * Math.floor(t * 8) * (Math.PI / 28), a = turn + (i / 14) * Math.PI * 2 + arm * 0.22;
-        for (let d = 22; d < len; d += 3) { const tw = a + (arm ? -1 : 1) * d * 0.012; g.rect(Math.round(cx + Math.cos(tw) * d * 1.6), Math.round(cy + Math.sin(tw) * d * 0.7), 2, 2).fill({ color: rainbow(i + Math.floor(d / 6) + f), alpha: Math.min(1, (3.6 - t) * 2) * (1 - d / 100) }); }
+      // the mandala: two rainbow spirals turning opposite ways, growing out of a rainbow frame around the toast
+      const len = Math.min(1, t / 0.35) * 64, fade = Math.min(1, (3.6 - t) * 2);
+      for (let arm = 0; arm < 2; arm++) for (let i = 0; i < 18; i++) {
+        const turn = (arm ? -1 : 1) * Math.floor(t * 8) * (Math.PI / 36), a = turn + (i / 18) * Math.PI * 2 + arm * 0.17;
+        for (let d = 0; d < len; d += 3) { const tw = a + (arm ? -1 : 1) * d * 0.02, [x, y] = rayPt(cx, cy, tw, edge(box, tw) + d); g.rect(x, y, 2, 2).fill({ color: rainbow(i + Math.floor(d / 6) + f), alpha: fade * (1 - d / 72) }); }
       }
+      toastFrame(g, cx, cy, box, t, (s) => rainbow((s >> 2) + f), fade);
     }
   }, tick(t) { if (reduce || t > 0.5) { app.stage.position.set(0, 0); return; } const f = Math.floor(t * 18), k = 1 - t / 0.5; app.stage.position.set((f % 2 ? 1 : -1) * Math.round(k * 6), ((f % 3) - 1) * Math.round(k * 3)); }, end() { app.stage.position.set(0, 0); } });
   if (reduce) return;
-  for (let i = 0; i < 90; i++) { const a = rand(0, Math.PI * 2), sp = rand(60, 170), c0 = Math.floor(rand(0, 7)); spawn({ x: cx + Math.cos(a) * 40, y: cy + Math.sin(a) * 12, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * 0.6 - 30, g: 90, life: 2.2 + rand(0, 0.8), age: -0.2 - rand(0, 0.3), size: 2, seed: c0, color: (p) => rainbow(p.seed + Math.floor(p.age * 10)) }); }
+  for (let i = 0; i < 90; i++) { const a = rand(0, Math.PI * 2), sp = rand(60, 170), c0 = Math.floor(rand(0, 7)); spawn({ x: cx + Math.cos(a) * box.hw, y: cy + Math.sin(a) * box.hh, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * 0.6 - 30, g: 90, life: 2.2 + rand(0, 0.8), age: -0.2 - rand(0, 0.3), size: 2, seed: c0, color: (p) => rainbow(p.seed + Math.floor(p.age * 10)) }); }
 }
 
 // ------------------------------------------------------------- win messages by tier
@@ -994,13 +1016,46 @@ function roundEnd(game) {
   if (natural && net >= 200) later(0.9, go); else go();
 }
 
-// Achievement unlocks: the effect plays behind the toast, centred on it.
+// The toast's own text for the two top rarities (works in every layout, effects layer or not):
+// Secret arrives as ??? and decodes letter by letter from 0.6 s, with a glitch jitter at first;
+// Insanity cycles its frame through the rainbow and its name shimmers, one letter hopping at a time.
+let toastRun = 0;
+function toastText(a) {
+  const el = doc.querySelector('.cos-toast');
+  if (!a || !el || (a.rarity !== 'secret' && a.rarity !== 'insanity')) return;
+  const run = ++toastRun, name = el.querySelector('.cos-toast-name'), desc = el.querySelector('.cos-toast-desc'), t0 = performance.now();
+  const parts = [name, desc].filter(Boolean).map((n) => ({ n, text: n.textContent }));
+  if (a.rarity === 'insanity' && name) name.innerHTML = [...name.textContent].map((ch) => `<span style="display:inline-block">${ch === ' ' ? '&nbsp;' : ch.replace(/[&<>]/g, (c) => `&#${c.charCodeAt(0)};`)}</span>`).join('');
+  const letters = name ? [...name.querySelectorAll('span')] : [];
+  const RB = ['#ff5a6a', '#ffb020', '#fff06a', '#6aff9a', '#5af2ff', '#6a8aff', '#c069f0'];
+  const tick = () => {
+    if (run !== toastRun || !el.isConnected) return;
+    const t = (performance.now() - t0) / 1000, f = Math.floor(t * 18);
+    if (a.rarity === 'secret') {
+      const shown = t < 0.6 ? 0 : 1 + Math.floor((t - 0.6) / 0.11);
+      parts.forEach((p, i) => { const k = i === 0 ? shown : Math.round(shown * p.text.length / Math.max(1, parts[0].text.length));
+        p.n.textContent = [...p.text].map((ch, j) => (j < k || ch === ' ' ? ch : '?')).join(''); });
+      el.style.translate = !reduce && t < 0.9 && f % 4 === 0 ? '2px 0' : '';
+      if (parts.every((p) => p.n.textContent === p.text)) { el.style.translate = ''; return; }
+    } else {
+      if (t > 4.2) { letters.forEach((s) => { s.style.color = ''; s.style.transform = ''; }); return; }
+      el.style.setProperty('--rar', RB[f % 7]);
+      letters.forEach((s, i) => { s.style.color = RB[(i + f) % 7]; s.style.transform = !reduce && Math.floor(t * 12) % letters.length === i ? 'translateY(-2px)' : ''; });
+    }
+    setTimeout(tick, 1000 / 18);
+  };
+  tick();
+}
+
+// Achievement unlocks: the effect plays around the toast. The toast is still sliding in when this fires, so its
+// resting place comes from its layout box (offsetTop/offsetHeight ignore the slide transform), not its current rect.
 doc.addEventListener('achievement:toast', (e) => {
+  toastText(e.detail && e.detail.achievement);
   if (!on()) return;
   const a = e.detail && e.detail.achievement, el = doc.querySelector('.cos-toast'), c = frontApp.canvas.getBoundingClientRect();
   if (!a || !el || !c.width) return;
-  const r = el.getBoundingClientRect(), k = W / c.width;
-  unlock(a.rarity, Math.round((r.left + r.width / 2 - c.left) * k), Math.round((r.top + r.height / 2 - c.top) * k));
+  const r = el.getBoundingClientRect(), k = W / c.width, top = el.offsetTop, h = el.offsetHeight;
+  unlock(a.rarity, Math.round((r.left + r.width / 2 - c.left) * k), Math.round((top + h / 2 - c.top) * k), { hw: r.width / 2 * k, hh: h / 2 * k });
 });
 // The stage can switch to the stacked layout when the window gets narrow: the layer hides there.
 root.addEventListener('resize', () => { if (backApp && cur) { const want = stageOn() && !!scene; show(want); if (!want) clearFx(); } });
@@ -1008,6 +1063,6 @@ root.addEventListener('resize', () => { if (backApp && cur) { const want = stage
 root.FXLayer = {
   start, stop, roundEnd, playEvent,
   /** For testing: FXLayer.test('blackjack' | 'win', amount | 'unlock', rarity). */
-  test: (what, v) => { if (!on()) return false; if (what === 'blackjack') blackjack(); else if (what === 'win') (v >= 1000 ? winTier(v, 'scene') : bigWin(v)); else if (what === 'unlock') unlock(v, 192, 40); return true; },
+  test: (what, v) => { if (!on()) return false; if (what === 'blackjack') blackjack(); else if (what === 'win') (v >= 1000 ? winTier(v, 'scene') : bigWin(v)); else if (what === 'unlock') unlock(v, 192, 20); return true; },
 };
 })(window);
