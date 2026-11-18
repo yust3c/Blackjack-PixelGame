@@ -696,7 +696,7 @@
     $('goal').textContent = goal === null ? fmt(M.endlessRecord(save, mode.difficulty).best) : fmt(goal);
     if (goal !== null) {
       const pct = Math.max(0, Math.min(1, (game.bankroll - start) / (goal - start)));
-      setProgress(pct, document.body.dataset.scene);
+      setProgress(pct, (window.Scenarios && Scenarios.forMode(mode.type, mode.difficulty)) || document.body.dataset.scene);   // from the mode: the first draw comes before the scene is applied
     }
   }
 
