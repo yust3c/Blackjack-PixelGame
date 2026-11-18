@@ -98,7 +98,7 @@
       hint: 'Secret. Royalty only plays for high stakes.' },
     { id: 'seventh_heaven', rarity: 'secret',    group: 'Secret',     name: 'Seventh Heaven',   desc: 'Make 21 with three 7s of the same suit.', secret: true,
       hint: 'Secret. Lucky number, lucky suit.' },
-    { id: 'completionist',  rarity: 'secret',    group: 'Secret',     name: 'Completionist',    desc: 'Unlock every other achievement.', secret: true,
+    { id: 'completionist',  rarity: 'secret',    group: 'Secret',     name: 'Completionist',    desc: 'Unlock every achievement up to Legendary.', secret: true,
       hint: 'Secret. Collect everything.' },
     // ---------- round 4 ----------
     { id: 'split_first', rarity: 'common', group: 'Skill', name: 'Splitter', desc: 'Split a pair for the first time.' },
@@ -212,6 +212,9 @@
 
   for (const a of LIST) if (a.counter) a.progress = () => [Math.min(save.stats[a.counter[0]] || 0, a.counter[1]), a.counter[1]];
 
+  // Completionist needs every Legendary-and-below achievement: secrets and Insanity ones are extra.
+  const allDone = () => LIST.every((a) => a.id === 'completionist' || a.secret || a.rarity === 'secret' || a.rarity === 'insanity' || save.unlocked[a.id]);
+
   function unlock(id) {
     if (!byId[id] || save.unlocked[id]) return false;
     save.unlocked[id] = Date.now();
@@ -219,7 +222,7 @@
     const reward = root.Cosmetics ? root.Cosmetics.rewardFor(id) : null;
     toast(byId[id], reward);
     doc.dispatchEvent(new CustomEvent('achievement:unlocked', { detail: { achievement: byId[id], reward } }));
-    if (id !== 'completionist' && LIST.every((a) => a.secret || save.unlocked[a.id])) unlock('completionist');
+    if (id !== 'completionist' && allDone()) unlock('completionist');
     if (root.Cosmetics) root.Cosmetics.refresh();
     return true;
   }
@@ -230,6 +233,7 @@
   let session = null;
   function startSession(opts) {
     const o = opts || {};
+    if (!save.unlocked.completionist && allDone()) unlock('completionist');   // saves that already qualify under the Legendary-only rule
     session = {
       mode: o.mode || 'practice', difficulty: o.difficulty || null, start: o.start || 0,
       lowest: Infinity, alwaysAboveStart: true,
