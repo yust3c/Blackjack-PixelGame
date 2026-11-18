@@ -228,7 +228,21 @@
         <button class="btn btn-ghost extra-btn" data-lore>Lore</button>
         ${window.GameSounds ? `<button class="btn btn-ghost extra-btn" data-settings>Settings</button>` : ''}
       </div>`;
+    fitMenu();
   }
+
+  // On wide screens the whole menu always fits the window: if it is taller, it is scaled down (never below 60%).
+  function fitMenu() {
+    const m = $('menu');
+    if (!m) return;
+    m.style.zoom = '';
+    if (m.hidden || window.innerWidth < 900) return;
+    const h = m.getBoundingClientRect().height;
+    if (h > window.innerHeight) m.style.zoom = Math.max(0.6, window.innerHeight / h).toFixed(3);
+  }
+  window.addEventListener('resize', () => fitMenu());
+  window.addEventListener('load', () => fitMenu());   // the pixel fonts change the menu's height once they load
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => fitMenu());
 
   // The Daily card: a wide bar under the three modes with today's casino, the streak with its tier icon, and today's best.
   const SCENE_OF = { easy: ['The Corner', 'Old Tito'], medium: ['Grand Hotel', 'Madame Odette'], hard: ['Neon', 'Vinnie'], expert: ['VIP Lounge', 'Mr. Valdez'] };
